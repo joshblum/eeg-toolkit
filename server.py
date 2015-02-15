@@ -1,5 +1,6 @@
 import io
 import json
+import h5py
 import struct
 import numpy as np
 
@@ -8,6 +9,57 @@ from pysoundfile import SoundFile
 
 AUDIO = "audio"
 EEG = "eeg"
+
+CHUNK_SIZE = 4096
+CHANNELS = ['LL', 'LP', 'RP', 'RL']
+DIFFERENCE_PAIRS = {
+    'LL': [
+        ('fp1', 'f7'),
+        ('f7', 't3'),
+        ('t3', 't5'),
+        ('t5', 'o1'),
+    ],
+    'LP': [
+        ('fp1', 'f3'),
+        ('f3', 'c3'),
+        ('c3', 'p3'),
+        ('p3', 'o1'),
+    ],
+    'RP': [
+        ('fp2', 'f4'),
+        ('f4', 'c4'),
+        ('c4', 'p4'),
+        ('p4', 'o2'),
+    ],
+    'RL': [
+        ('fp2', 'f8'),
+        ('f8', 't4'),
+        ('t4', 't6'),
+        ('t6', 'o2'),
+    ],
+}
+
+CHANNEL_INDEX = {
+    'fp1': 0,
+    'f3': 1,
+    'c3': 2,
+    'p3': 3,
+    'o1': 4,
+    'fp2': 5,
+    'f4': 6,
+    'c4': 7,
+    'p4': 8,
+    'o2': 9,
+    'f7': 10,
+    't3': 11,
+    't5': 12,
+    'f8': 13,
+    't4': 14,
+    't6': 15,
+    'fz': 16,
+    'cz': 17,
+    'pz': 18,
+}
 
 
 def hann(n):
@@ -155,7 +207,8 @@ class SpectrogramWebSocket(JSONWebSocket):
       super(self.__class__, self).receive_message(
           msg_type, content, data)
 
-  # TODO (joshblum): currently used but should handle both eeg and audio files
+  # TODO (joshblum): currently not used but should handle both eeg and audio
+  # files
   def on_file_spectrogram(self, filename, nfft=1024, overlap=0.5):
     """Loads an audio file and calculates a spectrogram.
 
@@ -176,6 +229,12 @@ class SpectrogramWebSocket(JSONWebSocket):
                        'length': len(file) / file.sample_rate},
                       spec.tostring())
 
+  def _load_spectrofile(self, filename):
+    f = h5py.File(filename, 'r')
+    data = f['data']
+    Fs = f['Fs'][0][0]
+    print "Loaded spectral file %s" % filename
+    return data, Fs
 
   def on_data_spectrogram(self, data, nfft=1024, overlap=0.5, dataType=AUDIO):
     """Loads an audio file and calculates a spectrogram.
@@ -187,16 +246,61 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     """
     dataHandlers = {
-      AUDIO: self.on_audio_data_spectrogram,
-      EEG: self.on_eeg_data_spectrogram,
+        AUDIO: self.on_audio_data_spectrogram,
+        EEG: self.on_eeg_data_spectrogram,
     }
     handler = dataHandlers.get(dataType)
     if handler is None:
-        return
+      return
     handler(data, nfft, overlap)
 
   def on_eeg_data_spectrogram(self, data, nfft, overlap):
-      return
+    """
+      Convert the raw data from a file into an array of four spectrograms.
+      The data file is a matrix of voltage data with a column per sensor.
+      We computer the differences between sensors in the four regions (LL, LP, RL, RP)
+      and then average the spectrograms for each of these regions.
+      We return a 4 x 1 array of these spectrograms for visualization
+    """
+    # TODO (joshblum): figure out something not as stupid...
+    FILENAME = 'tmp-data'
+    with open(FILENAME, 'w') as f:
+      f.write(data)
+    data, fs = _load_spectrofile(FILENAME)
+    # why transpose?
+    data = np.array(data).transpose()
+
+    # take differences between the channels in each of the regions
+    bipolar_data = {ch: [data[CHANNEL_INDEX.get(c2)] - data[CHANNEL_INDEX.get(c1)]
+                         for c1, c2 in pairs]
+                    for ch, pairs in DIFFERENCE_PAIRS.iteritems()
+                    }
+
+    # now store the spectrogram for each of the channels
+    spec = dict.fromkeys(CHANNELS)
+
+    for ch, diffs in bipolar_data.iteritems():
+      l = []
+      for diff in diffs:
+        spec = self.spectrogram(data, nfft, overlap)
+        l.append(np.transpose(spec))
+      spec[ch] = l
+
+    # from each of the spectrograms, average the channels within each region
+    reg_avg = dict.fromkeys(CHANNELS)
+
+    for ch, s_data in spec.iteritems():
+      T = np.zeros(s_data[0].shape)
+      for s in s_data:
+        T += s
+      reg_avg[ch] = T / 4
+
+    # TODO (joshblum): display all 4 images for the channels
+    self.send_message('spectrogram',
+                      {'extent': spec.shape,
+                       'fs': fs,
+                       'length': len(data) / fs},
+                      spec.tostring())
 
   def on_audio_data_spectrogram(self, data, nfft, overlap):
 
