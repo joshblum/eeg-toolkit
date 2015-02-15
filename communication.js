@@ -1,6 +1,8 @@
 var ws = new WebSocket("ws://localhost:" + getURLParameters()['port'] + "/spectrogram");
 ws.binaryType = 'arraybuffer';
 
+OVERLAP = 0.5;
+
 /* return an object containing the URL parameters */
 function getURLParameters() {
     var params = {};
@@ -67,11 +69,12 @@ function sendMessage(type, content, payload) {
    nfft      the FFT length used for calculating the spectrogram.
    overlap   the amount of overlap between consecutive spectra.
 */
-function requestFileSpectrogram(filename, nfft, overlap) {
+function requestFileSpectrogram(filename, nfft, overlap, dataType) {
     sendMessage("request_file_spectrogram", {
         filename: filename,
         nfft: nfft,
-        overlap: overlap
+        overlap: overlap,
+        dataType: dataType
     });
 }
 
@@ -82,10 +85,11 @@ function requestFileSpectrogram(filename, nfft, overlap) {
    nfft      the FFT length used for calculating the spectrogram.
    overlap   the amount of overlap between consecutive spectra.
 */
-function requestDataSpectrogram(data, nfft, overlap) {
+function requestDataSpectrogram(data, nfft, overlap, dataType) {
     sendMessage("request_data_spectrogram", {
         nfft: nfft,
-        overlap: overlap
+        overlap: overlap,
+        dataType: dataType
     }, data);
 }
 
@@ -157,15 +161,27 @@ ws.onopen = function() {
 */
 
 function reloadSpectrogram() {
-    var audioFile = document.getElementById('audioFile').files[0];
-    if (!audioFile) {
+    var inputFile = document.getElementById('inputFile').files[0];
+    if (!inputFile) {
         console.log("Could not load spectrogram: No file selected");
         return;
     }
     var reader = new FileReader();
-    reader.readAsArrayBuffer(audioFile);
+    var fileType = getFileType(inputFile);
+    reader.readAsArrayBuffer(inputFile);
     reader.onloadend = function() {
         var fftLen = parseFloat(document.getElementById('fftLen').value);
-        requestDataSpectrogram(reader.result, fftLen)
+        requestDataSpectrogram(reader.result, fftLen, OVERLAP, fileType)
     }
+}
+
+/*
+ * Determines the type of input file the server has to handle based on the filename.
+ *
+ * Currently handles audio and eeg type files.
+ */
+function getFileType(inputFile) {
+  var fileName = inputFile.name.split('.')
+  var fileExt = fileName[fileName.length - 1];
+  return fileExt === 'txt' ? 'eeg' : 'audio';
 }
