@@ -184,6 +184,8 @@ function loadSpectrogram(data, nblocks, nfreqs, fs, length) {
 
     // bail if too big for video memory
     if (Math.ceil(numTextures) > gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
+        console.log(Math.ceil(numTextures));
+        console.log(gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
         alert("Not enough texture units to display spectrogram");
         return;
     }
@@ -416,7 +418,7 @@ function drawSpecFrequencyScale() {
 
    If no modifier is pressed, scrolling scrolls the spectrogram.
 
-   If alt is pressed, scrolling changes the displayed amplitude range.
+   If alt or shift is pressed, scrolling changes the displayed amplitude range.
    Pressing shift as well switches X/Y scrolling.
 
    If ctrl is pressed, scrolling zooms in or out. If ctrl and shift is
@@ -428,7 +430,7 @@ function drawSpecFrequencyScale() {
 specView.onwheel = function(wheel) {
     var stepF = specViewSize.widthF() / 100;
     var stepT = specViewSize.widthT() / 100;
-    if (wheel.altKey) {
+    if (wheel.altKey || wheel.shiftKey) {
         var center = specViewSize.centerA();
         var range = specViewSize.widthA();
         range += wheel.shiftKey ? wheel.deltaY / 10 : wheel.deltaX / 10;

@@ -1,3 +1,5 @@
+from __future__ import division
+
 import io
 import json
 import h5py
@@ -9,11 +11,14 @@ from pysoundfile import SoundFile
 
 NUM_SAMPLES = 200 * 60 * 60  # 200Hz * 60s * 60m = 1hr of data
 
+MAX_SIZE = 100  # *1000**3 # arbitrarily 10 MB limit
+
+
 AUDIO = "audio"
 EEG = "eeg"
 
 CHUNK_SIZE = 4096
-CHANNELS = ['LL', 'LP', 'RP', 'RL']
+CHANNELS = ['LL']  # , 'LP', 'RP', 'RL']
 DIFFERENCE_PAIRS = {
     'LL': [
         ('fp1', 'f7'),
@@ -21,24 +26,23 @@ DIFFERENCE_PAIRS = {
         ('t3', 't5'),
         ('t5', 'o1'),
     ],
-    'LP': [
-        ('fp1', 'f3'),
-        ('f3', 'c3'),
-        ('c3', 'p3'),
-        ('p3', 'o1'),
-    ],
-    'RP': [
-        ('fp2', 'f4'),
-        ('f4', 'c4'),
-        ('c4', 'p4'),
-        ('p4', 'o2'),
-    ],
-    'RL': [
-        ('fp2', 'f8'),
-        ('f8', 't4'),
-        ('t4', 't6'),
-        ('t6', 'o2'),
-    ],
+    #        ('fp1', 'f3'),
+    #        ('f3', 'c3'),
+    #        ('c3', 'p3'),
+    #        ('p3', 'o1'),
+    #    ],
+    #    'RP': [
+    #        ('fp2', 'f4'),
+    #        ('f4', 'c4'),
+    #        ('c4', 'p4'),
+    #        ('p4', 'o2'),
+    #    ],
+    #    'RL': [
+    #        ('fp2', 'f8'),
+    #        ('f8', 't4'),
+    #        ('t4', 't6'),
+    #        ('t6', 'o2'),
+    #    ],
 }
 
 CHANNEL_INDEX = {
@@ -74,6 +78,16 @@ def from_bytes(b):
 
 def to_bytes(n):
   return struct.pack("@i", n)
+
+
+def downsample(spectrogram, n=3, phase=0):
+  """
+      Decrease sampling rate by intgerfactor n with included offset phase
+      if the nbytes of the spectrogram exceeds MAX_SIZE
+  """
+  if spectrogram.nbytes > MAX_SIZE:
+    spectrogram = spectrogram[phase::n]
+  return spectrogram
 
 
 class JSONWebSocket(WebSocketHandler):
@@ -283,6 +297,7 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     # TODO (joshblum): display all 4 images for the channels
     spec = reg_avg[ch]
+    spec = downsample(spec)
     self.send_message('spectrogram',
                       {'extent': spec.shape,
                        'fs': fs,
@@ -294,6 +309,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     sound = file[:].sum(axis=1)
     spec = self.spectrogram(sound, nfft, overlap)
 
+    spec = downsample(spec)
     self.send_message('spectrogram',
                       {'extent': spec.shape,
                        'fs': file.sample_rate,
@@ -361,7 +377,6 @@ class SpectrogramWebSocket(JSONWebSocket):
     overlap   the amount of overlap between consecutive spectra.
 
     """
-
     shift = round(nfft * overlap)
     num_blocks = int((len(data) - nfft) / shift + 1)
     specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
