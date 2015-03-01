@@ -1,3 +1,4 @@
 pkg-config
 libffi
 libsndfile
+libhdf5

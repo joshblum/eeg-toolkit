@@ -1,3 +1,5 @@
 pkg-config
 libffi-dev
 libsndfile-dev
+python-dev
+libhdf5-dev

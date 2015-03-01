@@ -184,8 +184,6 @@ function loadSpectrogram(data, nblocks, nfreqs, fs, length) {
 
     // bail if too big for video memory
     if (Math.ceil(numTextures) > gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
-        console.log(Math.ceil(numTextures));
-        console.log(gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
         alert("Not enough texture units to display spectrogram");
         return;
     }
@@ -247,7 +245,6 @@ function loadSpectrogram(data, nblocks, nfreqs, fs, length) {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     }
-
     // save spectrogram sizes
     specSize = new SpecSize(0, length, 0, fs / 2);
     specSize.numT = nblocks;

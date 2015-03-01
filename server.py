@@ -4,14 +4,15 @@ import io
 import json
 import h5py
 import struct
+import math
 import numpy as np
 
 from tornado.websocket import WebSocketHandler
 from pysoundfile import SoundFile
 
-NUM_SAMPLES = 200 * 60 * 60  # 200Hz * 60s * 60m = 1hr of data
+NUM_SAMPLES = 200 * 60 * 60 * 2  # 200Hz * 60s * 60m = 2hr of data
 
-MAX_SIZE = 100  # *1000**3 # arbitrarily 10 MB limit
+MAX_SIZE = 100**3  # arbitrarily 1 MB limit
 
 
 AUDIO = "audio"
@@ -68,6 +69,14 @@ CHANNEL_INDEX = {
 }
 
 
+def power_log(x):
+  return 2**(math.ceil(math.log(x, 2)))
+
+
+def pow2db(x):
+  return 10 * np.log10(x)
+
+
 def hann(n):
   return 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
 
@@ -80,7 +89,7 @@ def to_bytes(n):
   return struct.pack("@i", n)
 
 
-def downsample(spectrogram, n=3, phase=0):
+def downsample(spectrogram, n=10, phase=0):
   """
       Decrease sampling rate by intgerfactor n with included offset phase
       if the nbytes of the spectrogram exceeds MAX_SIZE
@@ -88,6 +97,14 @@ def downsample(spectrogram, n=3, phase=0):
   if spectrogram.nbytes > MAX_SIZE:
     spectrogram = spectrogram[phase::n]
   return spectrogram
+
+
+def astype(ndarray, _type='float32'):
+  """
+      Helper to chagne the type of a numpy array.
+      the `float32` type is necessary for correct parsing on the client
+  """
+  return ndarray.astype(_type)  # nececssary for type for diplay
 
 
 class JSONWebSocket(WebSocketHandler):
@@ -127,6 +144,7 @@ class JSONWebSocket(WebSocketHandler):
     else:
       header = json.dumps({'type': msg_type,
                            'content': content}).encode()
+
       # append enough spaces so that the payload starts at an 8-byte
       # aligned position. The first four bytes will be the length of
       # the header, encoded as a 32 bit signed integer:
@@ -298,10 +316,11 @@ class SpectrogramWebSocket(JSONWebSocket):
     # TODO (joshblum): display all 4 images for the channels
     spec = reg_avg[ch]
     spec = downsample(spec)
+    spec = astype(spec)
     self.send_message('spectrogram',
                       {'extent': spec.shape,
                        'fs': fs,
-                       'length': len(data) / fs},
+                       'length': NUM_SAMPLES / fs},
                       spec.tostring())
 
   def on_audio_file_spectrogram(self, filename, nfft, overlap):
@@ -310,6 +329,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     spec = self.spectrogram(sound, nfft, overlap)
 
     spec = downsample(spec)
+    spec = astype(spec)
     self.send_message('spectrogram',
                       {'extent': spec.shape,
                        'fs': file.sample_rate,
@@ -350,20 +370,19 @@ class SpectrogramWebSocket(JSONWebSocket):
     with open(FILENAME, 'w') as f:
       f.write(data)
 
-    self.on_file_eeg_spectrogram(FILENAME, nfft, overlap)
+    self.on_eeg_file_spectrogram(FILENAME, nfft, overlap)
 
   def on_audio_data_spectrogram(self, data, nfft, overlap):
     file = SoundFile(io.BytesIO(data), virtual_io=True)
     sound = file[:].sum(axis=1)
     spec = self.spectrogram(sound, nfft, overlap)
-
     self.send_message('spectrogram',
                       {'extent': spec.shape,
                        'fs': file.sample_rate,
                        'length': len(file) / file.sample_rate},
                       spec.tostring())
 
-  def spectrogram(self, data, nfft, overlap):
+  def spectrogram(self, data, nfft, overlap, Fs=200):
     """Calculate a real spectrogram from audio data
 
     An audio data will be cut up into overlapping blocks of length
@@ -377,15 +396,23 @@ class SpectrogramWebSocket(JSONWebSocket):
     overlap   the amount of overlap between consecutive spectra.
 
     """
-    shift = round(nfft * overlap)
+    # TODO (joshblum): cleanup the logic and the constants
+    movingwin = (1.5, .2)
+    pad = 0
+    Ch = 1
+    N = data.shape[0]
+    Nwin = int(Fs * movingwin[0])
+    Nstep = int(Fs * movingwin[1])
+    nfft = int(max(power_log(Nwin) + pad, Nwin))
+    winstart = xrange(1, (N - Nwin + 1))
+    nw = len(winstart)
+    shift = Nstep
     num_blocks = int((len(data) - nfft) / shift + 1)
-    specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
     window = hann(nfft)
-    for idx in range(num_blocks):
-      specs[:, idx] = np.abs(
-          np.fft.rfft(
-              data[idx * shift:idx * shift + nfft] * window,
-              n=nfft)) / nfft
+    specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
+    for idx in xrange(num_blocks):
+      specs[:, idx] = np.abs(np.fft.rfft(
+          data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
       if idx % 10 == 0:
         self.send_message(
             "loading_progress", {"progress": idx / num_blocks})

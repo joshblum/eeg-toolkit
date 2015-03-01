@@ -119,7 +119,6 @@ ws.onmessage = function(event) {
 
     var type = msg.type
     var content = msg.content
-
     if (type === "spectrogram") {
         loadSpectrogram(new Float32Array(event.data, headerLen + 4),
             content.extent[0], content.extent[1],
