@@ -317,10 +317,11 @@ class SpectrogramWebSocket(JSONWebSocket):
         # regions
         diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
         T.append(self.spectrogram(diff, nfft, shift, canvas_id=ch, log=False))
-        progress = (i + 1) / len(pairs)
+        progress = i / len(pairs)
         self.send_progress(progress, canvas_id=ch)
       # compute the regional average of the spectrograms for each channel
       self.send_spectrogram(sum(T) / 4, fs, NUM_SAMPLES / fs, canvas_id=ch)
+      self.send_progress(1, canvas_id=ch)
 
   def on_audio_file_spectrogram(self, filename, nfft, overlap):
     _file = SoundFile(filename)

@@ -69,16 +69,16 @@
           <option>4096</option>
         </select>
         <label for="specMode">Mode:</label>
-        <select id="specMode" name="specMode" onchange="window.requestAnimationFrame(drawScene)">
+        <select id="specMode" name="specMode" onchange="redrawSpectrograms()">
           <option value="0" selected>physical</option>
           <option value="1">normal</option>
           <option value="2">direction</option>
           <option value="3">multiple</option>
         </select>
         <label for="specInterpolation">Interpolate</label>
-        <input id="specInterpolation" type="checkbox" onchange="window.requestAnimationFrame(drawScene)">
+        <input id="specInterpolation" type="checkbox" onchange="redrawSpectrograms()">
         <label for="specLogarithmic">Logarithmic</label>
-        <input id="specLogarithmic" type="checkbox" onchange="window.requestAnimationFrame(drawScene)">
+        <input id="specLogarithmic" type="checkbox" onchange="redrawSpectrograms()">
       </form>
     </div>
     <div id="specContainer-LL" class="specContainer">

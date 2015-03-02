@@ -4,22 +4,39 @@ IDS = ['LL', 'LP', 'RP', 'RL'];
 // When a request for update comes in the sender must specify an id to update
 SPECTROGRAMS = {};
 
+/*
+ * Helper function to wrap `document.getElementById`
+ */
 function getElementById(type, id) {
-    return document.getElementById(type + '-' + id);
+    id = id ? '-' + id : '';
+    return document.getElementById(type + id);
 }
 
-/* A Spectogram object is used to hold various attributes
+/*
+ * Redraw all spectrograms on the page.
+ * Used when options such as the mode or scale are chagned
+ */
+function redrawSpectrograms() {
+    for (var key in SPECTROGRAMS) {
+        if (SPECTROGRAMS.hasOwnProperty(key)) {
+            SPECTROGRAMS[key].drawScene();
+        }
+    }
+}
+
+/*
+ * A Spectogram object is used to hold various attributes
  * of the spectrogram in a single object. This includes
  * the webGL context and the different canvases associated
  * with a view.
  */
 function Spectrogram(id) {
     this.id = id;
-    this.specView = document.getElementById('spectrogram-' + id);
-    this.specTimeScale = document.getElementById('specTimeScale-' + id);
-    this.specFrequencyScale = document.getElementById('specFreqScale-' + id);
-    this.specDataView = document.getElementById('specDataView-' + id);
-    this.progressBar = document.getElementById('progressBar-' + id);
+    this.specView = getElementById('spectrogram', id);
+    this.specTimeScale = getElementById('specTimeScale', id);
+    this.specFrequencyScale = getElementById('specFreqScale', id);
+    this.specDataView = getElementById('specDataView', id);
+    this.progressBar = getElementById('progressBar', id);
 
     this.gl; // the WebGL instance
 
@@ -188,7 +205,7 @@ Spectrogram.prototype.loadSpectrogramShaders = function() {
    Returns the compiled shader.
 */
 Spectrogram.prototype.getShader = function(id) {
-    var script = document.getElementById(id);
+    var script = getElementById(id);
 
     if (script.type == "x-shader/x-fragment") {
         var shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
@@ -340,13 +357,13 @@ Spectrogram.prototype.drawSpectrogram = function() {
     this.gl.uniform2f(this.specSizeUniform, this.specSize.widthT(), this.specSize.widthF());
     this.gl.uniform2f(this.specDataSizeUniform, this.specSize.numT, this.specSize.numF);
     // set the spectrogram display mode
-    var specMode = document.getElementById('specMode').value;
+    var specMode = getElementById('specMode').value;
     this.gl.uniform1i(this.specModeUniform, specMode);
-    var specLogarithmic = document.getElementById('specLogarithmic').checked;
-    this.gl.uniform1i(this.specLogarithmicUniform, this.specLogarithmic);
+    var specLogarithmic = getElementById('specLogarithmic').checked;
+    this.gl.uniform1i(this.specLogarithmicUniform, specLogarithmic);
 
     // switch interpolation on or off
-    var interpolate = document.getElementById('specInterpolation').checked;
+    var interpolate = getElementById('specInterpolation').checked;
 
     // draw the spectrogram textures
     for (var i = 0; i < this.spectrogramTextures.length; i++) {
@@ -426,7 +443,7 @@ Spectrogram.prototype.freqLin2Log = function(f) {
      appropriately distorted.
 */
 Spectrogram.prototype.formatFrequency = function(frequency) {
-    frequency = document.getElementById('specLogarithmic').checked ? this.freqLin2Log(frequency) : frequency;
+    frequency = getElementById('specLogarithmic').checked ? this.freqLin2Log(frequency) : frequency;
 
     if (frequency < 10) {
         return frequency.toFixed(2) + " Hz";
