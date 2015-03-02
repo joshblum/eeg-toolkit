@@ -20,6 +20,7 @@ EEG = "eeg"
 
 CHUNK_SIZE = 4096
 CHANNELS = ['LL']  # , 'LP', 'RP', 'RL']
+CANVAS_IDS = CHANNELS
 DIFFERENCE_PAIRS = {
     'LL': [
         ('fp1', 'f7'),
@@ -241,6 +242,21 @@ class SpectrogramWebSocket(JSONWebSocket):
       super(self.__class__, self).receive_message(
           msg_type, content, data)
 
+  def send_spectrogram(self, spec, fs, length, canvas_id=None):
+    spec = downsample(spec)
+    spec = astype(spec)
+    self.send_message('spectrogram',
+                      {'extent': spec.shape,
+                       'fs': fs,
+                       'length': length,
+                       'canvasId': canvas_id},
+                      spec.tostring())
+
+  def send_progress(self, progress, canvas_id=None):
+    self.send_message('loading_progress', {
+        'progress': progress,
+        'canvasId': canvas_id})
+
   def on_file_spectrogram(self, filename, nfft=1024,
                           overlap=0.5, dataType=AUDIO):
     """Loads an audio file and calculates a spectrogram.
@@ -315,26 +331,17 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     # TODO (joshblum): display all 4 images for the channels
     spec = reg_avg[ch]
-    spec = downsample(spec)
-    spec = astype(spec)
-    self.send_message('spectrogram',
-                      {'extent': spec.shape,
-                       'fs': fs,
-                       'length': NUM_SAMPLES / fs},
-                      spec.tostring())
+    self.send_spectrogram(spec, fs, NUM_SAMPLES / fs, canvas_id=ch)
 
   def on_audio_file_spectrogram(self, filename, nfft, overlap):
-    file = SoundFile(filename)
-    sound = file[:].sum(axis=1)
-    spec = self.spectrogram(sound, nfft, overlap)
+    _file = SoundFile(filename)
+    self._audio_file_spectrogram(_file, nfft, overlap)
 
-    spec = downsample(spec)
-    spec = astype(spec)
-    self.send_message('spectrogram',
-                      {'extent': spec.shape,
-                       'fs': file.sample_rate,
-                       'length': len(file) / file.sample_rate},
-                      spec.tostring())
+  def _audio_file_spectrogram(self, _file, nfft, overlap):
+    sound = _file[:].sum(axis=1)
+    spec = self.spectrogram(sound, nfft, overlap)
+    fs = _file.sample_rate
+    self.send_spectrogram(spec, fs, len(_file) / fs)
 
   def on_data_spectrogram(self, data, nfft=1024, overlap=0.5, dataType=AUDIO):
     """Loads an audio file and calculates a spectrogram.
@@ -373,14 +380,8 @@ class SpectrogramWebSocket(JSONWebSocket):
     self.on_eeg_file_spectrogram(FILENAME, nfft, overlap)
 
   def on_audio_data_spectrogram(self, data, nfft, overlap):
-    file = SoundFile(io.BytesIO(data), virtual_io=True)
-    sound = file[:].sum(axis=1)
-    spec = self.spectrogram(sound, nfft, overlap)
-    self.send_message('spectrogram',
-                      {'extent': spec.shape,
-                       'fs': file.sample_rate,
-                       'length': len(file) / file.sample_rate},
-                      spec.tostring())
+    _file = SoundFile(io.BytesIO(data), virtual_io=True)
+    self._audio_file_spectrogram(_file, nfft, overlap)
 
   def spectrogram(self, data, nfft, overlap, Fs=200):
     """Calculate a real spectrogram from audio data
@@ -414,11 +415,10 @@ class SpectrogramWebSocket(JSONWebSocket):
       specs[:, idx] = np.abs(np.fft.rfft(
           data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
       if idx % 10 == 0:
-        self.send_message(
-            "loading_progress", {"progress": idx / num_blocks})
+        self.send_progress(idx / num_blocks)
     specs[:, -1] = np.abs(
         np.fft.rfft(data[num_blocks * shift:], n=nfft)) / nfft
-    self.send_message("loading_progress", {"progress": 1})
+    self.send_progress(1)
     return specs.T
 
 if __name__ == "__main__":

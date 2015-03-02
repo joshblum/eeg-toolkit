@@ -3,33 +3,33 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Spectrogram</title>
     <style>
-      #specContainer {
+      .specContainer {
         position: relative;
         width: 100%;
         height: calc(100% - 100px);
       }
-      #spectrogram {
+      .spectrogram {
         position: absolute;
         left: 10px;
         top: 10px;
         width: calc(100% - 50px);
         height: calc(100% - 30px);
       }
-      #specFreqScale {
+      .specFreqScale {
         position: absolute;
         right: 0px;
         top: 0px;
         height: calc(100% - 10px);
         width: 40px;
       }
-      #specTimeScale {
+      .specTimeScale {
         position: absolute;
         left: 0px;
         bottom: 0px;
         width: calc(100% - 30px);
         height: 20px;
       }
-      #specDataView {
+      .specDataView {
         position: absolute;
         background: #ffffff;
         z-index: 9999;
@@ -40,7 +40,7 @@
         opacity: 0.7;
         font: 10px sans-serif;
       }
-      #progressBar {
+      .progressBar {
         position: absolute;
         margin-left: calc(50% - 100px);
         margin-top: 200px;
@@ -81,12 +81,12 @@
         <input id="specLogarithmic" type="checkbox" onchange="window.requestAnimationFrame(drawScene)">
       </form>
     </div>
-    <div id="specContainer">
-    <canvas id="spectrogram"></canvas>
-    <div id="specDataView">NaN</div>
-    <progress id="progressBar" hidden="True"></progress>
-    <canvas id="specFreqScale"></canvas>
-    <canvas id="specTimeScale"></canvas>
+    <div id="specContainer-LL" class="specContainer">
+    <canvas id="spectrogram-LL" class="spectrogram"></canvas>
+    <div id="specDataView-LL" class="specDataView">NaN</div>
+    <progress id="progressBar-LL" class="progressBar" hidden="True"></progress>
+    <canvas id="specFreqScale-LL" class="specFreqScale"></canvas>
+    <canvas id="specTimeScale-LL" class="specTimeScale"></canvas>
     </div>
     <script id="fragmentShader" type="x-shader/x-fragment">
       varying highp vec2 vTextureCoord;
@@ -272,5 +272,6 @@
     <script src="specsize.js"></script>
     <script src="spectrogram.js"></script>
     <script src="communication.js"></script>
+    <script src="main.js"></script>
   </body>
 </html>

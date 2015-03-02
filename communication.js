@@ -117,37 +117,26 @@ ws.onmessage = function(event) {
         return
     }
 
-    var type = msg.type
-    var content = msg.content
+    var type = msg.type;
+    var id = msg.canvasId || IDS[0];
+    var content = msg.content;
+    var spectrogram = SPECTROGRAMS[id];
     if (type === "spectrogram") {
-        loadSpectrogram(new Float32Array(event.data, headerLen + 4),
-            content.extent[0], content.extent[1],
-            content.fs, content.length);
+        spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4), content.extent[0], content.extent[1], content.fs, content.length);
     } else if (type === "loading_progress") {
-        updateProgressBar(content.progress);
+        spectrogram.updateProgressBar(content.progress);
     } else {
         console.log(type, content);
     }
 }
 
-/* Sets the progress bar
-
-   If progress is 0 or 1, the progress bar will be turned invisible.
-*/
-function updateProgressBar(progress) {
-    var progressBar = document.getElementById('progressBar');
-    if (progress === 0 || progress === 1) {
-        progressBar.hidden = true;
-    } else {
-        progressBar.hidden = false;
-        progressBar.value = progress;
-    }
-}
-
 /* log some info about the GL, then display spectrogram */
 ws.onopen = function() {
-    logGLInfo();
-    reloadSpectrogram();
+  for (var i in SPECTROGRAMS) {
+    var spectrogram = SPECTROGRAMS[i];
+    spectrogram.logGLInfo();
+  }
+  reloadSpectrogram();
 }
 
 /* Test the keyup event for a submission and then reload the spectrogram.
