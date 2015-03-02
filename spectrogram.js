@@ -1,5 +1,5 @@
 // TODO (joshblum): Is it better to have it more general and allow the server to dictate ids?
-IDS = ['LL']; //, 'LP', 'RP', 'RL'];
+IDS = ['LL', 'LP', 'RP', 'RL'];
 // global data structure which holds spectrogram objects.
 // When a request for update comes in the sender must specify an id to update
 SPECTROGRAMS = {};
@@ -53,7 +53,9 @@ Spectrogram.prototype.init = function() {
         this.gl = this.specView.getContext('webgl');
     } catch (e) {
         alert('Could not initialize WebGL');
+        console.log(e);
         this.gl = null;
+        return;
     }
 
     // needed for floating point textures
@@ -61,12 +63,14 @@ Spectrogram.prototype.init = function() {
     var error = this.gl.getError();
     if (error != this.gl.NO_ERROR) {
         alert("Could not enable float texture extension");
+        return;
     }
 
     // needed for linear filtering of floating point textures
     this.gl.getExtension("OES_texture_float_linear");
     if (error != this.gl.NO_ERROR) {
         alert("Could not enable float texture linear extension");
+        return;
     }
 
     // 2D-drawing only
@@ -86,10 +90,10 @@ Spectrogram.prototype.addListeners = function() {
     this.updateCanvasResolutions();
     var self = this;
     this.specView.onwheel = function(wheel) {
-      self.onwheel(wheel);
+        self.onwheel(wheel);
     }
     this.specView.onmousemove = function(mouse) {
-      self.onmousemove(mouse);
+        self.onmousemove(mouse);
     }
 }
 
@@ -104,7 +108,7 @@ Spectrogram.prototype.updateCanvasResolutions = function() {
     this.specFrequencyScale.height = this.specFrequencyScale.clientHeight;
     var self = this;
     window.requestAnimationFrame(function() {
-      self.drawScene();
+        self.drawScene();
     });
 }
 
@@ -300,7 +304,7 @@ Spectrogram.prototype.loadSpectrogram = function(data, nblocks, nfreqs, fs, leng
     this.specViewSize = new SpecSize(0, length, 0, fs / 2, -120, 0);
     var self = this;
     window.requestAnimationFrame(function() {
-      self.drawScene();
+        self.drawScene();
     });
 }
 
@@ -539,7 +543,7 @@ Spectrogram.prototype.onwheel = function(wheel) {
     this.specView.onmousemove(wheel);
     var self = this;
     window.requestAnimationFrame(function() {
-      self.drawScene();
+        self.drawScene();
     });
 }
 

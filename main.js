@@ -6,4 +6,3 @@ function start() {
         SPECTROGRAMS[id] = new Spectrogram(id);
     }
 }
-

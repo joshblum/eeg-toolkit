@@ -6,7 +6,7 @@
       .specContainer {
         position: relative;
         width: 100%;
-        height: calc(100% - 100px);
+        height: calc(35% - 100px);
       }
       .spectrogram {
         position: absolute;
@@ -42,8 +42,8 @@
       }
       .progressBar {
         position: absolute;
-        margin-left: calc(50% - 100px);
-        margin-top: 200px;
+        margin-left: calc(40%);
+        margin-top: calc(7%);
         width: 200px;
       }
       label {
@@ -82,11 +82,32 @@
       </form>
     </div>
     <div id="specContainer-LL" class="specContainer">
-    <canvas id="spectrogram-LL" class="spectrogram"></canvas>
-    <div id="specDataView-LL" class="specDataView">NaN</div>
-    <progress id="progressBar-LL" class="progressBar" hidden="True"></progress>
-    <canvas id="specFreqScale-LL" class="specFreqScale"></canvas>
-    <canvas id="specTimeScale-LL" class="specTimeScale"></canvas>
+      <canvas id="spectrogram-LL" class="spectrogram"></canvas>
+      <div id="specDataView-LL" class="specDataView">NaN</div>
+      <progress id="progressBar-LL" class="progressBar" hidden="True"></progress>
+      <canvas id="specFreqScale-LL" class="specFreqScale"></canvas>
+      <canvas id="specTimeScale-LL" class="specTimeScale"></canvas>
+    </div>
+    <div id="specContainer-LP" class="specContainer">
+      <canvas id="spectrogram-LP" class="spectrogram"></canvas>
+      <div id="specDataView-LP" class="specDataView">NaN</div>
+      <progress id="progressBar-LP" class="progressBar" hidden="True"></progress>
+      <canvas id="specFreqScale-LP" class="specFreqScale"></canvas>
+      <canvas id="specTimeScale-LP" class="specTimeScale"></canvas>
+    </div>
+    <div id="specContainer-RP" class="specContainer">
+      <canvas id="spectrogram-RP" class="spectrogram"></canvas>
+      <div id="specDataView-RP" class="specDataView">NaN</div>
+      <progress id="progressBar-RP" class="progressBar" hidden="True"></progress>
+      <canvas id="specFreqScale-RP" class="specFreqScale"></canvas>
+      <canvas id="specTimeScale-RP" class="specTimeScale"></canvas>
+    </div>
+    <div id="specContainer-RL" class="specContainer">
+      <canvas id="spectrogram-RL" class="spectrogram"></canvas>
+      <div id="specDataView-RL" class="specDataView">NaN</div>
+      <progress id="progressBar-RL" class="progressBar" hidden="True"></progress>
+      <canvas id="specFreqScale-RL" class="specFreqScale"></canvas>
+      <canvas id="specTimeScale-RL" class="specTimeScale"></canvas>
     </div>
     <script id="fragmentShader" type="x-shader/x-fragment">
       varying highp vec2 vTextureCoord;

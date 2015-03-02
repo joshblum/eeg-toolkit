@@ -109,7 +109,7 @@ ws.onmessage = function(event) {
     } else {
         var header = event.data;
     }
-
+    var msg;
     try {
         msg = JSON.parse(header);
     } catch (e) {
@@ -118,10 +118,12 @@ ws.onmessage = function(event) {
     }
 
     var type = msg.type;
-    var id = msg.canvasId || IDS[0];
     var content = msg.content;
-    var spectrogram = SPECTROGRAMS[id];
+    var canvasId = content.canvas_id || IDS[0];
+    var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
+    console.log(content);
+    console.log(spectrogram)
         spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4), content.extent[0], content.extent[1], content.fs, content.length);
     } else if (type === "loading_progress") {
         spectrogram.updateProgressBar(content.progress);

@@ -15,12 +15,11 @@ NUM_SAMPLES = 200 * 60 * 60 * 2  # 200Hz * 60s * 60m = 2hr of data
 MAX_SIZE = 100**3  # arbitrarily 1 MB limit
 
 
-AUDIO = "audio"
-EEG = "eeg"
+AUDIO = 'audio'
+EEG = 'eeg'
 
 CHUNK_SIZE = 4096
-CHANNELS = ['LL']  # , 'LP', 'RP', 'RL']
-CANVAS_IDS = CHANNELS
+CHANNELS = ['LL', 'LP', 'RP', 'RL']
 DIFFERENCE_PAIRS = {
     'LL': [
         ('fp1', 'f7'),
@@ -28,23 +27,24 @@ DIFFERENCE_PAIRS = {
         ('t3', 't5'),
         ('t5', 'o1'),
     ],
-    #        ('fp1', 'f3'),
-    #        ('f3', 'c3'),
-    #        ('c3', 'p3'),
-    #        ('p3', 'o1'),
-    #    ],
-    #    'RP': [
-    #        ('fp2', 'f4'),
-    #        ('f4', 'c4'),
-    #        ('c4', 'p4'),
-    #        ('p4', 'o2'),
-    #    ],
-    #    'RL': [
-    #        ('fp2', 'f8'),
-    #        ('f8', 't4'),
-    #        ('t4', 't6'),
-    #        ('t6', 'o2'),
-    #    ],
+    'LP': [
+        ('fp1', 'f3'),
+        ('f3', 'c3'),
+        ('c3', 'p3'),
+        ('p3', 'o1'),
+    ],
+    'RP': [
+        ('fp2', 'f4'),
+        ('f4', 'c4'),
+        ('c4', 'p4'),
+        ('p4', 'o2'),
+    ],
+    'RL': [
+        ('fp2', 'f8'),
+        ('f8', 't4'),
+        ('t4', 't6'),
+        ('t6', 'o2'),
+    ],
 }
 
 CHANNEL_INDEX = {
@@ -74,8 +74,17 @@ def power_log(x):
   return 2**(math.ceil(math.log(x, 2)))
 
 
-def pow2db(x):
-  return 10 * np.log10(x)
+def get_spectrogram_params(fs):
+  """
+      Emulating the original matlab code with these
+      hardcoded constants for the window parameters
+  """
+  # TODO (joshblum): Need to take nfft into account instead of hardcoding
+  pad = 0
+  Nwin = int(fs * 1.5)
+  Nstep = int(fs * 0.2)
+  nfft = int(max(power_log(Nwin) + pad, Nwin))
+  return nfft, Nstep
 
 
 def hann(n):
@@ -83,11 +92,11 @@ def hann(n):
 
 
 def from_bytes(b):
-  return struct.unpack("@i", b)[0]
+  return struct.unpack('@i', b)[0]
 
 
 def to_bytes(n):
-  return struct.pack("@i", n)
+  return struct.pack('@i', n)
 
 
 def downsample(spectrogram, n=10, phase=0):
@@ -127,7 +136,7 @@ class JSONWebSocket(WebSocketHandler):
     return True
 
   def open(self):
-    print("WebSocket opened")
+    print('WebSocket opened')
 
   def send_message(self, msg_type, content, data=None):
     """Send a message.
@@ -140,8 +149,8 @@ class JSONWebSocket(WebSocketHandler):
     """
 
     if data is None:
-      self.write_message(json.dumps({"type": msg_type,
-                                     "content": content}).encode())
+      self.write_message(json.dumps({'type': msg_type,
+                                     'content': content}).encode())
     else:
       header = json.dumps({'type': msg_type,
                            'content': content}).encode()
@@ -195,14 +204,14 @@ class JSONWebSocket(WebSocketHandler):
 
     """
 
-    if msg_type == "information":
+    if msg_type == 'information':
       print(content)
     else:
-      print(("Don't know what to do with message of type {}" +
-             "and content {}").format(msg_type, content))
+      print(('Don\'t know what to do with message of type {}' +
+             'and content {}').format(msg_type, content))
 
   def on_close(self):
-    print("WebSocket closed")
+    print('WebSocket closed')
 
 
 class SpectrogramWebSocket(JSONWebSocket):
@@ -249,13 +258,13 @@ class SpectrogramWebSocket(JSONWebSocket):
                       {'extent': spec.shape,
                        'fs': fs,
                        'length': length,
-                       'canvasId': canvas_id},
+                       'canvas_id': canvas_id},
                       spec.tostring())
 
   def send_progress(self, progress, canvas_id=None):
     self.send_message('loading_progress', {
         'progress': progress,
-        'canvasId': canvas_id})
+        'canvas_id': canvas_id})
 
   def on_file_spectrogram(self, filename, nfft=1024,
                           overlap=0.5, dataType=AUDIO):
@@ -272,7 +281,6 @@ class SpectrogramWebSocket(JSONWebSocket):
         AUDIO: self.on_audio_file_spectrogram,
         EEG: self.on_eeg_file_spectrogram,
     }
-    print "dataType:", dataType
 
     handler = dataHandlers.get(dataType)
     if handler is None:
@@ -290,48 +298,29 @@ class SpectrogramWebSocket(JSONWebSocket):
   def _load_spectrofile(self, filename):
     f = h5py.File(filename, 'r')
     data = f['data']
-    Fs = f['Fs'][0][0]
-    print "Loaded spectral file %s" % filename
-    return data, Fs
+    fs = f['Fs'][0][0]
+    print 'Loaded spectral file %s' % filename
+    return data, fs
 
   def on_eeg_file_spectrogram(self, filename, nfft, overlap):
     data, fs = self._load_spectrofile(filename)
     data = data[:NUM_SAMPLES]  # ok lets just chunk a bit of this mess
 
-    print "Calculating bioploar data..."
-    # take differences between the channels (columns) in each of the regions
-    bipolar_data = {ch: [
-        data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
-        for c1, c2 in pairs]
-        for ch, pairs in DIFFERENCE_PAIRS.iteritems()
-    }
+    nfft, shift = get_spectrogram_params(fs)
 
-    print "Calculated bioploar data"
-    # now store the spectrogram for each of the channels
-    spec_data = dict.fromkeys(CHANNELS)
-
-    for ch, diffs in bipolar_data.iteritems():
-      l = []
-      print "Computing spectrogram for ch: %s" % ch
-      for diff in diffs:
-        spectrogram = self.spectrogram(diff, nfft, overlap)
-        print "spectrogram shape:", spectrogram.shape
-        l.append(spectrogram)
-      spec_data[ch] = l
-
-    # from each of the spectrograms, average the channels within each region
-    reg_avg = dict.fromkeys(CHANNELS)
-
-    for ch, spec_data in spec_data.iteritems():
-      T = np.zeros(spec_data[0].shape)
-      print "Computing regional average for ch: %s" % ch
-      for s in spec_data:
-        T += s
-      reg_avg[ch] = T / 4
-
-    # TODO (joshblum): display all 4 images for the channels
-    spec = reg_avg[ch]
-    self.send_spectrogram(spec, fs, NUM_SAMPLES / fs, canvas_id=ch)
+    for ch in CHANNELS:
+      T = []
+      pairs = DIFFERENCE_PAIRS.get(ch)
+      for i, pair in enumerate(pairs):
+        c1, c2 = pair
+        # take differences between the channels (columns) in each of the
+        # regions
+        diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
+        T.append(self.spectrogram(diff, nfft, shift, canvas_id=ch, log=False))
+        progress = (i + 1) / len(pairs)
+        self.send_progress(progress, canvas_id=ch)
+      # compute the regional average of the spectrograms for each channel
+      self.send_spectrogram(sum(T) / 4, fs, NUM_SAMPLES / fs, canvas_id=ch)
 
   def on_audio_file_spectrogram(self, filename, nfft, overlap):
     _file = SoundFile(filename)
@@ -339,7 +328,8 @@ class SpectrogramWebSocket(JSONWebSocket):
 
   def _audio_file_spectrogram(self, _file, nfft, overlap):
     sound = _file[:].sum(axis=1)
-    spec = self.spectrogram(sound, nfft, overlap)
+    shift = round(nfft * overlap)
+    spec = self.spectrogram(sound, nfft, shift)
     fs = _file.sample_rate
     self.send_spectrogram(spec, fs, len(_file) / fs)
 
@@ -368,7 +358,7 @@ class SpectrogramWebSocket(JSONWebSocket):
       We computer the differences between sensors in the four
       regions (LL, LP, RL, RP)
       and then average the spectrograms for each of these regions.
-      We return a 4 x 1 array of these spectrograms for visualization
+      We send each spectrogram to the client for visualization.
     """
     # TODO (joshblum): figure out something not as stupid... (can work
     # concurrently?)
@@ -383,7 +373,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     _file = SoundFile(io.BytesIO(data), virtual_io=True)
     self._audio_file_spectrogram(_file, nfft, overlap)
 
-  def spectrogram(self, data, nfft, overlap, Fs=200):
+  def spectrogram(self, data, nfft, shift, canvas_id=None, log=True):
     """Calculate a real spectrogram from audio data
 
     An audio data will be cut up into overlapping blocks of length
@@ -394,41 +384,31 @@ class SpectrogramWebSocket(JSONWebSocket):
     Arguments:
     data      audio data as a numpy array.
     nfft      the FFT length used for calculating the spectrogram.
-    overlap   the amount of overlap between consecutive spectra.
+    shift   the amount of overlap between consecutive spectra.
 
     """
-    # TODO (joshblum): cleanup the logic and the constants
-    movingwin = (1.5, .2)
-    pad = 0
-    Ch = 1
-    N = data.shape[0]
-    Nwin = int(Fs * movingwin[0])
-    Nstep = int(Fs * movingwin[1])
-    nfft = int(max(power_log(Nwin) + pad, Nwin))
-    winstart = xrange(1, (N - Nwin + 1))
-    nw = len(winstart)
-    shift = Nstep
     num_blocks = int((len(data) - nfft) / shift + 1)
     window = hann(nfft)
     specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
     for idx in xrange(num_blocks):
       specs[:, idx] = np.abs(np.fft.rfft(
           data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
-      if idx % 10 == 0:
-        self.send_progress(idx / num_blocks)
+      if log and idx % 10 == 0:
+        self.send_progress(idx / num_blocks, canvas_id)
     specs[:, -1] = np.abs(
         np.fft.rfft(data[num_blocks * shift:], n=nfft)) / nfft
-    self.send_progress(1)
+    if log:
+      self.send_progress(1, canvas_id)
     return specs.T
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   import os
   import webbrowser
   from tornado.web import Application
   from tornado.ioloop import IOLoop
   import random
 
-  app = Application([("/spectrogram", SpectrogramWebSocket)])
+  app = Application([('/spectrogram', SpectrogramWebSocket)])
 
   random.seed()
   port = random.randrange(49152, 65535)
