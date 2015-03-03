@@ -10,7 +10,7 @@ import numpy as np
 from tornado.websocket import WebSocketHandler
 from pysoundfile import SoundFile
 
-NUM_SAMPLES = 200 * 60 * 60 * 2  # 200Hz * 60s * 60m = 2hr of data
+NUM_SAMPLES = 200 * 60 * 60 * 4  # 200Hz * 60s * 60m * 4hr = 4hr of data
 
 MAX_SIZE = 100**3  # arbitrarily 1 MB limit
 
@@ -68,6 +68,59 @@ CHANNEL_INDEX = {
     'cz': 17,
     'pz': 18,
 }
+
+
+def _load_spectrofile(filename):
+  f = h5py.File(filename, 'r')
+  data = f['data']
+  fs = f['Fs'][0][0]
+  print 'Loaded spectral file %s' % filename
+  return data, fs
+
+
+def eeg_ch_spectrogram(ch, data, nfft, shift, progress_fn):
+  """
+    Compute the spectrogram for an individual spectrogram in the eeg
+  """
+  T = []
+  pairs = DIFFERENCE_PAIRS.get(ch)
+  for i, pair in enumerate(pairs):
+    c1, c2 = pair
+    # take differences between the channels in each of the regions
+    diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
+    T.append(spectrogram(diff, nfft, shift, canvas_id=ch))
+    progress_fn((i + 1) / len(pairs))
+    # compute the regional average of the spectrograms for each channel
+  return sum(T) / 4
+
+
+def spectrogram(data, nfft, shift, canvas_id=None, progress_fn=None):
+  """Calculate a real spectrogram from audio data
+
+  An audio data will be cut up into overlapping blocks of length
+  `nfft`. The amount of overlap will be `overlap*nfft`. Then,
+  calculate a real fourier transform of length `nfft` of every
+  block and save the absolute spectrum.
+
+  Arguments:
+  data      audio data as a numpy array.
+  nfft      the FFT length used for calculating the spectrogram.
+  shift   the amount of overlap between consecutive spectra.
+
+  """
+  num_blocks = int((len(data) - nfft) / shift + 1)
+  window = hann(nfft)
+  specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
+  for idx in xrange(num_blocks):
+    specs[:, idx] = np.abs(np.fft.rfft(
+        data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
+    if progress_fn and idx % 10 == 0:
+      progress_fn(idx / num_blocks)
+  specs[:, -1] = np.abs(
+      np.fft.rfft(data[num_blocks * shift:], n=nfft)) / nfft
+  if progress_fn:
+    progress_fn(1)
+  return specs.T
 
 
 def power_log(x):
@@ -295,33 +348,15 @@ class SpectrogramWebSocket(JSONWebSocket):
       })
       print(error_msg)
 
-  def _load_spectrofile(self, filename):
-    f = h5py.File(filename, 'r')
-    data = f['data']
-    fs = f['Fs'][0][0]
-    print 'Loaded spectral file %s' % filename
-    return data, fs
-
   def on_eeg_file_spectrogram(self, filename, nfft, overlap):
-    data, fs = self._load_spectrofile(filename)
+    data, fs = _load_spectrofile(filename)
     data = data[:NUM_SAMPLES]  # ok lets just chunk a bit of this mess
-
     nfft, shift = get_spectrogram_params(fs)
 
     for ch in CHANNELS:
-      T = []
-      pairs = DIFFERENCE_PAIRS.get(ch)
-      for i, pair in enumerate(pairs):
-        c1, c2 = pair
-        # take differences between the channels (columns) in each of the
-        # regions
-        diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
-        T.append(self.spectrogram(diff, nfft, shift, canvas_id=ch, log=False))
-        progress = i / len(pairs)
-        self.send_progress(progress, canvas_id=ch)
-      # compute the regional average of the spectrograms for each channel
-      self.send_spectrogram(sum(T) / 4, fs, NUM_SAMPLES / fs, canvas_id=ch)
-      self.send_progress(1, canvas_id=ch)
+      spec = eeg_ch_spectrogram(ch, data, nfft, shift, self.send_progress)
+      self.send_progress(1, ch)
+      self.send_spectrogram(spec, fs, NUM_SAMPLES / fs, canvas_id=ch)
 
   def on_audio_file_spectrogram(self, filename, nfft, overlap):
     _file = SoundFile(filename)
@@ -330,7 +365,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def _audio_file_spectrogram(self, _file, nfft, overlap):
     sound = _file[:].sum(axis=1)
     shift = round(nfft * overlap)
-    spec = self.spectrogram(sound, nfft, shift)
+    spec = spectrogram(sound, nfft, shift)
     fs = _file.sample_rate
     self.send_spectrogram(spec, fs, len(_file) / fs)
 
@@ -373,34 +408,6 @@ class SpectrogramWebSocket(JSONWebSocket):
   def on_audio_data_spectrogram(self, data, nfft, overlap):
     _file = SoundFile(io.BytesIO(data), virtual_io=True)
     self._audio_file_spectrogram(_file, nfft, overlap)
-
-  def spectrogram(self, data, nfft, shift, canvas_id=None, log=True):
-    """Calculate a real spectrogram from audio data
-
-    An audio data will be cut up into overlapping blocks of length
-    `nfft`. The amount of overlap will be `overlap*nfft`. Then,
-    calculate a real fourier transform of length `nfft` of every
-    block and save the absolute spectrum.
-
-    Arguments:
-    data      audio data as a numpy array.
-    nfft      the FFT length used for calculating the spectrogram.
-    shift   the amount of overlap between consecutive spectra.
-
-    """
-    num_blocks = int((len(data) - nfft) / shift + 1)
-    window = hann(nfft)
-    specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
-    for idx in xrange(num_blocks):
-      specs[:, idx] = np.abs(np.fft.rfft(
-          data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
-      if log and idx % 10 == 0:
-        self.send_progress(idx / num_blocks, canvas_id)
-    specs[:, -1] = np.abs(
-        np.fft.rfft(data[num_blocks * shift:], n=nfft)) / nfft
-    if log:
-      self.send_progress(1, canvas_id)
-    return specs.T
 
 if __name__ == '__main__':
   import os
