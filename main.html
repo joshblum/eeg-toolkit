@@ -53,6 +53,9 @@
         margin-top: calc(7%);
         width: 200px;
       }
+      #specDuration {
+        width: 30px;
+      }
       label {
         margin-left: 20px;
         font: 12px sans-serif;
@@ -66,6 +69,8 @@
         <input id="audioFileByData" name="audioFileByData" type="file" accept="audio/*" onchange="reloadSpectrogram()">
         <input id="audioFileByName" name="audioFileByName" type="text" onkeyup="submitSpectrogram(event)">
         <input id="audioFileNameSubmit" type="button" value="Submit" onclick="reloadSpectrogram()">
+        <label for="specDuration">Duration (hrs):</label>
+        <input id="specDuration" type="text" value="4.0" onkeyup="submitSpectrogram(event)">
         <label for="fftLen">NFFT:</label>
         <select id="fftLen" name="fftLen" onchange="reloadSpectrogram()">
           <option>128</option>

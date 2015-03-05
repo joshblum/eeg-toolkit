@@ -67,12 +67,14 @@ function sendMessage(type, content, payload) {
    Arguments:
    filename  the file name from which to load audio data.
    nfft      the FFT length used for calculating the spectrogram.
+   duration  the length (in hours) to display.
    overlap   the amount of overlap between consecutive spectra.
 */
-function requestFileSpectrogram(filename, nfft, overlap, dataType) {
+function requestFileSpectrogram(filename, nfft, duration, overlap, dataType) {
     sendMessage("request_file_spectrogram", {
         filename: filename,
         nfft: nfft,
+        duration: duration,
         overlap: overlap,
         dataType: dataType
     });
@@ -83,11 +85,13 @@ function requestFileSpectrogram(filename, nfft, overlap, dataType) {
    Arguments:
    data      the content of a file from which to load audio data.
    nfft      the FFT length used for calculating the spectrogram.
+   duration  the length (in hours) to display.
    overlap   the amount of overlap between consecutive spectra.
 */
-function requestDataSpectrogram(data, nfft, overlap, dataType) {
+function requestDataSpectrogram(data, nfft, duration, overlap, dataType) {
     sendMessage("request_data_spectrogram", {
         nfft: nfft,
+        duration: duration,
         overlap: overlap,
         dataType: dataType
     }, data);
@@ -132,11 +136,11 @@ ws.onmessage = function(event) {
 
 /* log some info about the GL, then display spectrogram */
 ws.onopen = function() {
-  for (var i in SPECTROGRAMS) {
-    var spectrogram = SPECTROGRAMS[i];
-    spectrogram.logGLInfo();
-  }
-  reloadSpectrogram();
+    for (var i in SPECTROGRAMS) {
+        var spectrogram = SPECTROGRAMS[i];
+        spectrogram.logGLInfo();
+    }
+    reloadSpectrogram();
 }
 
 /* Test the keyup event for a submission and then reload the spectrogram.
@@ -157,8 +161,9 @@ function submitSpectrogram(e) {
    spectrogram is up to the server.
 */
 function reloadSpectrogram() {
-    var audioFile = document.getElementById('audioFileByData').files[0];
-    var fftLen = parseFloat(document.getElementById('fftLen').value);
+    var audioFile = getElementById('audioFileByData').files[0];
+    var fftLen = parseFloat(getElementById('fftLen').value);
+    var duration = parseFloat(getElementById('specDuration').value);
     var dataType;
     // first we try to load a file
     if (audioFile) {
@@ -166,14 +171,16 @@ function reloadSpectrogram() {
         dataType = getDataType(audioFile.name);
         reader.readAsArrayBuffer(audioFile);
         reader.onloadend = function() {
-            requestDataSpectrogram(reader.result, fftLen, OVERLAP, dataType);
+            requestDataSpectrogram(reader.result, fftLen, duration,
+                OVERLAP, dataType);
         }
     } else { // otherwise see if there is a filename
-        audioFile = document.getElementById('audioFileByName').value;
+        audioFile = getElementById('audioFileByName').value;
         if (audioFile) {
             dataType = getDataType(audioFile);
             console.log("Requesting spectrogram for: " + audioFile);
-            requestFileSpectrogram(audioFile, fftLen, OVERLAP, dataType);
+            requestFileSpectrogram(audioFile, fftLen, duration,
+                OVERLAP, dataType);
         }
     }
     if (!audioFile) {
@@ -184,8 +191,8 @@ function reloadSpectrogram() {
 
 /*
  * Determines the type of input file the server has to handle based on the filename.
- *
  * Currently handles audio and eeg type files.
+ * TODO (joshblum): Document file types/allow other types
  */
 function getDataType(inputFile) {
     var fileName = inputFile.split('.')
