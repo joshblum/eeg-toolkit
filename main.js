@@ -6,3 +6,10 @@ function start() {
         SPECTROGRAMS[id] = new Spectrogram(id);
     }
 }
+
+function updateSpectrogramStartTimes() {
+  for (var i in IDS) {
+    var id = IDS[i];
+    SPECTROGRAMS[id].updateStartRequestTime();
+  }
+}

@@ -1,7 +1,7 @@
 var ws = new WebSocket("ws://localhost:" + getURLParameters()['port'] + "/spectrogram");
 ws.binaryType = 'arraybuffer';
 
-OVERLAP = 0.5;
+var OVERLAP = 0.5;
 
 /* return an object containing the URL parameters */
 function getURLParameters() {
@@ -71,6 +71,7 @@ function sendMessage(type, content, payload) {
    overlap   the amount of overlap between consecutive spectra.
 */
 function requestFileSpectrogram(filename, nfft, duration, overlap, dataType) {
+    updateSpectrogramStartTimes();
     sendMessage("request_file_spectrogram", {
         filename: filename,
         nfft: nfft,
@@ -107,6 +108,9 @@ function requestDataSpectrogram(data, nfft, duration, overlap, dataType) {
    event     the message, either as string or ArrayBuffer.
 */
 ws.onmessage = function(event) {
+    // TODO (joshblum) Instead of allocating new arrays here
+    // it might be worth it to have some of the things preallocated and cached.
+    // 1. Figure out if it is a bottleneck. When things are chunked it should be easier to reuse
     if (event.data.constructor.name === "ArrayBuffer") {
         var headerLen = new Int32Array(event.data, 0, 1)[0];
         var header = String.fromCharCode.apply(null, new Uint8Array(event.data, 4, headerLen));
@@ -126,7 +130,10 @@ ws.onmessage = function(event) {
     var canvasId = content.canvas_id || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
-        spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4), content.extent[0], content.extent[1], content.fs, content.length);
+        spectrogram.updateStartLoadTime();
+        spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4),
+            content.extent[0], content.extent[1], content.fs, content.length);
+        spectrogram.logElaspedTime();
     } else if (type === "loading_progress") {
         spectrogram.updateProgressBar(content.progress);
     } else {

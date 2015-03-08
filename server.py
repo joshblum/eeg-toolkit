@@ -11,7 +11,7 @@ import numpy as np
 from tornado.websocket import WebSocketHandler
 from pysoundfile import SoundFile
 
-MAX_SIZE = 100**3  # arbitrarily 1 MB limit
+MAX_SIZE = 10*100**3  # arbitrarily 10 MB limit
 
 AUDIO = 'audio'
 EEG = 'eeg'

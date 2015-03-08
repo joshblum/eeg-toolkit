@@ -60,6 +60,13 @@ function Spectrogram(id) {
     // textures objects
     this.spectrogramTextures;
 
+    // Use this to determine if we need to allocate any new buffers
+    this.oldNumTextures;
+
+    // Debugging info
+    this.startRequestTime;
+    this.startLoadTime;
+
     this.specSize; // total size of the spectrogram
     this.specViewSize; // visible size of the spectrogram
     this.init();
@@ -92,6 +99,23 @@ Spectrogram.prototype.init = function() {
 
     // 2D-drawing only
     this.gl.disable(this.gl.DEPTH_TEST);
+
+    // cache some gl parameters
+    this.maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
+
+    this.vertexPositionBuffers = new Array(this.maxTexSize);
+    this.spectrogramTextures = new Array(this.maxTexSize);
+    this.textureCoordBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
+    // texture coordinates for all textures are identical
+    var textureCoordinates = new Float32Array([
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        0.0, 0.0
+    ]);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, textureCoordinates, this.gl.STATIC_DRAW);
+    this.oldNumTextures = 0;
 
     // get shaders ready
     this.loadSpectrogramShaders();
@@ -140,10 +164,31 @@ Spectrogram.prototype.logGLInfo = function() {
         "max combined texture image units: " + this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 }
 
-/* Sets the progress bar
+/* Update the start time when asking for a new spectrogram */
+Spectrogram.prototype.updateStartRequestTime = function() {
+    console.log("updating startRequestTime");
+    this.startRequestTime = Date.now();
+}
 
-   If progress is 0 or 1, the progress bar will be turned invisible.
-*/
+Spectrogram.prototype.updateStartLoadTime = function() {
+    console.log("updating startLoadTime");
+    this.startLoadTime = Date.now();
+}
+
+/* Log the elapsed time to generate a spectrogram */
+Spectrogram.prototype.logElaspedTime = function() {
+    var endTime = Date.now();
+    var totalTime = endTime - this.startRequestTime;
+    var loadTime = endTime - this.startLoadTime;
+    console.log("Spectrogram " + this.id + ":\n" +
+        "Total request time: " + totalTime + " ms.\n" +
+        "Load time: " + loadTime + " ms.");
+}
+
+/*
+ * Sets the progress bar
+ * If progress is 0 or 1, the progress bar will be turned invisible.
+ */
 Spectrogram.prototype.updateProgressBar = function(progress) {
     if (progress === 0 || progress === 1) {
         this.progressBar.hidden = true;
@@ -246,9 +291,7 @@ Spectrogram.prototype.getShader = function(id) {
 */
 Spectrogram.prototype.loadSpectrogram = function(data, nblocks, nfreqs, fs, length) {
     // calculate the number of textures needed
-    // TODO (joshblum): cache this
-    var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-    var numTextures = nblocks / maxTexSize;
+    var numTextures = nblocks / this.maxTexSize;
 
     // bail if too big for video memory
     if (Math.ceil(numTextures) > this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
@@ -256,64 +299,57 @@ Spectrogram.prototype.loadSpectrogram = function(data, nblocks, nfreqs, fs, leng
         return;
     }
 
-    // delete previously allocated textures and VBOs
-    // TODO (joshblum): Investigate: Can we overwrite instead of reallocate?
-    for (var i in this.spectrogramTextures) {
-        this.gl.deleteBuffer(this.vertexPositionBuffers[i]);
-        this.gl.deleteTexture(this.spectrogramTextures[i]);
+    // We need to allocate more buffers
+    if (numTextures > this.oldNumTextures) {
+        for (var i = this.oldNumTextures; i < numTextures; i++) {
+            // texture position in 0..1:
+            var minX = i / numTextures;
+            var maxX = ((i + 1) < numTextures) ? (i + 1) / numTextures : 1;
+
+            // calculate vertex positions, scaled to -1..1
+            this.vertexPositionBuffers[i] = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexPositionBuffers[i]);
+            var vertices = new Float32Array([
+                maxX * 2 - 1, 1.0,
+                maxX * 2 - 1, -1.0,
+                minX * 2 - 1, 1.0,
+                minX * 2 - 1, -1.0
+            ]);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
+
+        }
     }
-    this.gl.deleteBuffer(this.textureCoordBuffer);
-
-
-    this.vertexPositionBuffers = new Array(Math.ceil(numTextures));
-    this.spectrogramTextures = new Array(Math.ceil(numTextures));
-
-    // texture coordinates for all textures are identical
-    this.textureCoordBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
-    var textureCoordinates = new Float32Array([
-        1.0, 1.0,
-        1.0, 0.0,
-        0.0, 1.0,
-        0.0, 0.0
-    ]);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, textureCoordinates, this.gl.STATIC_DRAW);
 
     // for every texture, calculate vertex indices and texture content
     for (var i = 0; i < numTextures; i++) {
-        // texture position in 0..1:
-        var minX = i / numTextures;
-        var maxX = ((i + 1) < numTextures) ? (i + 1) / numTextures : 1;
-
-        // calculate vertex positions, scaled to -1..1
-        this.vertexPositionBuffers[i] = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexPositionBuffers[i]);
-        var vertices = new Float32Array([
-            maxX * 2 - 1, 1.0,
-            maxX * 2 - 1, -1.0,
-            minX * 2 - 1, 1.0,
-            minX * 2 - 1, -1.0
-        ]);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-
         // fill textures with spectrogram data
-        var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
-        var chunk = data.subarray(i * maxTexSize * nfreqs, (i * maxTexSize + blocks) * nfreqs);
+        var blocks = ((i + 1) < numTextures) ? this.maxTexSize : (numTextures % 1) * this.maxTexSize;
+        var chunk = data.subarray(i * this.maxTexSize * nfreqs, (i * this.maxTexSize + blocks) * nfreqs);
         var tmp = new Float32Array(chunk.length);
         for (var x = 0; x < blocks; x++) {
             for (var y = 0; y < nfreqs; y++) {
                 tmp[x + blocks * y] = chunk[y + nfreqs * x];
             }
         }
-        this.spectrogramTextures[i] = this.gl.createTexture();
+        if (this.spectrogramTextures[i] === undefined) {
+            this.spectrogramTextures[i] = this.gl.createTexture();
+        }
         this.gl.activeTexture(this.gl.TEXTURE0 + i);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.spectrogramTextures[i]);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.LUMINANCE, blocks, nfreqs, 0, this.gl.LUMINANCE, this.gl.FLOAT, tmp);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D,
+            this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D,
+            this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0,
+            this.gl.LUMINANCE, blocks, nfreqs, 0,
+            this.gl.LUMINANCE, this.gl.FLOAT, tmp);
+        this.gl.texParameteri(this.gl.TEXTURE_2D,
+            this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D,
+            this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
     }
+
+    this.oldNumTextures = numTextures;
     // save spectrogram sizes
     this.specSize = new SpecSize(0, length, 0, fs / 2);
     this.specSize.numT = nblocks;
@@ -366,7 +402,7 @@ Spectrogram.prototype.drawSpectrogram = function() {
     var interpolate = getElementById('specInterpolation').checked;
 
     // draw the spectrogram textures
-    for (var i = 0; i < this.spectrogramTextures.length; i++) {
+    for (var i = 0; i < this.oldNumTextures; i++) {
         this.gl.activeTexture(this.gl.TEXTURE0 + i);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, interpolate ? this.gl.LINEAR : this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, interpolate ? this.gl.LINEAR : this.gl.NEAREST);
