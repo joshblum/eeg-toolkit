@@ -168,6 +168,7 @@ Spectrogram.prototype.logGLInfo = function() {
         "max texture size: " + this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) + "\n" +
         "max combined texture image units: " + this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 }
+
 /* Update the start time when asking for a new spectrogram */
 Spectrogram.prototype.updateStartRequestTime = function() {
     console.log("updating startRequestTime");
@@ -289,13 +290,11 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     }
 
     // delete previously allocated textures and VBOs
-    // TODO (joshblum): Investigate: Can we overwrite instead of reallocate?
     for (var i in this.spectrogramTextures) {
         this.gl.deleteBuffer(this.vertexPositionBuffers[i]);
         this.gl.deleteTexture(this.spectrogramTextures[i]);
     }
     this.gl.deleteBuffer(this.textureCoordBuffer);
-
 
     this.vertexPositionBuffers = new Array(Math.ceil(this.numTextures));
     this.spectrogramTextures = new Array(Math.ceil(this.numTextures));
@@ -326,7 +325,6 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
     }
 
-    this.oldNumTextures = numTextures;
     // save spectrogram sizes
     this.specSize = new SpecSize(0, length, 0, fs / 2);
     this.specSize.numT = nblocks;

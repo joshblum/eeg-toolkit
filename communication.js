@@ -141,6 +141,9 @@ ws.onmessage = function(event) {
                 content.length)
         } else if (action == "update") {
             // Now lets update the next frame in the spectrogram
+            // TODO (joshblum) Instead of allocating new arrays here
+            // it might be worth it to have some of the things preallocated and cached.
+            // 1. Figure out if it is a bottleneck. When things are chunked it should be easier to reuse
             spectrogram.updateStartLoadTime();
             spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4),
                 content.nblocks, content.nfreqs);
