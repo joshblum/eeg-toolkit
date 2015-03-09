@@ -131,8 +131,7 @@ ws.onmessage = function(event) {
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
         spectrogram.updateStartLoadTime();
-        spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4),
-            content.extent[0], content.extent[1], content.fs, content.length);
+        spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4), content.extent[0], content.extent[1], content.fs, content.length);
         spectrogram.logElaspedTime();
     } else if (type === "loading_progress") {
         spectrogram.updateProgressBar(content.progress);

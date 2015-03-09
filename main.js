@@ -8,8 +8,8 @@ function start() {
 }
 
 function updateSpectrogramStartTimes() {
-  for (var i in IDS) {
-    var id = IDS[i];
-    SPECTROGRAMS[id].updateStartRequestTime();
-  }
+    for (var i in IDS) {
+        var id = IDS[i];
+        SPECTROGRAMS[id].updateStartRequestTime();
+    }
 }

@@ -60,9 +60,6 @@ function Spectrogram(id) {
     // textures objects
     this.spectrogramTextures;
 
-    // Use this to determine if we need to allocate any new buffers
-    this.oldNumTextures;
-
     // Debugging info
     this.startRequestTime;
     this.startLoadTime;
@@ -163,7 +160,6 @@ Spectrogram.prototype.logGLInfo = function() {
         "max texture size: " + this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) + "\n" +
         "max combined texture image units: " + this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
 }
-
 /* Update the start time when asking for a new spectrogram */
 Spectrogram.prototype.updateStartRequestTime = function() {
     console.log("updating startRequestTime");
