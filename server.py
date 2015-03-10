@@ -320,6 +320,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def send_spectrogram(self, spec, fs, length, canvas_id=None):
     spec = downsample(spec)
     spec = astype(spec)
+    print "shape:", spec.shape
     self.send_message('spectrogram',
                       {'extent': spec.shape,
                        'fs': fs,
