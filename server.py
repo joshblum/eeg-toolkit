@@ -8,13 +8,19 @@ import math
 import time
 import numpy as np
 
+from collections import namedtuple
 from tornado.websocket import WebSocketHandler
 from pysoundfile import SoundFile
+
+SpecParams = namedtuple(
+    'SpecParams', ['nfft', 'shift', 'nblocks', 'nfreqs', 'spec_len', 'fs', 'nsamples'])
 
 MAX_SIZE = 10 * 100**3  # arbitrarily 10 MB limit
 
 AUDIO = 'audio'
 EEG = 'eeg'
+
+DOWNSAMPLE_RATE = 10
 
 CHANNELS = ['LL', 'LP', 'RP', 'RL']
 DIFFERENCE_PAIRS = {
@@ -74,7 +80,7 @@ def _load_spectrofile(filename):
   return data, fs
 
 
-def eeg_ch_spectrogram(ch, data, nfft, shift, progress_fn):
+def eeg_ch_spectrogram(ch, data, spec_params, progress_fn):
   """
     Compute the spectrogram for an individual spectrogram in the eeg
   """
@@ -85,7 +91,7 @@ def eeg_ch_spectrogram(ch, data, nfft, shift, progress_fn):
     c1, c2 = pair
     # take differences between the channels in each of the regions
     diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
-    T.append(spectrogram(diff, nfft, shift, canvas_id=ch))
+    T.append(spectrogram(diff, spec_params, canvas_id=ch))
     progress_fn((i + 1) / len(pairs))
     # compute the regional average of the spectrograms for each channel
   res = sum(T) / 4
@@ -94,7 +100,7 @@ def eeg_ch_spectrogram(ch, data, nfft, shift, progress_fn):
   return res
 
 
-def spectrogram(data, nfft, shift, canvas_id=None, progress_fn=None):
+def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   """Calculate a real spectrogram from audio data
 
   An audio data will be cut up into overlapping blocks of length
@@ -108,16 +114,20 @@ def spectrogram(data, nfft, shift, canvas_id=None, progress_fn=None):
   shift   the amount of overlap between consecutive spectra.
 
   """
-  num_blocks = int((len(data) - nfft) / shift + 1)
+  nfft = spec_params.nfft
+  shift = spec_params.shift
+  nblocks = spec_params.nblocks
+  nfreqs = spec_params.nfreqs
+
   window = hann(nfft)
-  specs = np.zeros((nfft / 2 + 1, num_blocks), dtype=np.float32)
-  for idx in xrange(num_blocks):
+  specs = np.zeros((nfreqs, nblocks), dtype=np.float32)
+  for idx in xrange(nblocks):
     specs[:, idx] = np.abs(np.fft.rfft(
         data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
     if progress_fn and idx % 10 == 0:
       progress_fn(idx / num_blocks)
   specs[:, -1] = np.abs(
-      np.fft.rfft(data[num_blocks * shift:], n=nfft)) / nfft
+      np.fft.rfft(data[nblocks * shift:], n=nfft)) / nfft
   if progress_fn:
     progress_fn(1)
   return specs.T
@@ -127,20 +137,29 @@ def power_log(x):
   return 2**(math.ceil(math.log(x, 2)))
 
 
-def get_num_samples(data_len, fs, duration):
+def _get_nsamples(data, fs, duration):
   """
     Determine the number of samples to take
     from a data source based on the duration (hrs)
     specified
   """
+  data_len = len(data)
   if duration is None:
     return data_len
-  num_samples = min(data_len, int(fs * 60 * 60 * duration))
-  print "Num samples:", num_samples
-  return num_samples
+  nsamples = min(data_len, int(fs * 60 * 60 * duration))
+  print "Num samples:", nsamples
+  return nsamples
 
 
-def get_spectrogram_params(fs):
+def _get_nblocks(data, nfft, shift):
+  return int((len(data) - nfft) / shift + 1)
+
+
+def _get_nfreqs(nfft):
+  return nfft / 2 + 1
+
+
+def get_eeg_spectrogram_params(data, duration, nfft, overlap, fs):
   """
       Emulating the original matlab code with these
       hardcoded constants for the window parameters
@@ -150,7 +169,25 @@ def get_spectrogram_params(fs):
   Nwin = int(fs * 1.5)
   Nstep = int(fs * 0.2)
   nfft = int(max(power_log(Nwin) + pad, Nwin))
-  return nfft, Nstep
+  shift = round(nfft * overlap)
+  nsamples = _get_nsamples(data, fs, duration)
+  nblocks = _get_nblocks(data, nfft, shift)
+  nfreqs = _get_nfreqs(nfft)
+  return SpecParams(nfft=nfft, shift=Nstep,
+                    nsamples=nsamples,
+                    spec_len=nsamples / fs,
+                    nblocks=nblocks, nfreqs=nfreqs, fs=fs)
+
+
+def get_audio_spectrogram_params(data, duration, nfft, overlap, fs):
+  shift = round(nfft * overlap)
+  nsamples = _get_nsamples(data, fs, duration)
+  nblocks = _get_nblocks(data, nfft, shift)
+  nfreqs = _get_nfreqs(nfft)
+  return SpecParams(nfft=nfft, shift=shift,
+                    nsamples=nsamples,
+                    spec_len=nsamples / fs,
+                    nblocks=nblocks, nfreqs=nfreqs, fs=fs)
 
 
 def hann(n):
@@ -165,7 +202,7 @@ def to_bytes(n):
   return struct.pack('@i', n)
 
 
-def downsample(spectrogram, n=10, phase=0):
+def downsample(spectrogram, n=DOWNSAMPLE_RATE, phase=0):
   """
       Decrease sampling rate by intgerfactor n with included offset phase
       if the nbytes of the spectrogram exceeds MAX_SIZE
@@ -173,6 +210,12 @@ def downsample(spectrogram, n=10, phase=0):
   if spectrogram.nbytes > MAX_SIZE:
     spectrogram = spectrogram[phase::n]
   return spectrogram
+
+
+def downsample_extent(nblocks, nfreqs, n=DOWNSAMPLE_RATE):
+  if nblocks * nfreqs * 4 > MAX_SIZE:
+    nblocks = nblocks / DOWNSAMPLE_RATE
+  return int(nblocks), int(nfreqs)
 
 
 def astype(ndarray, _type='float32'):
@@ -317,14 +360,28 @@ class SpectrogramWebSocket(JSONWebSocket):
       super(self.__class__, self).receive_message(
           msg_type, content, data)
 
-  def send_spectrogram(self, spec, fs, length, canvas_id=None):
+  def send_spectrogram_new(self, spec_params, canvas_id=None):
+    nblocks, nfreqs = downsample_extent(
+        spec_params.nblocks, spec_params.nfreqs)
+    print "shape:", (nblocks, nfreqs)
+    self.send_message('spectrogram',
+                      {'action': 'new',
+                       'nblocks': nblocks,
+                       'nfreqs': nfreqs,
+                       'fs': spec_params.fs,
+                       'length': spec_params.spec_len,
+                       'canvas_id': canvas_id},
+                      None)
+
+  def send_spectrogram_update(self, spec, canvas_id=None):
     spec = downsample(spec)
     spec = astype(spec)
+    nblocks, nfreqs = spec.shape
     print "shape:", spec.shape
     self.send_message('spectrogram',
-                      {'extent': spec.shape,
-                       'fs': fs,
-                       'length': length,
+                      {'action': 'update',
+                       'nblocks': nblocks,
+                       'nfreqs': nfreqs,
                        'canvas_id': canvas_id},
                       spec.tostring())
 
@@ -368,28 +425,33 @@ class SpectrogramWebSocket(JSONWebSocket):
   def on_eeg_file_spectrogram(self, filename, nfft, duration, overlap):
     t0 = time.time()
     data, fs = _load_spectrofile(filename)
-    num_samples = get_num_samples(len(data), fs, duration)
-    data = data[:num_samples]  # ok lets just chunk a bit of this mess
+    spec_params = get_eeg_spectrogram_params(data, duration, nfft, overlap, fs)
+
+    data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
     t1 = time.time()
     print "Time for Loading file:", t1 - t0
-    nfft, shift = get_spectrogram_params(fs)
 
     for ch in CHANNELS:
-      spec = eeg_ch_spectrogram(ch, data, nfft, shift, self.send_progress)
+      self.send_spectrogram_new(spec_params, canvas_id=ch)
+      spec = eeg_ch_spectrogram(ch, data, spec_params, self.send_progress)
       self.send_progress(1, ch)
-      self.send_spectrogram(spec, fs, num_samples / fs, canvas_id=ch)
+      self.send_spectrogram_update(spec, canvas_id=ch)
 
   def on_audio_file_spectrogram(self, filename, nfft, duration, overlap):
     _file = SoundFile(filename)
     self._audio_file_spectrogram(_file, nfft, duration, overlap)
 
   def _audio_file_spectrogram(self, _file, nfft, duration, overlap):
+    # first get the spec_params and let the client setup the canvas
     fs = _file.sample_rate
-    num_samples = get_num_samples(len(_file), fs, duration)
-    sound = _file[:num_samples].sum(axis=1)
-    shift = round(nfft * overlap)
-    spec = spectrogram(sound, nfft, shift)
-    self.send_spectrogram(spec, fs, num_samples / fs)
+    spec_params = get_audio_spectrogram_params(
+        _file, duration, nfft, overlap, fs)
+    self.send_spectrogram_new(spec_params)
+
+    # now lets compute the spectrogram and send it over
+    sound = _file[:spec_params.nsamples].sum(axis=1)
+    spec = spectrogram(sound, spec_params)
+    self.send_spectrogram_update(spec)
 
   def on_data_spectrogram(self, data, nfft=1024, duration=None,
                           overlap=0.5, dataType=AUDIO):

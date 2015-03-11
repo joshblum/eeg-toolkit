@@ -72,6 +72,7 @@ function sendMessage(type, content, payload) {
 */
 function requestFileSpectrogram(filename, nfft, duration, overlap, dataType) {
     updateSpectrogramStartTimes();
+    // TODO (joshblum): need a new field for request action to allow updates for panning
     sendMessage("request_file_spectrogram", {
         filename: filename,
         nfft: nfft,
@@ -90,6 +91,7 @@ function requestFileSpectrogram(filename, nfft, duration, overlap, dataType) {
    overlap   the amount of overlap between consecutive spectra.
 */
 function requestDataSpectrogram(data, nfft, duration, overlap, dataType) {
+    updateSpectrogramStartTimes();
     sendMessage("request_data_spectrogram", {
         nfft: nfft,
         duration: duration,
@@ -130,10 +132,23 @@ ws.onmessage = function(event) {
     var canvasId = content.canvas_id || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
-        spectrogram.updateStartLoadTime();
-        spectrogram.newSpectrogram(content.extent[0], content.extent[1], content.fs, content.length)
-        spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4), content.extent[0], content.extent[1]);
-        spectrogram.logElaspedTime();
+        // spectrogram messages can either be a `new` message or an `update` action.
+        var action = content.action;
+        if (action === "new") {
+            // First let's setup the canvas
+            spectrogram.newSpectrogram(content.nblocks,
+                content.nfreqs, content.fs,
+                content.length)
+        } else if (action == "update") {
+            // Now lets update the next frame in the spectrogram
+            spectrogram.updateStartLoadTime();
+            spectrogram.loadSpectrogram(new Float32Array(event.data, headerLen + 4),
+                content.nblocks, content.nfreqs);
+            spectrogram.logElaspedTime();
+
+        } else {
+            console.log(action);
+        }
     } else if (type === "loading_progress") {
         spectrogram.updateProgressBar(content.progress);
     } else {
