@@ -110,9 +110,6 @@ function requestDataSpectrogram(data, nfft, duration, overlap, dataType) {
    event     the message, either as string or ArrayBuffer.
 */
 ws.onmessage = function(event) {
-    // TODO (joshblum) Instead of allocating new arrays here
-    // it might be worth it to have some of the things preallocated and cached.
-    // 1. Figure out if it is a bottleneck. When things are chunked it should be easier to reuse
     if (event.data.constructor.name === "ArrayBuffer") {
         var headerLen = new Int32Array(event.data, 0, 1)[0];
         var header = String.fromCharCode.apply(null, new Uint8Array(event.data, 4, headerLen));

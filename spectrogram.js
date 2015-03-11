@@ -103,23 +103,6 @@ Spectrogram.prototype.init = function() {
     // 2D-drawing only
     this.gl.disable(this.gl.DEPTH_TEST);
 
-    // cache some gl parameters
-    this.maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-
-    this.vertexPositionBuffers = new Array(this.maxTexSize);
-    this.spectrogramTextures = new Array(this.maxTexSize);
-    this.textureCoordBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
-    // texture coordinates for all textures are identical
-    var textureCoordinates = new Float32Array([
-        1.0, 1.0,
-        1.0, 0.0,
-        0.0, 1.0,
-        0.0, 0.0
-    ]);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, textureCoordinates, this.gl.STATIC_DRAW);
-    this.oldNumTextures = 0;
-
     // get shaders ready
     this.loadSpectrogramShaders();
 
@@ -298,8 +281,18 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
 
     this.vertexPositionBuffers = new Array(Math.ceil(this.numTextures));
     this.spectrogramTextures = new Array(Math.ceil(this.numTextures));
-    // for every texture, calculate vertex indices and texture content
+    // texture coordinates for all textures are identical
+    this.textureCoordBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
+    var textureCoordinates = new Float32Array([
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        0.0, 0.0
+    ]);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, textureCoordinates, this.gl.STATIC_DRAW);
 
+    // for every texture, calculate vertex indices and texture content
     for (var i = 0; i < this.numTextures; i++) {
         var blocks = ((i + 1) < this.numTextures) ? this.maxTexSize : (this.numTextures % 1) * this.maxTexSize;
         // texture position in 0..1:
@@ -418,7 +411,7 @@ Spectrogram.prototype.drawSpectrogram = function() {
     var interpolate = getElementById('specInterpolation').checked;
 
     // draw the spectrogram textures
-    for (var i = 0; i < this.oldNumTextures; i++) {
+    for (var i = 0; i < this.spectrogramTextures.length; i++) {
         this.gl.activeTexture(this.gl.TEXTURE0 + i);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, interpolate ? this.gl.LINEAR : this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, interpolate ? this.gl.LINEAR : this.gl.NEAREST);
