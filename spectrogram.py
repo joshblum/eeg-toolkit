@@ -4,10 +4,6 @@ import time
 
 import numpy as np
 from collections import namedtuple
-SpecParams = namedtuple(
-    'SpecParams', ['nfft', 'shift',
-                   'nblocks', 'nfreqs',
-                   'spec_len', 'fs', 'nsamples'])
 
 CHANNELS = ['LL', 'LP', 'RP', 'RL']
 DIFFERENCE_PAIRS = {
@@ -59,13 +55,11 @@ CHANNEL_INDEX = {
     'pz': 18,
 }
 
-
-def _hann(n):
-  return 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
-
-
-def _power_log(x):
-  return 2**(math.ceil(math.log(x, 2)))
+SpecParams = namedtuple(
+    'SpecParams', ['chunksize', 'fs',
+                   'shift', 'spec_len',
+                   'nfft', 'nblocks',
+                   'nfreqs', 'nsamples'])
 
 
 def _get_nsamples(data, fs, duration):
@@ -82,12 +76,30 @@ def _get_nsamples(data, fs, duration):
   return nsamples
 
 
+def _get_chunksize(nsamples, fs):
+  """
+      A chunk will be at most 1 hr in length.
+  """
+  chunksize = min(fs, nsamples)
+  print 'chunksize:', chunksize
+  return chunksize
+  return min(fs * 60 * 60, nsamples)
+
+
 def _get_nblocks(data, nfft, shift):
   return int((len(data) - nfft) / shift + 1)
 
 
 def _get_nfreqs(nfft):
   return nfft / 2 + 1
+
+
+def _hann(n):
+  return 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
+
+
+def _power_log(x):
+  return 2**(math.ceil(math.log(x, 2)))
 
 
 def load_h5py_spectrofile(filename):
@@ -111,10 +123,12 @@ def get_eeg_spectrogram_params(data, duration, nfft, overlap, fs):
   nsamples = _get_nsamples(data, fs, duration)
   nblocks = _get_nblocks(data, nfft, shift)
   nfreqs = _get_nfreqs(nfft)
+  chunksize = _get_chunksize(nsamples, fs)
   return SpecParams(nfft=nfft, shift=Nstep,
                     nsamples=nsamples,
                     spec_len=nsamples / fs,
-                    nblocks=nblocks, nfreqs=nfreqs, fs=fs)
+                    nblocks=nblocks, nfreqs=nfreqs,
+                    fs=fs, chunksize=chunksize)
 
 
 def get_audio_spectrogram_params(data, duration, nfft, overlap, fs):
@@ -122,10 +136,12 @@ def get_audio_spectrogram_params(data, duration, nfft, overlap, fs):
   nsamples = _get_nsamples(data, fs, duration)
   nblocks = _get_nblocks(data, nfft, shift)
   nfreqs = _get_nfreqs(nfft)
+  chunksize = _get_chunksize(nsamples, fs)
   return SpecParams(nfft=nfft, shift=shift,
                     nsamples=nsamples,
                     spec_len=nsamples / fs,
-                    nblocks=nblocks, nfreqs=nfreqs, fs=fs)
+                    nblocks=nblocks, nfreqs=nfreqs,
+                    fs=fs, chunksize=chunksize)
 
 
 def eeg_ch_spectrogram(ch, data, spec_params, progress_fn):
@@ -134,6 +150,7 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn):
   """
   T = []
   t0 = time.time()
+  # TODO (joshblum): do this once in a preprocessing step.
   pairs = DIFFERENCE_PAIRS.get(ch)
   for i, pair in enumerate(pairs):
     c1, c2 = pair
@@ -164,8 +181,8 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   """
   nfft = spec_params.nfft
   shift = spec_params.shift
-  nblocks = spec_params.nblocks
-  nfreqs = spec_params.nfreqs
+  nblocks = _get_nblocks(data, nfft, shift)
+  nfreqs = _get_nfreqs(nfft)
 
   window = _hann(nfft)
   specs = np.zeros((nfreqs, nblocks), dtype=np.float32)

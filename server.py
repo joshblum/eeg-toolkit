@@ -1,10 +1,12 @@
 from __future__ import division
 
 import io
+import itertools
 import json
 import struct
 import time
 
+import numpy as np
 from pysoundfile import SoundFile
 from spectrogram import eeg_ch_spectrogram
 from spectrogram import get_audio_spectrogram_params
@@ -28,6 +30,18 @@ def from_bytes(b):
 
 def to_bytes(n):
   return struct.pack('@i', n)
+
+
+def grouper(iterable, n):
+  it = iter(iterable)
+  while True:
+    try:
+      chunk = tuple(itertools.islice(it, n))
+    except RuntimeError:
+      chunk = None
+    if not chunk:
+      return
+    yield chunk
 
 
 def downsample(spectrogram, n=DOWNSAMPLE_RATE, phase=0):
@@ -254,6 +268,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     t0 = time.time()
     data, fs = load_h5py_spectrofile(filename)
     spec_params = get_eeg_spectrogram_params(data, duration, nfft, overlap, fs)
+    chunksize = get_chunksize(spec_params.fs, spec_params.nsamples)
 
     data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
     t1 = time.time()
@@ -261,9 +276,13 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     for ch in CHANNELS:
       self.send_spectrogram_new(spec_params, canvas_id=ch)
-      spec = eeg_ch_spectrogram(ch, data, spec_params, self.send_progress)
-      self.send_progress(1, ch)
-      self.send_spectrogram_update(spec, canvas_id=ch)
+
+    for chunk in grouper(data, chunksize):
+      chunk = np.array(chunk)
+      for ch in CHANNELS:
+        spec = eeg_ch_spectrogram(ch, chunk, spec_params, self.send_progress)
+        self.send_progress(1, ch)
+        self.send_spectrogram_update(spec, canvas_id=ch)
 
   def on_audio_file_spectrogram(self, filename, nfft, duration, overlap):
     _file = SoundFile(filename)
@@ -277,9 +296,11 @@ class SpectrogramWebSocket(JSONWebSocket):
     self.send_spectrogram_new(spec_params)
 
     # now lets compute the spectrogram and send it over
-    sound = _file[:spec_params.nsamples].sum(axis=1)
-    spec = spectrogram(sound, spec_params)
-    self.send_spectrogram_update(spec)
+    data = _file[:spec_params.nsamples].sum(axis=1)
+    for chunk in grouper(data, spec_params.chunksize):
+      chunk = np.array(chunk)
+      spec = spectrogram(chunk, spec_params)
+      self.send_spectrogram_update(spec)
 
   def on_data_spectrogram(self, data, nfft=1024, duration=None,
                           overlap=0.5, dataType=AUDIO):

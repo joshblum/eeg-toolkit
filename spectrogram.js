@@ -1,4 +1,3 @@
-// TODO (joshblum): Is it better to have it more general and allow the server to dictate ids?
 IDS = ['LL', 'LP', 'RP', 'RL'];
 // global data structure which holds spectrogram objects.
 // When a request for update comes in the sender must specify an id to update
@@ -65,11 +64,9 @@ function Spectrogram(id) {
     this.startLoadTime;
 
     // Spectrogram meta data
-    this.numTextures;
+    this.xOffset;
     this.nblocks;
     this.nfreqs;
-    this.maxTexSize;
-
     this.specSize; // total size of the spectrogram
     this.specViewSize; // visible size of the spectrogram
     this.init();
@@ -105,8 +102,6 @@ Spectrogram.prototype.init = function() {
 
     // get shaders ready
     this.loadSpectrogramShaders();
-
-    this.maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
     // load dummy data
     this.newSpectrogram(1, 1, 44100, 1);
@@ -186,7 +181,6 @@ Spectrogram.prototype.updateProgressBar = function(progress) {
     }
 }
 
-
 /* link shaders and save uniforms and attributes
 
    saves the following attributes to global scope:
@@ -262,12 +256,14 @@ Spectrogram.prototype.getShader = function(id) {
 Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     this.nblocks = nblocks;
     this.nfreqs = nfreqs;
+    this.xOffset = 0;
+    var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
     // calculate the number of textures needed
-    this.numTextures = nblocks / this.maxTexSize;
+    numTextures = nblocks / maxTexSize;
 
     // bail if too big for video memory
-    if (Math.ceil(this.numTextures) > this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
+    if (Math.ceil(numTextures) > this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
         alert("Not enough texture units to display spectrogram");
         return;
     }
@@ -279,8 +275,8 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     }
     this.gl.deleteBuffer(this.textureCoordBuffer);
 
-    this.vertexPositionBuffers = new Array(Math.ceil(this.numTextures));
-    this.spectrogramTextures = new Array(Math.ceil(this.numTextures));
+    this.vertexPositionBuffers = new Array(Math.ceil(numTextures));
+    this.spectrogramTextures = new Array(Math.ceil(numTextures));
     // texture coordinates for all textures are identical
     this.textureCoordBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureCoordBuffer);
@@ -293,11 +289,11 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     this.gl.bufferData(this.gl.ARRAY_BUFFER, textureCoordinates, this.gl.STATIC_DRAW);
 
     // for every texture, calculate vertex indices and texture content
-    for (var i = 0; i < this.numTextures; i++) {
-        var blocks = ((i + 1) < this.numTextures) ? this.maxTexSize : (this.numTextures % 1) * this.maxTexSize;
+    for (var i = 0; i < numTextures; i++) {
+        var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
         // texture position in 0..1:
-        var minX = i / this.numTextures;
-        var maxX = ((i + 1) < this.numTextures) ? (i + 1) / this.numTextures : 1;
+        var minX = i / numTextures;
+        var maxX = ((i + 1) < numTextures) ? (i + 1) / numTextures : 1;
         // calculate vertex positions, scaled to -1..1
         this.vertexPositionBuffers[i] = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexPositionBuffers[i]);
@@ -322,7 +318,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     this.specSize = new SpecSize(0, length, 0, fs / 2);
     this.specSize.numT = nblocks;
     this.specSize.numF = nfreqs;
-    this.specViewSize = new SpecSize(0, length, 0, fs / 2, -45, 45);
+    this.specViewSize = new SpecSize(0, length, 0, fs / 2, -120, 0);
     var self = this;
     window.requestAnimationFrame(function() {
         self.drawScene();
@@ -347,12 +343,17 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
    fs         the sample rate of the audio data.
    length     the length of the audio data in seconds.
 */
-Spectrogram.prototype.loadSpectrogram = function(data, nblocks, nfreqs) {
+Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs) {
+    var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
-    for (var i = 0; i < this.numTextures; i++) {
+    // calculate the number of textures needed
+    numTextures = nblocks / maxTexSize;
+
+    for (var i = 0; i < numTextures; i++) {
         // fill textures with spectrogram data
-        var blocks = ((i + 1) < this.numTextures) ? this.maxTexSize : (this.numTextures % 1) * this.maxTexSize;
-        var chunk = data.subarray(i * this.maxTexSize * nfreqs, (i * this.maxTexSize + blocks) * nfreqs);
+        var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
+        // If we have filled the texture, reset the xOffset.
+        var chunk = data.subarray(i * maxTexSize * nfreqs, (i * maxTexSize + blocks) * nfreqs);
         var tmp = new Float32Array(chunk.length);
         for (var x = 0; x < blocks; x++) {
             for (var y = 0; y < nfreqs; y++) {
@@ -362,7 +363,9 @@ Spectrogram.prototype.loadSpectrogram = function(data, nblocks, nfreqs) {
         this.gl.activeTexture(this.gl.TEXTURE0 + i);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.spectrogramTextures[i]);
         this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0,
-            0, 0, blocks, nfreqs, this.gl.LUMINANCE, this.gl.FLOAT, tmp);
+            this.xOffset, 0, blocks, nfreqs,
+            this.gl.LUMINANCE, this.gl.FLOAT, tmp);
+        this.xOffset = ((i + 1) < numTextures) ? 0 : this.xOffset + blocks;
     }
     var self = this;
     window.requestAnimationFrame(function() {
