@@ -1,3 +1,5 @@
+"use strict";
+
 /* initialize all canvases */
 function start() {
     /* get WebGL context and load required extensions */

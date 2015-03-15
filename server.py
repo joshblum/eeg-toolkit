@@ -1,7 +1,6 @@
 from __future__ import division
 
 import io
-import itertools
 import json
 import struct
 import time
@@ -211,7 +210,7 @@ class SpectrogramWebSocket(JSONWebSocket):
                        'nfreqs': nfreqs,
                        'fs': spec_params.fs,
                        'length': spec_params.spec_len,
-                       'canvas_id': canvas_id},
+                       'canvasId': canvas_id},
                       None)
 
   def send_spectrogram_update(self, spec, canvas_id=None):

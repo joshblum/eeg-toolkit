@@ -1,0 +1,27 @@
+{
+    "globals": {
+        "module": false,
+        "require": false,
+        "SPECTROGRAMS": true,
+        "IDS": true,
+        "Spectrogram": true,
+        "updateSpectrogramStartTimes": true,
+        "SpecSize": true,
+        "sendMessage": true
+    },
+    "browser": true,
+    "jquery": true,
+    "debug": false,
+    "laxcomma": true,
+    "camelcase": true,
+    "curly": true,
+    "immed": true,
+    "newcap": true,
+    "quotmark": "double",
+    "undef": true,
+    "strict": true,
+    "trailing": true,
+    "globalstrict": true,
+    "eqeqeq": true,
+    "predef": ["console", "alert", "getElementById"]
+}

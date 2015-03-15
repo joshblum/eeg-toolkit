@@ -1,5 +1,7 @@
-var ws = new WebSocket("ws://localhost:" + getURLParameters()['port'] + "/spectrogram");
-ws.binaryType = 'arraybuffer';
+"use strict";
+
+var ws = new WebSocket("ws://localhost:" + getURLParameters().port + "/spectrogram");
+ws.binaryType = "arraybuffer";
 
 var OVERLAP = 0.5;
 
@@ -7,14 +9,16 @@ var OVERLAP = 0.5;
 function getURLParameters() {
     var params = {};
     if (location.search) {
-        var parts = location.search.substring(1).split('&');
+        var parts = location.search.substring(1).split("&");
         for (var i = 0; i < parts.length; i++) {
-            var pair = parts[i].split('=');
-            if (!pair[0]) continue;
+            var pair = parts[i].split("=");
+            if (!pair[0]) {
+                continue;
+            }
             params[pair[0]] = pair[1] || "";
         }
     }
-    return params
+    return params;
 }
 
 /* Send a message.
@@ -50,13 +54,13 @@ function sendMessage(type, content, payload) {
         prefixData[0] = headerString.length;
 
         // write the header data
-        var headerData = new Uint8Array(message, 4, headerString.length)
-        for (var i = 0; i < headerString.length; i++) {
+        var headerData = new Uint8Array(message, 4, headerString.length);
+        for (i = 0; i < headerString.length; i++) {
             headerData[i] = headerString.charCodeAt(i);
         }
 
         // write the payload data
-        payloadData = new Uint8Array(message, 4 + headerString.length, payload.byteLength);
+        var payloadData = new Uint8Array(message, 4 + headerString.length, payload.byteLength);
         payloadData.set(new Uint8Array(payload));
         ws.send(message);
     }
@@ -110,33 +114,34 @@ function requestDataSpectrogram(data, nfft, duration, overlap, dataType) {
    event     the message, either as string or ArrayBuffer.
 */
 ws.onmessage = function(event) {
+    var header, headerLen;
     if (event.data.constructor.name === "ArrayBuffer") {
-        var headerLen = new Int32Array(event.data, 0, 1)[0];
-        var header = String.fromCharCode.apply(null, new Uint8Array(event.data, 4, headerLen));
+        headerLen = new Int32Array(event.data, 0, 1)[0];
+        header = String.fromCharCode.apply(null, new Uint8Array(event.data, 4, headerLen));
     } else {
-        var header = event.data;
+        header = event.data;
     }
     var msg;
     try {
         msg = JSON.parse(header);
     } catch (e) {
         console.error("Message", e.message, "is not a valid JSON object");
-        return
+        return;
     }
 
     var type = msg.type;
     var content = msg.content;
-    var canvasId = content.canvas_id || IDS[0];
+    var canvasId = content.canvasId || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
         // spectrogram messages can either be a `new` message or an `update` action.
         var action = content.action;
         if (action === "new") {
-            // First let's setup the canvas
+            // First let"s setup the canvas
             spectrogram.newSpectrogram(content.nblocks,
                 content.nfreqs, content.fs,
-                content.length)
-        } else if (action == "update") {
+                content.length);
+        } else if (action === "update") {
             // Now lets update the next frame in the spectrogram
             // TODO (joshblum) Instead of allocating new arrays here
             // it might be worth it to have some of the things preallocated and cached.
@@ -153,7 +158,7 @@ ws.onmessage = function(event) {
     } else {
         console.log(type, content);
     }
-}
+};
 
 /* log some info about the GL, then display spectrogram */
 ws.onopen = function() {
@@ -162,13 +167,13 @@ ws.onopen = function() {
         spectrogram.logGLInfo();
     }
     reloadSpectrogram();
-}
+};
 
 /* Test the keyup event for a submission and then reload the spectrogram.
  */
 function submitSpectrogram(e) {
     e.which = e.which || e.keyCode;
-    if (e.which == 13) {
+    if (e.which === 13) {
         reloadSpectrogram();
     }
 }
@@ -182,9 +187,9 @@ function submitSpectrogram(e) {
    spectrogram is up to the server.
 */
 function reloadSpectrogram() {
-    var audioFile = getElementById('audioFileByData').files[0];
-    var fftLen = parseFloat(getElementById('fftLen').value);
-    var duration = parseFloat(getElementById('specDuration').value);
+    var audioFile = getElementById("audioFileByData").files[0];
+    var fftLen = parseFloat(getElementById("fftLen").value);
+    var duration = parseFloat(getElementById("specDuration").value);
     var dataType;
     // first we try to load a file
     if (audioFile) {
@@ -194,9 +199,9 @@ function reloadSpectrogram() {
         reader.onloadend = function() {
             requestDataSpectrogram(reader.result, fftLen, duration,
                 OVERLAP, dataType);
-        }
+        };
     } else { // otherwise see if there is a filename
-        audioFile = getElementById('audioFileByName').value;
+        audioFile = getElementById("audioFileByName").value;
         if (audioFile) {
             dataType = getDataType(audioFile);
             console.log("Requesting spectrogram for: " + audioFile);
@@ -216,7 +221,7 @@ function reloadSpectrogram() {
  * TODO (joshblum): Document file types/allow other types
  */
 function getDataType(inputFile) {
-    var fileName = inputFile.split('.')
+    var fileName = inputFile.split(".");
     var fileExt = fileName[fileName.length - 1];
-    return fileExt === 'eeg' ? 'eeg' : 'audio';
+    return fileExt === "eeg" ? "eeg" : "audio";
 }

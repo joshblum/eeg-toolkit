@@ -1,4 +1,4 @@
-.PHONY: clean run installdeps lint
+.PHONY: clean run installdeps lint pylint jslint
 
 OS := $(shell uname)
 
@@ -8,12 +8,20 @@ else
 	PKG_INSTALLER = apt-get
 endif
 
-run:
+run: clean
 	python server.py
 
 clean:
 	find . -type f -name '*.py[cod]' -delete
 	find . -type f -name '*.*~' -delete
+
+pylint:
+	-flake8 .
+
+jslint:
+	-jshint -c .jshintrc --exclude-path .jshintignore .
+
+lint: clean pylint jslint
 
 installdeps:
 ifeq ('$(OS)','Darwin')
@@ -25,6 +33,3 @@ else
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	pip install -r requirements.txt
-
-lint: clean
-	flake8 .

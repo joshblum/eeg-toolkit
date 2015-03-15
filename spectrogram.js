@@ -1,13 +1,15 @@
-IDS = ['LL', 'LP', 'RP', 'RL'];
+"use strict";
+
+var IDS = ["LL", "LP", "RP", "RL"];
 // global data structure which holds spectrogram objects.
 // When a request for update comes in the sender must specify an id to update
-SPECTROGRAMS = {};
+var SPECTROGRAMS = {};
 
 /*
  * Helper function to wrap `document.getElementById`
  */
 function getElementById(type, id) {
-    id = id ? '-' + id : '';
+    id = id ? "-" + id : "";
     return document.getElementById(type + id);
 }
 
@@ -31,52 +33,52 @@ function redrawSpectrograms() {
  */
 function Spectrogram(id) {
     this.id = id;
-    this.specView = getElementById('spectrogram', id);
-    this.specTimeScale = getElementById('specTimeScale', id);
-    this.specFrequencyScale = getElementById('specFreqScale', id);
-    this.specDataView = getElementById('specDataView', id);
-    this.progressBar = getElementById('progressBar', id);
+    this.specView = getElementById("spectrogram", id);
+    this.specTimeScale = getElementById("specTimeScale", id);
+    this.specFrequencyScale = getElementById("specFreqScale", id);
+    this.specDataView = getElementById("specDataView", id);
+    this.progressBar = getElementById("progressBar", id);
 
-    this.gl; // the WebGL instance
+    this.gl = null; // the WebGL instance
 
     // shader attributes:
-    this.vertexPositionAttribute;
-    this.textureCoordAttribute;
+    this.vertexPositionAttribute = null;
+    this.textureCoordAttribute = null;
 
     // shader uniforms:
-    this.samplerUniform;
-    this.ampRangeUniform;
-    this.zoomUniform;
-    this.specSizeUniform;
-    this.specDataSizeUniform;
-    this.specModeUniform;
-    this.specLogarithmicUniform;
+    this.samplerUniform = null;
+    this.ampRangeUniform = null;
+    this.zoomUniform = null;
+    this.specSizeUniform = null;
+    this.specDataSizeUniform = null;
+    this.specModeUniform = null;
+    this.specLogarithmicUniform = null;
 
     // vertex buffer objects
-    this.vertexPositionBuffers;
-    this.textureCoordBuffer;
+    this.vertexPositionBuffers = null;
+    this.textureCoordBuffer = null;
 
     // textures objects
-    this.spectrogramTextures;
+    this.spectrogramTextures = null;
 
     // Debugging info
-    this.startRequestTime;
-    this.startLoadTime;
+    this.startRequestTime = null;
+    this.startLoadTime = null;
 
     // Spectrogram meta data
-    this.xOffset;
-    this.nblocks;
-    this.nfreqs;
-    this.specSize; // total size of the spectrogram
-    this.specViewSize; // visible size of the spectrogram
+    this.xOffset = 0;
+    this.nblocks = 0;
+    this.nfreqs = 0;
+    this.specSize = 0; // total size of the spectrogram
+    this.specViewSize = 0; // visible size of the spectrogram
     this.init();
 }
 
 Spectrogram.prototype.init = function() {
     try {
-        this.gl = this.specView.getContext('webgl');
+        this.gl = this.specView.getContext("webgl");
     } catch (e) {
-        alert('Could not initialize WebGL');
+        alert("Could not initialize WebGL");
         console.log(e);
         this.gl = null;
         return;
@@ -85,14 +87,14 @@ Spectrogram.prototype.init = function() {
     // needed for floating point textures
     this.gl.getExtension("OES_texture_float");
     var error = this.gl.getError();
-    if (error != this.gl.NO_ERROR) {
+    if (error !== this.gl.NO_ERROR) {
         alert("Could not enable float texture extension");
         return;
     }
 
     // needed for linear filtering of floating point textures
     this.gl.getExtension("OES_texture_float_linear");
-    if (error != this.gl.NO_ERROR) {
+    if (error !== this.gl.NO_ERROR) {
         alert("Could not enable float texture linear extension");
         return;
     }
@@ -107,7 +109,7 @@ Spectrogram.prototype.init = function() {
     this.newSpectrogram(1, 1, 44100, 1);
 
     this.addListeners();
-}
+};
 
 Spectrogram.prototype.addListeners = function() {
     window.addEventListener("resize", this.updateCanvasResolutions, false);
@@ -115,11 +117,11 @@ Spectrogram.prototype.addListeners = function() {
     var self = this;
     this.specView.onwheel = function(wheel) {
         self.onwheel(wheel);
-    }
+    };
     this.specView.onmousemove = function(mouse) {
         self.onmousemove(mouse);
-    }
-}
+    };
+};
 
 /* set resolution of all canvases to native resolution */
 Spectrogram.prototype.updateCanvasResolutions = function() {
@@ -134,29 +136,29 @@ Spectrogram.prototype.updateCanvasResolutions = function() {
     window.requestAnimationFrame(function() {
         self.drawScene();
     });
-}
+};
 
 /* log version and memory information about WebGL */
 Spectrogram.prototype.logGLInfo = function() {
-    sendMessage('information',
+    sendMessage("information",
         "version: " + this.gl.getParameter(this.gl.VERSION) + "\n" +
         "shading language version: " + this.gl.getParameter(this.gl.SHADING_LANGUAGE_VERSION) + "\n" +
         "vendor: " + this.gl.getParameter(this.gl.VENDOR) + "\n" +
         "renderer: " + this.gl.getParameter(this.gl.RENDERER) + "\n" +
         "max texture size: " + this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) + "\n" +
         "max combined texture image units: " + this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
-}
+};
 
 /* Update the start time when asking for a new spectrogram */
 Spectrogram.prototype.updateStartRequestTime = function() {
     console.log("updating startRequestTime");
     this.startRequestTime = Date.now();
-}
+};
 
 Spectrogram.prototype.updateStartLoadTime = function() {
     console.log("updating startLoadTime");
     this.startLoadTime = Date.now();
-}
+};
 
 /* Log the elapsed time to generate a spectrogram */
 Spectrogram.prototype.logElaspedTime = function() {
@@ -166,7 +168,7 @@ Spectrogram.prototype.logElaspedTime = function() {
     console.log("Spectrogram " + this.id + ":\n" +
         "Total request time: " + totalTime + " ms.\n" +
         "Load time: " + loadTime + " ms.");
-}
+};
 
 /*
  * Sets the progress bar
@@ -179,7 +181,7 @@ Spectrogram.prototype.updateProgressBar = function(progress) {
         this.progressBar.hidden = false;
         this.progressBar.value = progress;
     }
-}
+};
 
 /* link shaders and save uniforms and attributes
 
@@ -195,8 +197,8 @@ Spectrogram.prototype.updateProgressBar = function(progress) {
    - specModeUniform: uSpecMode
 */
 Spectrogram.prototype.loadSpectrogramShaders = function() {
-    var fragmentShader = this.getShader('fragmentShader');
-    var vertexShader = this.getShader('vertexShader');
+    var fragmentShader = this.getShader("fragmentShader");
+    var vertexShader = this.getShader("vertexShader");
 
     var shaderProgram = this.gl.createProgram();
     this.gl.attachShader(shaderProgram, vertexShader);
@@ -209,20 +211,20 @@ Spectrogram.prototype.loadSpectrogramShaders = function() {
 
     this.gl.useProgram(shaderProgram);
 
-    this.vertexPositionAttribute = this.gl.getAttribLocation(shaderProgram, 'aVertexPosition');
+    this.vertexPositionAttribute = this.gl.getAttribLocation(shaderProgram, "aVertexPosition");
     this.gl.enableVertexAttribArray(this.vertexPositionAttribute);
 
-    this.textureCoordAttribute = this.gl.getAttribLocation(shaderProgram, 'aTextureCoord');
+    this.textureCoordAttribute = this.gl.getAttribLocation(shaderProgram, "aTextureCoord");
     this.gl.enableVertexAttribArray(this.textureCoordAttribute);
 
-    this.samplerUniform = this.gl.getUniformLocation(shaderProgram, 'uSampler');
-    this.zoomUniform = this.gl.getUniformLocation(shaderProgram, 'mZoom');
-    this.ampRangeUniform = this.gl.getUniformLocation(shaderProgram, 'vAmpRange');
-    this.specSizeUniform = this.gl.getUniformLocation(shaderProgram, 'vSpecSize');
-    this.specDataSizeUniform = this.gl.getUniformLocation(shaderProgram, 'vDataSize');
-    this.specModeUniform = this.gl.getUniformLocation(shaderProgram, 'uSpecMode');
-    this.specLogarithmicUniform = this.gl.getUniformLocation(shaderProgram, 'bSpecLogarithmic');
-}
+    this.samplerUniform = this.gl.getUniformLocation(shaderProgram, "uSampler");
+    this.zoomUniform = this.gl.getUniformLocation(shaderProgram, "mZoom");
+    this.ampRangeUniform = this.gl.getUniformLocation(shaderProgram, "vAmpRange");
+    this.specSizeUniform = this.gl.getUniformLocation(shaderProgram, "vSpecSize");
+    this.specDataSizeUniform = this.gl.getUniformLocation(shaderProgram, "vDataSize");
+    this.specModeUniform = this.gl.getUniformLocation(shaderProgram, "uSpecMode");
+    this.specLogarithmicUniform = this.gl.getUniformLocation(shaderProgram, "bSpecLogarithmic");
+};
 
 /* load and compile a shader
 
@@ -233,11 +235,11 @@ Spectrogram.prototype.loadSpectrogramShaders = function() {
 */
 Spectrogram.prototype.getShader = function(id) {
     var script = getElementById(id);
-
-    if (script.type == "x-shader/x-fragment") {
-        var shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-    } else if (script.type == "x-shader/x-vertex") {
-        var shader = this.gl.createShader(this.gl.VERTEX_SHADER);
+    var shader;
+    if (script.type === "x-shader/x-fragment") {
+        shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+    } else if (script.type === "x-shader/x-vertex") {
+        shader = this.gl.createShader(this.gl.VERTEX_SHADER);
     } else {
         return null;
     }
@@ -251,7 +253,7 @@ Spectrogram.prototype.getShader = function(id) {
     }
 
     return shader;
-}
+};
 
 Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     this.nblocks = nblocks;
@@ -260,7 +262,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
     // calculate the number of textures needed
-    numTextures = nblocks / maxTexSize;
+    var numTextures = nblocks / maxTexSize;
 
     // bail if too big for video memory
     if (Math.ceil(numTextures) > this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
@@ -289,7 +291,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     this.gl.bufferData(this.gl.ARRAY_BUFFER, textureCoordinates, this.gl.STATIC_DRAW);
 
     // for every texture, calculate vertex indices and texture content
-    for (var i = 0; i < numTextures; i++) {
+    for (i = 0; i < numTextures; i++) {
         var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
         // texture position in 0..1:
         var minX = i / numTextures;
@@ -323,7 +325,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     window.requestAnimationFrame(function() {
         self.drawScene();
     });
-}
+};
 
 /* loads a spectrogram into video memory and fills VBOs
 
@@ -347,13 +349,13 @@ Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift)
     var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
     // calculate the number of textures needed
-    numTextures = nblocks / maxTexSize;
+    var numTextures = nblocks / maxTexSize;
 
     for (var i = 0; i < numTextures; i++) {
         // fill textures with spectrogram data
         var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
         if (this.xOffset + blocks > this.nblocks) {
-          blocks = this.nblocks - this.xOffset
+            blocks = this.nblocks - this.xOffset;
         }
         var chunk = data.subarray(i * maxTexSize * nfreqs, (i * maxTexSize + blocks) * nfreqs);
         var tmp = new Float32Array(chunk.length);
@@ -376,14 +378,14 @@ Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift)
     window.requestAnimationFrame(function() {
         self.drawScene();
     });
-}
+};
 
 /* updates the spectrogram and the scales */
 Spectrogram.prototype.drawScene = function() {
     this.drawSpectrogram();
     this.drawSpecTimeScale();
     this.drawSpecFrequencyScale();
-}
+};
 
 
 /* draw the zoomed spectrogram, one texture at a time */
@@ -410,13 +412,13 @@ Spectrogram.prototype.drawSpectrogram = function() {
     this.gl.uniform2f(this.specSizeUniform, this.specSize.widthT(), this.specSize.widthF());
     this.gl.uniform2f(this.specDataSizeUniform, this.specSize.numT, this.specSize.numF);
     // set the spectrogram display mode
-    var specMode = getElementById('specMode').value;
+    var specMode = getElementById("specMode").value;
     this.gl.uniform1i(this.specModeUniform, specMode);
-    var specLogarithmic = getElementById('specLogarithmic').checked;
+    var specLogarithmic = getElementById("specLogarithmic").checked;
     this.gl.uniform1i(this.specLogarithmicUniform, specLogarithmic);
 
     // switch interpolation on or off
-    var interpolate = getElementById('specInterpolation').checked;
+    var interpolate = getElementById("specInterpolation").checked;
 
     // draw the spectrogram textures
     for (var i = 0; i < this.spectrogramTextures.length; i++) {
@@ -431,7 +433,7 @@ Spectrogram.prototype.drawSpectrogram = function() {
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
-}
+};
 
 /* format a time in mm:ss.ss
 
@@ -443,7 +445,7 @@ Spectrogram.prototype.drawSpectrogram = function() {
 */
 Spectrogram.prototype.formatTime = function(seconds) {
     var minutes = Math.floor(seconds / 60);
-    var seconds = seconds % 60;
+    seconds = seconds % 60;
     minutes = minutes.toString();
     if (minutes.length === 1) {
         minutes = "0" + minutes;
@@ -453,7 +455,7 @@ Spectrogram.prototype.formatTime = function(seconds) {
         seconds = "0" + seconds;
     }
     return minutes + ":" + seconds;
-}
+};
 
 /* draw the time scale canvas
 
@@ -462,7 +464,7 @@ Spectrogram.prototype.formatTime = function(seconds) {
    from specViewSize.(min|max)T.
 */
 Spectrogram.prototype.drawSpecTimeScale = function() {
-    var ctx = this.specTimeScale.getContext('2d');
+    var ctx = this.specTimeScale.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     // draw axis line and two ticks
     ctx.fillStyle = "black";
@@ -475,15 +477,15 @@ Spectrogram.prototype.drawSpecTimeScale = function() {
     var textWidth = ctx.measureText(text).width;
     ctx.fillText(text, 0, ctx.canvas.height - 2);
     // draw upper time bound
-    var text = this.formatTime(this.specViewSize.maxT);
-    var textWidth = ctx.measureText(text).width;
+    text = this.formatTime(this.specViewSize.maxT);
+    textWidth = ctx.measureText(text).width;
     ctx.fillText(text, ctx.canvas.width - textWidth, ctx.canvas.height - 2);
-}
+};
 
 /* convert a linear frequency coordinate to logarithmic frequency */
 Spectrogram.prototype.freqLin2Log = function(f) {
     return Math.pow(this.specSize.widthF(), f / this.specSize.widthF());
-}
+};
 
 /* format a frequency
 
@@ -496,7 +498,7 @@ Spectrogram.prototype.freqLin2Log = function(f) {
      appropriately distorted.
 */
 Spectrogram.prototype.formatFrequency = function(frequency) {
-    frequency = getElementById('specLogarithmic').checked ? this.freqLin2Log(frequency) : frequency;
+    frequency = getElementById("specLogarithmic").checked ? this.freqLin2Log(frequency) : frequency;
 
     if (frequency < 10) {
         return frequency.toFixed(2) + " Hz";
@@ -509,7 +511,7 @@ Spectrogram.prototype.formatFrequency = function(frequency) {
     } else {
         return (frequency / 1000).toFixed(1) + " kHz";
     }
-}
+};
 
 /* draw the frequency scale canvas
 
@@ -518,7 +520,7 @@ Spectrogram.prototype.formatFrequency = function(frequency) {
    frequency are taken from specViewSize.(min|max)F.
 */
 Spectrogram.prototype.drawSpecFrequencyScale = function() {
-    var ctx = this.specFrequencyScale.getContext('2d');
+    var ctx = this.specFrequencyScale.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     // draw axis line and two ticks
     ctx.fillStyle = "black";
@@ -531,10 +533,10 @@ Spectrogram.prototype.drawSpecFrequencyScale = function() {
     var textWidth = ctx.measureText(text).width;
     ctx.fillText(text, 8, 14);
     // draw lower frequency bound
-    var text = this.formatFrequency(this.specViewSize.minF);
-    var textWidth = ctx.measureText(text).width;
+    text = this.formatFrequency(this.specViewSize.minF);
+    textWidth = ctx.measureText(text).width;
     ctx.fillText(text, 8, ctx.canvas.height - 8);
-}
+};
 
 /* zoom or pan when on scrolling
 
@@ -552,6 +554,7 @@ Spectrogram.prototype.drawSpecFrequencyScale = function() {
 Spectrogram.prototype.onwheel = function(wheel) {
     var stepF = this.specViewSize.widthF() / 100;
     var stepT = this.specViewSize.widthT() / 100;
+    var deltaT, deltaF;
     if (wheel.altKey || wheel.shiftKey) {
         var center = this.specViewSize.centerA();
         var range = this.specViewSize.widthA();
@@ -561,11 +564,11 @@ Spectrogram.prototype.onwheel = function(wheel) {
         this.specViewSize.minA = center - range / 2;
         this.specViewSize.maxA = center + range / 2;
     } else if (wheel.ctrlKey) {
-        var deltaT = wheel.deltaY * stepT;
+        deltaT = wheel.deltaY * stepT;
         if (this.specViewSize.widthT() + 2 * deltaT > this.specSize.widthT()) {
             deltaT = (this.specSize.widthT() - this.specViewSize.widthT()) / 2;
         }
-        var deltaF = wheel.shiftKey ? 0 : wheel.deltaY * stepF;
+        deltaF = wheel.shiftKey ? 0 : wheel.deltaY * stepF;
         if (this.specViewSize.widthF() + 2 * deltaF > this.specSize.widthF()) {
             deltaF = (this.specSize.widthF() - this.specViewSize.widthF()) / 2;
         }
@@ -590,14 +593,14 @@ Spectrogram.prototype.onwheel = function(wheel) {
             this.specViewSize.maxF += this.specSize.maxF - this.specViewSize.maxF;
         }
     } else {
-        var deltaT = (wheel.shiftKey ? -wheel.deltaY : wheel.deltaX) * stepT / 10;
+        deltaT = (wheel.shiftKey ? -wheel.deltaY : wheel.deltaX) * stepT / 10;
         if (this.specViewSize.maxT + deltaT > this.specSize.maxT) {
             deltaT = this.specSize.maxT - this.specViewSize.maxT;
         }
         if (this.specViewSize.minT + deltaT < this.specSize.minT) {
             deltaT = this.specSize.minT - this.specViewSize.minT;
         }
-        var deltaF = (wheel.shiftKey ? wheel.deltaX : -wheel.deltaY) * stepF / 10;
+        deltaF = (wheel.shiftKey ? wheel.deltaX : -wheel.deltaY) * stepF / 10;
         if (this.specViewSize.maxF + deltaF > this.specSize.maxF) {
             deltaF = this.specSize.maxF - this.specViewSize.maxF;
         }
@@ -615,7 +618,7 @@ Spectrogram.prototype.onwheel = function(wheel) {
     window.requestAnimationFrame(function() {
         self.drawScene();
     });
-}
+};
 
 /* update the specDataView with cursor position.
 
@@ -629,13 +632,13 @@ Spectrogram.prototype.onmousemove = function(mouse) {
     this.specDataView.innerHTML = this.formatTime(t) + ", " + this.formatFrequency(f) + "<br/>" +
         this.specViewSize.centerA().toFixed(2) + " dB " +
         "&plusmn; " + (this.specViewSize.widthA() / 2).toFixed(2) + " dB";
-}
+};
 
 /* update spectrogram display mode on keypress */
 window.onkeypress = function(e) {
     // prevent the default action of submitting the GET parameters.
     e.which = e.which || e.keyCode;
-    if (e.which == 13) {
+    if (e.which === 13) {
         e.preventDefault();
     }
-}
+};
