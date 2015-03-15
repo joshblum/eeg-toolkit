@@ -76,18 +76,20 @@ def _get_nsamples(data, fs, duration):
   return nsamples
 
 
-def _get_chunksize(nsamples, fs):
+def _get_chunksize(nsamples, fs, nfft, num_hours=2):
   """
       A chunk will be at most 1 hr in length.
   """
-  chunksize = min(fs, nsamples)
-  print 'chunksize:', chunksize
-  return chunksize
-  return min(fs * 60 * 60, nsamples)
+  chunksize = int(fs) * 60 * 60 * num_hours
+  return min(chunksize + (chunksize % nfft), nsamples)
+
+
+def _get_shift(nfft, overlap):
+  return int(round(nfft * overlap))
 
 
 def _get_nblocks(data, nfft, shift):
-  return int((len(data) - nfft) / shift + 1)
+  return int(math.ceil((len(data) - nfft) / shift))
 
 
 def _get_nfreqs(nfft):
@@ -119,11 +121,11 @@ def get_eeg_spectrogram_params(data, duration, nfft, overlap, fs):
   Nwin = int(fs * 1.5)
   Nstep = int(fs * 0.2)
   nfft = int(max(_power_log(Nwin) + pad, Nwin))
-  shift = round(nfft * overlap)
+  shift = _get_shift(nfft, overlap)
   nsamples = _get_nsamples(data, fs, duration)
   nblocks = _get_nblocks(data, nfft, shift)
   nfreqs = _get_nfreqs(nfft)
-  chunksize = _get_chunksize(nsamples, fs)
+  chunksize = _get_chunksize(nsamples, fs, nfft)
   return SpecParams(nfft=nfft, shift=Nstep,
                     nsamples=nsamples,
                     spec_len=nsamples / fs,
@@ -132,11 +134,11 @@ def get_eeg_spectrogram_params(data, duration, nfft, overlap, fs):
 
 
 def get_audio_spectrogram_params(data, duration, nfft, overlap, fs):
-  shift = round(nfft * overlap)
+  shift = _get_shift(nfft, overlap)
   nsamples = _get_nsamples(data, fs, duration)
   nblocks = _get_nblocks(data, nfft, shift)
   nfreqs = _get_nfreqs(nfft)
-  chunksize = _get_chunksize(nsamples, fs)
+  chunksize = _get_chunksize(nsamples, fs, nfft)
   return SpecParams(nfft=nfft, shift=shift,
                     nsamples=nsamples,
                     spec_len=nsamples / fs,

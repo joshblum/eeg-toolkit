@@ -32,21 +32,19 @@ def to_bytes(n):
   return struct.pack('@i', n)
 
 
-def grouper(iterable, n):
-  it = iter(iterable)
-  while True:
-    try:
-      chunk = tuple(itertools.islice(it, n))
-    except RuntimeError:
-      chunk = None
-    if not chunk:
-      return
-    yield chunk
+def grouper(iterable, n, nfft):
+  if len(iterable) < n + nfft:
+    yield iterable
+  else:
+    for i in xrange(nfft, len(iterable) - n - nfft, n):
+      yield iterable[i - nfft:i + n + nfft]
+    # TODO(joshblum): This doesn't seem right..
+    yield iterable[i + n - nfft:]
 
 
 def downsample(spectrogram, n=DOWNSAMPLE_RATE, phase=0):
   """
-      Decrease sampling rate by intgerfactor n with included offset phase
+      Decrease sampling rate by intger factor n with included offset phase
       if the nbytes of the spectrogram exceeds MAX_SIZE
   """
   if spectrogram.nbytes > MAX_SIZE:
@@ -55,6 +53,7 @@ def downsample(spectrogram, n=DOWNSAMPLE_RATE, phase=0):
 
 
 def downsample_extent(nblocks, nfreqs, n=DOWNSAMPLE_RATE):
+  # calculate the number of bytes
   if nblocks * nfreqs * 4 > MAX_SIZE:
     nblocks = nblocks / DOWNSAMPLE_RATE
   return int(nblocks), int(nfreqs)
@@ -268,7 +267,6 @@ class SpectrogramWebSocket(JSONWebSocket):
     t0 = time.time()
     data, fs = load_h5py_spectrofile(filename)
     spec_params = get_eeg_spectrogram_params(data, duration, nfft, overlap, fs)
-    chunksize = get_chunksize(spec_params.fs, spec_params.nsamples)
 
     data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
     t1 = time.time()
@@ -277,7 +275,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     for ch in CHANNELS:
       self.send_spectrogram_new(spec_params, canvas_id=ch)
 
-    for chunk in grouper(data, chunksize):
+    for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
       chunk = np.array(chunk)
       for ch in CHANNELS:
         spec = eeg_ch_spectrogram(ch, chunk, spec_params, self.send_progress)
@@ -297,7 +295,7 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     # now lets compute the spectrogram and send it over
     data = _file[:spec_params.nsamples].sum(axis=1)
-    for chunk in grouper(data, spec_params.chunksize):
+    for chunk in grouper(data, spec_params.chunksize, spec_params.nfft):
       chunk = np.array(chunk)
       spec = spectrogram(chunk, spec_params)
       self.send_spectrogram_update(spec)

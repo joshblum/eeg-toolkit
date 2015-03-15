@@ -343,7 +343,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
    fs         the sample rate of the audio data.
    length     the length of the audio data in seconds.
 */
-Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs) {
+Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift) {
     var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
     // calculate the number of textures needed
@@ -352,7 +352,9 @@ Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs) {
     for (var i = 0; i < numTextures; i++) {
         // fill textures with spectrogram data
         var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
-        // If we have filled the texture, reset the xOffset.
+        if (this.xOffset + blocks > this.nblocks) {
+          blocks = this.nblocks - this.xOffset
+        }
         var chunk = data.subarray(i * maxTexSize * nfreqs, (i * maxTexSize + blocks) * nfreqs);
         var tmp = new Float32Array(chunk.length);
         for (var x = 0; x < blocks; x++) {
@@ -365,7 +367,10 @@ Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs) {
         this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0,
             this.xOffset, 0, blocks, nfreqs,
             this.gl.LUMINANCE, this.gl.FLOAT, tmp);
-        this.xOffset = ((i + 1) < numTextures) ? 0 : this.xOffset + blocks;
+        // If we have filled the texture, reset the xOffset.
+        // We subtract 1 so the spectrogram appears continuous when we splice chunks
+        this.xOffset = ((i + 1) < numTextures) ? 0 : this.xOffset + blocks - 1;
+
     }
     var self = this;
     window.requestAnimationFrame(function() {
