@@ -29,13 +29,14 @@ jslint:
 lint: clean pylint jslint
 
 installdeps: clean
-	$(PKG_INSTALLER) update
 ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
-	cat packages-osx.txt | xargs $(PKG_INSTALLER) install
+	brew update
+	cat packages-osx.txt | xargs brew install
 	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
+	sudo $(PKG_INSTALLER) update
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	pip install -r requirements.txt
