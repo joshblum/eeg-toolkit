@@ -41,7 +41,7 @@ else
 endif
 	pip install -r requirements.txt
 
-install: installdeps supervisor
+install: installdeps
 
 deploy:
 	fab prod deploy
