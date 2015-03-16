@@ -15,6 +15,7 @@ def prod():
 def deploy():
   with cd(env.server_path):
     run('git pull --rebase origin master')
+    run('source ~/.bash_profile')
     run('workon eeg-spectrogram')
     run('make install')
     run('make prod-run')
