@@ -352,7 +352,7 @@ class SpectrogramWebSocket(JSONWebSocket):
 class MainHandler(RequestHandler):
 
   def get(self):
-    self.render('main.html')
+    self.render('html/main.html')
 
 
 def make_app():
