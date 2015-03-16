@@ -320,7 +320,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     this.specSize = new SpecSize(0, length, 0, fs / 2);
     this.specSize.numT = nblocks;
     this.specSize.numF = nfreqs;
-    this.specViewSize = new SpecSize(0, length, 0, fs / 2, -120, 0);
+    this.specViewSize = new SpecSize(0, length, 0, fs / 2, -45, 45);
     var self = this;
     window.requestAnimationFrame(function() {
         self.drawScene();

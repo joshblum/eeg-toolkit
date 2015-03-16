@@ -203,7 +203,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def send_spectrogram_new(self, spec_params, canvas_id=None):
     nblocks, nfreqs = downsample_extent(
         spec_params.nblocks, spec_params.nfreqs)
-    print "shape:", (nblocks, nfreqs)
+    print "shape:", (nblocks, nfreqs), "ch:", canvas_id
     self.send_message('spectrogram',
                       {'action': 'new',
                        'nblocks': nblocks,
@@ -217,12 +217,12 @@ class SpectrogramWebSocket(JSONWebSocket):
     spec = downsample(spec)
     spec = astype(spec)
     nblocks, nfreqs = spec.shape
-    print "shape:", spec.shape
+    print "shape:", spec.shape, "ch:", canvas_id
     self.send_message('spectrogram',
                       {'action': 'update',
                        'nblocks': nblocks,
                        'nfreqs': nfreqs,
-                       'canvas_id': canvas_id},
+                       'canvasId': canvas_id},
                       spec.tostring())
 
   def send_progress(self, progress, canvas_id=None):
@@ -265,7 +265,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def on_eeg_file_spectrogram(self, filename, nfft, duration, overlap):
     t0 = time.time()
     data, fs = load_h5py_spectrofile(filename)
-    spec_params = get_eeg_spectrogram_params(data, duration, nfft, overlap, fs)
+    spec_params = get_eeg_spectrogram_params(data, fs, duration)
 
     data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
     t1 = time.time()
@@ -289,7 +289,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     # first get the spec_params and let the client setup the canvas
     fs = _file.sample_rate
     spec_params = get_audio_spectrogram_params(
-        _file, duration, nfft, overlap, fs)
+        _file, fs, duration, nfft, overlap)
     self.send_spectrogram_new(spec_params)
 
     # now lets compute the spectrogram and send it over
