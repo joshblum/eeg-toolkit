@@ -7,13 +7,19 @@ import time
 
 import numpy as np
 from pysoundfile import SoundFile
+
 from spectrogram import eeg_ch_spectrogram
 from spectrogram import get_audio_spectrogram_params
 from spectrogram import get_eeg_spectrogram_params
 from spectrogram import spectrogram
 from spectrogram import load_h5py_spectrofile
 from spectrogram import CHANNELS
+
+from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
+from tornado.web import Application
+from tornado.web import StaticFileHandler
+from tornado.web import RequestHandler
 
 MAX_SIZE = 10 * 100**3  # arbitrarily 10 MB limit
 
@@ -342,17 +348,30 @@ class SpectrogramWebSocket(JSONWebSocket):
     _file = SoundFile(io.BytesIO(data), virtual_io=True)
     self._audio_file_spectrogram(_file, nfft, overlap)
 
-if __name__ == '__main__':
-  import os
-  import webbrowser
-  from tornado.web import Application
-  from tornado.ioloop import IOLoop
-  import random
 
-  app = Application([('/spectrogram', SpectrogramWebSocket)])
+class MainHandler(RequestHandler):
 
-  random.seed()
-  port = random.randrange(49152, 65535)
+  def get(self):
+    self.render('main.html')
+
+
+def make_app():
+  handlers = [
+      (r'/', MainHandler),
+      (r'/spectrogram', SpectrogramWebSocket),
+      (r'/(.*)', StaticFileHandler, {
+          'path': ''
+      }),
+  ]
+  return Application(handlers, autoreload=True)
+
+
+def main():
+  app = make_app()
+  port = 5000
   app.listen(port)
-  webbrowser.open('file://{}/main.html?port={}'.format(os.getcwd(), port))
-  IOLoop.instance().start()
+  print 'Listing on port:', port
+  IOLoop.current().start()
+
+if __name__ == '__main__':
+  main()

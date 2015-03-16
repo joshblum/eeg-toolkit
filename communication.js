@@ -1,9 +1,22 @@
 "use strict";
 
-var ws = new WebSocket("ws://localhost:" + getURLParameters().port + "/spectrogram");
+var ws = new WebSocket(getwsUrl());
 ws.binaryType = "arraybuffer";
 
 var OVERLAP = 0.5;
+
+function getwsUrl() {
+    var loc = window.location,
+        newUri;
+    if (loc.protocol === "https:") {
+        newUri = "wss:";
+    } else {
+        newUri = "ws:";
+    }
+    newUri += "//" + loc.host;
+    newUri += loc.pathname + "spectrogram";
+    return newUri;
+}
 
 /* return an object containing the URL parameters */
 function getURLParameters() {

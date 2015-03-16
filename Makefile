@@ -1,4 +1,4 @@
-.PHONY: clean run installdeps lint pylint jslint
+.PHONY: clean run installdeps lint pylint jslint prod-run install deploy
 
 OS := $(shell uname)
 
@@ -6,6 +6,11 @@ ifeq ($(RPM),1)
 	PKG_INSTALLER = yum
 else
 	PKG_INSTALLER = apt-get
+endif
+
+ifeq ('$(OS)', 'Darwin')
+	OSX = true
+	PKG_INSTALLER = brew
 endif
 
 run: clean
@@ -23,13 +28,24 @@ jslint:
 
 lint: clean pylint jslint
 
-installdeps:
-ifeq ('$(OS)','Darwin')
+installdeps: clean
+	$(PKG_INSTALLER) update
+ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
-	cat packages-osx.txt | xargs brew install
+	cat packages-osx.txt | xargs $(PKG_INSTALLER) install
 	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	pip install -r requirements.txt
+
+install: installdeps supervisor
+
+deploy:
+	fab prod deploy
+
+prod-run:
+	supervisorctl reread
+	supervisorctl update
+	supervisorctl restart eeg:eeg-8000

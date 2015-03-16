@@ -1,0 +1,10 @@
+# -*- conf -*-
+
+[program:eeg]
+process_name = eeg-%(process_num)s
+environment = PYTHONPATH="%(here)s"
+command = python -m server
+  --port=%(process_num)s
+# Increase numprocs to run multiple processes on different ports.
+numprocs = 1
+numprocs_start = 8000
