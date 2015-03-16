@@ -28,3 +28,5 @@ pip-delete-this-directory.txt
 
 # supervisor files
 *.sock
+*.pid
+*.log
