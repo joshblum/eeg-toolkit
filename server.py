@@ -2,11 +2,22 @@ from __future__ import division
 
 import io
 import json
-import struct
 import time
 
 import numpy as np
 from pysoundfile import SoundFile
+
+from tornado.ioloop import IOLoop
+from tornado.websocket import WebSocketHandler
+from tornado.web import Application
+from tornado.web import StaticFileHandler
+from tornado.web import RequestHandler
+
+from helpers import from_bytes
+from helpers import to_bytes
+from helpers import grouper
+from helpers import downsample
+from helpers import downsample_extent
 
 from spectrogram import eeg_ch_spectrogram
 from spectrogram import get_audio_spectrogram_params
@@ -15,62 +26,8 @@ from spectrogram import spectrogram
 from spectrogram import load_h5py_spectrofile
 from spectrogram import CHANNELS
 
-from tornado.ioloop import IOLoop
-from tornado.websocket import WebSocketHandler
-from tornado.web import Application
-from tornado.web import StaticFileHandler
-from tornado.web import RequestHandler
-
-MAX_SIZE = 10 * 100**3  # arbitrarily 10 MB limit
-
 AUDIO = 'audio'
 EEG = 'eeg'
-
-DOWNSAMPLE_RATE = 10
-
-
-def from_bytes(b):
-  return struct.unpack('@i', b)[0]
-
-
-def to_bytes(n):
-  return struct.pack('@i', n)
-
-
-def grouper(iterable, n, nfft):
-  if len(iterable) < n + nfft:
-    yield iterable
-  else:
-    for i in xrange(nfft, len(iterable) - n - nfft, n):
-      yield iterable[i - nfft:i + n + nfft]
-    # TODO(joshblum): This doesn't seem right..
-    yield iterable[i + n - nfft:]
-
-
-def downsample(spectrogram, n=DOWNSAMPLE_RATE, phase=0):
-  """
-      Decrease sampling rate by intger factor n with included offset phase
-      if the nbytes of the spectrogram exceeds MAX_SIZE
-  """
-  if spectrogram.nbytes > MAX_SIZE:
-    spectrogram = spectrogram[phase::n]
-  return spectrogram
-
-
-def downsample_extent(nblocks, nfreqs, n=DOWNSAMPLE_RATE):
-  # calculate the number of bytes
-  if nblocks * nfreqs * 4 > MAX_SIZE:
-    nblocks = nblocks / DOWNSAMPLE_RATE
-  return int(nblocks), int(nfreqs)
-
-
-def astype(ndarray, _type='float32'):
-  """
-      Helper to chagne the type of a numpy array.
-      the `float32` type is necessary for correct parsing on the client
-  """
-  return ndarray.astype(_type)  # nececssary for type for diplay
-
 
 class JSONWebSocket(WebSocketHandler):
 

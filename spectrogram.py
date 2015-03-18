@@ -8,6 +8,8 @@ from collections import namedtuple
 from scipy import signal
 from spectrum import dpss
 
+from helpers import grouper
+
 CHANNELS = ['LL', 'LP', 'RP', 'RL']
 DIFFERENCE_PAIRS = {
     'LL': [
@@ -58,6 +60,8 @@ CHANNEL_INDEX = {
     'pz': 18,
 }
 
+CHUNK_HOURS = 1.0
+
 EEGSpecParams = namedtuple(
     'SpecParams', ['chunksize', 'fs',
                    'shift', 'spec_len',
@@ -69,6 +73,14 @@ AudioSpecParams = namedtuple(
                    'shift', 'spec_len',
                    'nfft', 'nblocks',
                    'nfreqs', 'nsamples'])
+
+# see if we are running normally or using kernprof
+try:
+  profile(lambda x: None)
+except NameError:
+  def noop_decorator(fn):
+    return fn
+  profile = noop_decorator
 
 
 def _get_nsamples(data, fs, duration):
@@ -85,11 +97,11 @@ def _get_nsamples(data, fs, duration):
   return nsamples
 
 
-def _get_chunksize(nsamples, fs, nfft, num_hours=2):
+def _get_chunksize(nsamples, fs, nfft, num_hours=CHUNK_HOURS):
   """
       A chunk will be at most 1 hr in length.
   """
-  chunksize = int(fs) * 60 * 60 * num_hours
+  chunksize = int(fs * 60 * 60 * num_hours)
   return min(chunksize + (chunksize % nfft), nsamples)
 
 
@@ -109,10 +121,12 @@ def _hann(n):
   return 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
 
 
+@profile
 def _power_log(x):
   return 2**(math.ceil(math.log(x, 2)))
 
 
+@profile
 def _change_row_to_column(data):
   """
      Transform 1d array into column vectors
@@ -143,6 +157,7 @@ def _getfgrid(fs, nfft, fpass):
   return fout, findx[0]
 
 
+@profile
 def _dpsschk(tapers, N, fs):
   """
   Helper function to calculate tapers and
@@ -155,6 +170,7 @@ def _dpsschk(tapers, N, fs):
   return tapers
 
 
+@profile
 def _mtfftc(data, tapers, nfft, fs):
   """ Helper function which calculates the fft of the data using the tapers"""
   NC, C = data.shape
@@ -205,20 +221,8 @@ def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
                        chunksize=chunksize)
 
 
-def get_audio_spectrogram_params(data, fs, duration, nfft, overlap):
-  shift = _get_shift(nfft, overlap)
-  nsamples = _get_nsamples(data, fs, duration)
-  chunksize = _get_chunksize(nsamples, fs, nfft)
-  nblocks = _get_nblocks(nsamples, nfft, shift)
-  nfreqs = _get_nfreqs(nfft)
-  return AudioSpecParams(nfft=nfft, shift=shift,
-                         nsamples=nsamples,
-                         spec_len=nsamples / fs,
-                         nblocks=nblocks, nfreqs=nfreqs,
-                         fs=fs, chunksize=chunksize)
-
-
-def eeg_ch_spectrogram(ch, data, spec_params, progress_fn):
+@profile
+def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
   """
     Compute the spectrogram for an individual spectrogram in the eeg
   """
@@ -232,7 +236,8 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn):
     diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
     T.append(multitaper_spectrogram(
         diff, spec_params))
-    progress_fn((i + 1) / len(pairs), canvas_id=ch)
+    if progress_fn:
+      progress_fn((i + 1) / len(pairs), canvas_id=ch)
 
   # compute the regional average of the spectrograms for each channel
   res = sum(T) / 4
@@ -241,6 +246,7 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn):
   return res
 
 
+@profile
 def multitaper_spectrogram(data, spec_params):
 
   data = _change_row_to_column(data)
@@ -276,6 +282,38 @@ def multitaper_spectrogram(data, spec_params):
   return spect
 
 
+@profile
+def on_eeg_file_spectrogram_profile(filename, duration):
+
+  data, fs = load_h5py_spectrofile(filename)
+  spec_params = get_eeg_spectrogram_params(data, fs, duration)
+
+  data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
+  print 'loaded file'
+
+  t0 = time.time()
+  for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
+    chunk = np.array(chunk)
+    for ch in CHANNELS:
+      print 'computing channel %s' % ch
+      spec = eeg_ch_spectrogram(ch, chunk, spec_params)
+  t1 = time.time()
+  print "Total time: %s" % (t1 - t0)
+
+
+def get_audio_spectrogram_params(data, fs, duration, nfft, overlap):
+  shift = _get_shift(nfft, overlap)
+  nsamples = _get_nsamples(data, fs, duration)
+  chunksize = _get_chunksize(nsamples, fs, nfft)
+  nblocks = _get_nblocks(nsamples, nfft, shift)
+  nfreqs = _get_nfreqs(nfft)
+  return AudioSpecParams(nfft=nfft, shift=shift,
+                         nsamples=nsamples,
+                         spec_len=nsamples / fs,
+                         nblocks=nblocks, nfreqs=nfreqs,
+                         fs=fs, chunksize=chunksize)
+
+
 def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   """Calculate a real spectrogram from audio data
 
@@ -307,3 +345,17 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   if progress_fn:
     progress_fn(1, canvas_id=canvas_id)
   return specs.T
+
+if __name__ == '__main__':
+  import argparse
+
+  parser = argparse.ArgumentParser(
+      description='Profile spectrogram code.')
+  parser.add_argument('-f', '--filename', default='test.eeg',
+                      dest='filename', help='filename for spectrogram data.')
+  parser.add_argument('-d', '--duration', default=4.0,
+                      dest='duration', help='duration of the data')
+
+  args = parser.parse_args()
+
+  on_eeg_file_spectrogram_profile(args.filename, args.duration)
