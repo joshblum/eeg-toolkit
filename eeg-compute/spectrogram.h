@@ -17,6 +17,70 @@ typedef struct spec_params {
   int nfreqs; // number of frequencies
 } spec_params_t;
 
+typedef enum {
+  LL,
+  LP,
+  RP,
+  RL
+} ch_t;
+
+// map channel names to index
+typedef enum {
+    FP1 = 0,
+    F3,
+    C3,
+    P3,
+    O1,
+    FP2,
+    F4,
+    C4,
+    P4,
+    O2,
+    F7,
+    T3,
+    T5,
+    F8,
+    T4,
+    T6,
+    FZ,
+    CZ,
+    PZ
+} ch_idx_t;
+
+typedef struct ch_diff {
+  ch_t ch; // channel name
+  // store an array of channels used
+  // in the diff. The diff is computed by
+  // subtracting channels: (i+1) - (i)
+  ch_idx_t ch_idx[5];
+} ch_diff_t;
+
+static ch_diff_t DIFFERENCE_PAIRS[4] =  {
+  // (FP1 - F7)
+  // (F7 - T3)
+  // (T3 - T5)
+  // (T5 - O1)
+  {.ch=LL, .ch_idx={FP1, F7, T3, T5, O1}},
+
+  // (FP2 - F3)
+  // (F3 - C3)
+  // (C3 - P3)
+  // (P3 - O1)
+  {.ch=LP, .ch_idx={FP1, F3, C3, P3, O1}},
+
+  // (FP2 - F4)
+  // (F4 - C4)
+  // (C4 - P4)
+  // (P4 - O2)
+  {.ch=RP, .ch_idx={FP2, F4, C4, P4, O2}},
+
+  // (FP2 - F8)
+  // (F8 - T4)
+  // (T4 - T6)
+  // (T6 - O2)
+  {.ch=RL, .ch_idx={FP2, F8, T4, T6, O2}},
+};
+
 void print_spec_params_t(spec_params_t* spec_params);
 int get_nfreqs(int nfft);
 int get_nblocks(int data_len, int fs, int shift);
@@ -26,6 +90,8 @@ int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
     edf_hdr_struct* hdr, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
+void eeg_ch_spectrogram(char* ch, edf_hdr_struct* hdr,
+    spec_params_t* spec_params);
 int eeg_file_spectrogram(char* filename, float duration);
 int main(int argc, char* argv[]);
 
