@@ -46,16 +46,18 @@ typedef enum {
     CZ,
     PZ
 } ch_idx_t;
-
+static int NUM_DIFFS = 5;
 typedef struct ch_diff {
   ch_t ch; // channel name
   // store an array of channels used
   // in the diff. The diff is computed by
   // subtracting channels: (i+1) - (i)
-  ch_idx_t ch_idx[5];
+  ch_idx_t ch_idx[NUM_DIFFS];
 } ch_diff_t;
 
-static ch_diff_t DIFFERENCE_PAIRS[4] =  {
+
+static int NUM_CH = 4;
+static ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =  {
   // (FP1 - F7)
   // (F7 - T3)
   // (T3 - T5)
@@ -90,6 +92,8 @@ int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
     edf_hdr_struct* hdr, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
+double* create_buffer(int n);
+int read_samples(int handle, int edfsignal, int n, double *buf);
 void eeg_ch_spectrogram(char* ch, edf_hdr_struct* hdr,
     spec_params_t* spec_params);
 int eeg_file_spectrogram(char* filename, float duration);
