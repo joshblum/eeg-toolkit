@@ -1,3 +1,5 @@
 pkg-config
 libffi
 libsndfile
+homebrew/science/armadillo
+fftw
