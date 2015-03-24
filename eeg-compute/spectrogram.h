@@ -1,6 +1,8 @@
 #ifndef SPECTROGRAM_H
 #define SPECTROGRAM_H
 
+#include <fftw3.h>
+#include <armadillo>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +48,7 @@ typedef enum {
     CZ,
     PZ
 } ch_idx_t;
-static int NUM_DIFFS = 5;
+static const int NUM_DIFFS = 5;
 typedef struct ch_diff {
   ch_t ch; // channel name
   // store an array of channels used
@@ -56,7 +58,7 @@ typedef struct ch_diff {
 } ch_diff_t;
 
 
-static int NUM_CH = 4;
+static const int NUM_CH = 4;
 static ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =  {
   // (FP1 - F7)
   // (F7 - T3)
@@ -92,10 +94,10 @@ int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
     edf_hdr_struct* hdr, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
-double* create_buffer(int n);
+double* create_buffer(int n, int hdl);
 int read_samples(int handle, int edfsignal, int n, double *buf);
-void eeg_ch_spectrogram(char* ch, edf_hdr_struct* hdr,
-    spec_params_t* spec_params);
+void hamming(int windowLength, double* buffer);
+void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs);
 int eeg_file_spectrogram(char* filename, float duration);
 int main(int argc, char* argv[]);
 

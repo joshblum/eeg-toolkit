@@ -16,7 +16,7 @@ default: $(TARGET)
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 main : main.o $(OBJ)
-	$(CXX) $^ $(LDFLAGS) -o $@
+	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@
 
 clean:
 	rm -f -r *.dSYM *.o *.d *~ $(TARGET)

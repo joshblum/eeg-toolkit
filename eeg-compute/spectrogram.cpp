@@ -1,8 +1,8 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <fftw3.h>
-#include <armadillo>
 
 #include "edflib.h"
 #include "spectrogram.h"
@@ -96,7 +96,7 @@ void load_edf(edf_hdr_struct* hdr, char* filename) {
   }
 }
 
-double* create_buffer(int n) {
+double* create_buffer(int n, int hdl) {
     double* buf = (double * ) malloc(sizeof(double[n]));
     if (buf == NULL) {
         printf("\nmalloc error\n");
@@ -106,8 +106,8 @@ double* create_buffer(int n) {
     return buf;
 }
 
-int read_samples(int handle, int edfsignal, int n, double *buf) {
-  n = edfread_physical_samples(hdl, ch2, n, buf);
+int read_samples(int hdl, int ch, int n, double *buf) {
+  n = edfread_physical_samples(hdl, ch, n, buf);
 
   if (n == -1) {
       printf("\nerror: edf_read_physical_samples()\n");
@@ -121,29 +121,32 @@ int read_samples(int handle, int edfsignal, int n, double *buf) {
 // Create a hamming window of windowLength samples in buffer
 void hamming(int windowLength, double* buffer) {
  for(int i = 0; i < windowLength; i++) {
-   buffer[i] = 0.54 - (0.46 * cos( 2 * PI * (i / ((windowLength - 1) * 1.0))));
+   buffer[i] = 0.54 - (0.46 * cos( 2 * M_PI * (i / ((windowLength - 1) * 1.0))));
  }
 }
 
-// copy pasta http://ofdsp.blogspot.co.il/2011/08/short-time-fourier-transform-with-fftw3.html
-void STFT(rowvec diff, spec_params_t spec_params, mat specs) {
+static inline double abs(fftw_complex* arr, int i) {
+  return sqrt(arr[i][0] * arr[i][0] + arr[i][1]*arr[i][1]);
+}
 
-    fftw_real    *data, *fft_result;
+// copy pasta http://ofdsp.blogspot.co.il/2011/08/short-time-fourier-transform-with-fftw3.html
+void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
+
+    fftw_complex    *data, *fft_result;
     fftw_plan       plan_forward;
-    int nfft = spec_params.nfft
-    int shift = spec_params.shift
-    int nblocks = spec_params.nblocks
-    int nfreqs = spec_params.nfreqs
+    int nfft = spec_params.nfft;
+    int shift = spec_params.shift;
+    int nblocks = spec_params.nblocks;
     int nsamples = spec_params.nsamples;
 
     data = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
     fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
     // TODO keep plans in memory until end
-    plan_forward = fftw_plan_r2r_1d(nfft, data, fft_result,
+    plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
         FFTW_FORWARD, FFTW_ESTIMATE);
 
     // Create a hamming window of appropriate length
-    float window[nfft];
+    double window[nfft];
     hamming(nfft, window);
 
     for (int idx = 0; idx < nblocks; idx++) {
@@ -152,15 +155,19 @@ void STFT(rowvec diff, spec_params_t spec_params, mat specs) {
         // get the last chunk
         int upper_bound = (nfft + idx*shift) - nsamples;
         for (int i = 0; i < upper_bound; i++) {
-          data[i] = (*diff)[idx*shift + i] * window[i];
+          data[i][0] = diff(idx*shift + i) * window[i];
+          data[i][1] = 0.0;
+
         }
         for(int i = upper_bound; i < nfft; i++) {
-          data[i] = 0;
+          data[i][0] = 0.0;
+          data[i][1] = 0.0;
         }
       } else {
         for(int i = 0; i < nfft; i++) {
           // TODO vector multiplication?
-          data[i] = (*diff)[idx*shift + i] * window[i];
+          data[i][0] = diff(idx*shift + i) * window[i];
+          data[i][1] = 0.0;
         }
       }
 
@@ -181,8 +188,8 @@ void STFT(rowvec diff, spec_params_t spec_params, mat specs) {
       // Matlab's spectrogram routine works.
       // TODO: change maybe?
       // http://www.fftw.org/fftw2_doc/fftw_2.html
-        for (i = 0; i < nfft/2 + 1; i++) {
-            specs(i, idx) = fft_result[i]*fft_result[i];
+        for (int i = 0; i < nfft/2 + 1; i++) {
+            specs(i, idx) = abs(fft_result, i);
         }
   }
 
@@ -204,24 +211,25 @@ int eeg_file_spectrogram(char * filename, float duration) {
     // TODO chunking?
     // write edf method to do diff on the fly?
     int hdl = hdr.handle;
-    int n = spec_params.nsamples;
-    buf1 = create_buffer(n);
-    buf2 = create_buffer(n);
+    int nsamples = spec_params.nsamples;
+    double* buf1 = create_buffer(nsamples, hdl);
+    double* buf2 = create_buffer(nsamples, hdl);
 
     int ch1, ch2, n1, n2;
-    for (int i = 0; i < NUM_PAIRS; i++) {
+    for (int i = 0; i < NUM_CH; i++) {
       for (int j = 0; j < NUM_DIFFS - 1; j++) {
         ch1 = DIFFERENCE_PAIRS[i].ch_idx[j];
         ch2 = DIFFERENCE_PAIRS[i].ch_idx[j+1];
-        n1 = read_samples(hdl, ch1, n, buf1);
-        n2 = read_samples(hdl, ch2, n, buf2);
-        rowrev v1 = rowvec::fixed<n>(const *buf1);
-        rowvec v2 = rowvec::fixed<n>(const *buf2);
-        rowvec diff = v2 - v1;
+        n1 = read_samples(hdl, ch1, nsamples, buf1);
+        n2 = read_samples(hdl, ch2, nsamples, buf2);
+        // TODO use arm::rowvec::fixed with fixed size chunks
+        arma::rowvec v1 = arma::rowvec(*buf1, nsamples);
+        arma::rowvec v2 = arma::rowvec(*buf2, nsamples);
+        arma::rowvec diff = v2 - v1;
         // nfreqs x nblocks matrix
-        mat specs = mat(spec_params.nfreqs, spec_params.nblocks, fill::zeros);
+        arma::mat specs(spec_params.nfreqs, spec_params.nblocks, arma::fill::zeros);
         // fill in the spec matrix with fft values
-        STFT(diff, spec_params, spec);
+        STFT(diff, spec_params, specs);
       }
     }
 
