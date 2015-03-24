@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <time.h>
 
 #include "edflib.h"
 #include "spectrogram.h"
@@ -16,6 +17,27 @@
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
+
+#include <time.h>
+#include <sys/time.h>
+
+unsigned long long getticks()
+{
+    struct timeval t;
+    gettimeofday(&t, 0);
+    return t.tv_sec * 1000000ULL + t.tv_usec;
+}
+
+double ticks_to_seconds(unsigned long long ticks)
+{
+    return ticks * 1.0e-6;
+}
+
+
+void log_time_diff(unsigned long long ticks) {
+  double diff = ticks_to_seconds(ticks);
+  printf("Time taken %.2f seconds\n", diff);
+}
 
 void print_spec_params_t(spec_params_t* spec_params) {
   printf("spec_params: {\n");
@@ -174,23 +196,23 @@ void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
       // Perform the FFT on our chunk
       fftw_execute( plan_forward );
 
-      /* Uncomment to see the raw-data output from the FFT calculation
-      std::cout << "Column: " << chunkPosition << std::endl;
-      for(i = 0 ; i < nfft ; i++ ) {
-       fprintf( stdout, "fft_result[%d] = { %2.2f, %2.2f }\n",
-         i, fft_result[i][0], fft_result[i][1] );
-      }
-       */
-
       // Copy the first (nfft/2 + 1) data points into your spectrogram.
       // We do this because the FFT output is mirrored about the nyquist
       // frequency, so the second half of the data is redundant. This is how
       // Matlab's spectrogram routine works.
       // TODO: change maybe?
       // http://www.fftw.org/fftw2_doc/fftw_2.html
-        for (int i = 0; i < nfft/2 + 1; i++) {
-            specs(i, idx) = abs(fft_result, i);
-        }
+      for (int i = 0; i < nfft/2 + 1; i++) {
+          specs(i, idx) = abs(fft_result, i);
+      }
+
+      // Uncomment to see the raw-data output from the FFT calculation
+      // std::cout << "Column: " << idx << std::endl;
+      // for(int i = 0 ; i < nfft/2 ; i++ ) {
+      //  fprintf( stdout, "specc(%d, %d) = { %2.2f }\n", i,
+      //    idx, specs(i, idx));
+      // }
+
   }
 
   fftw_destroy_plan( plan_forward );
@@ -223,8 +245,8 @@ int eeg_file_spectrogram(char * filename, float duration) {
         n1 = read_samples(hdl, ch1, nsamples, buf1);
         n2 = read_samples(hdl, ch2, nsamples, buf2);
         // TODO use arm::rowvec::fixed with fixed size chunks
-        arma::rowvec v1 = arma::rowvec(*buf1, nsamples);
-        arma::rowvec v2 = arma::rowvec(*buf2, nsamples);
+        arma::rowvec v1 = arma::rowvec(buf1, nsamples);
+        arma::rowvec v2 = arma::rowvec(buf2, nsamples);
         arma::rowvec diff = v2 - v1;
         // nfreqs x nblocks matrix
         arma::mat specs(spec_params.nfreqs, spec_params.nblocks, arma::fill::zeros);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "edflib.h"
 #include "spectrogram.h"
@@ -14,10 +15,13 @@ int main(int argc, char *argv[])
     } else {
       duration = 4.0; // default duration
     }
-    printf("Using filename: %s, duration: %.2f\n", filename, duration);
-    return eeg_file_spectrogram(filename, duration);
+    printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
+    unsigned long long start = getticks();
+    eeg_file_spectrogram(filename, duration);
+    unsigned long long end = getticks();
+    log_time_diff(end - start);
   } else {
     printf("\nusage: spectrogram <filename> <duration>\n\n");
-    return 1;
   }
+  return 1;
 }
