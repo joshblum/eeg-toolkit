@@ -152,6 +152,10 @@ static inline double abs(fftw_complex* arr, int i) {
 }
 
 // copy pasta http://ofdsp.blogspot.co.il/2011/08/short-time-fourier-transform-with-fftw3.html
+/*
+ * Fill the `specs` matrix with values for the spectrogram for the given diff.
+ * `specs` is expected to be initialized and the results are added to allow averaging
+ */
 void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
 
     fftw_complex    *data, *fft_result;
@@ -203,7 +207,7 @@ void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
       // TODO: change maybe?
       // http://www.fftw.org/fftw2_doc/fftw_2.html
       for (int i = 0; i < nfft/2 + 1; i++) {
-          specs(i, idx) = abs(fft_result, i);
+          specs(i, idx) += abs(fft_result, i);
       }
 
       // Uncomment to see the raw-data output from the FFT calculation
@@ -212,7 +216,6 @@ void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
       //  fprintf( stdout, "specc(%d, %d) = { %2.2f }\n", i,
       //    idx, specs(i, idx));
       // }
-
   }
 
   fftw_destroy_plan( plan_forward );
@@ -237,8 +240,13 @@ int eeg_file_spectrogram(char * filename, float duration) {
     double* buf1 = create_buffer(nsamples, hdl);
     double* buf2 = create_buffer(nsamples, hdl);
 
+    // nfreqs x nblocks matrix
+    arma::mat specs(spec_params.nfreqs, spec_params.nblocks);
+
     int ch1, ch2, n1, n2;
     for (int i = 0; i < NUM_CH; i++) {
+      // reset the rolling avgerage
+      specs.zeros();
       for (int j = 0; j < NUM_DIFFS - 1; j++) {
         ch1 = DIFFERENCE_PAIRS[i].ch_idx[j];
         ch2 = DIFFERENCE_PAIRS[i].ch_idx[j+1];
@@ -248,11 +256,11 @@ int eeg_file_spectrogram(char * filename, float duration) {
         arma::rowvec v1 = arma::rowvec(buf1, nsamples);
         arma::rowvec v2 = arma::rowvec(buf2, nsamples);
         arma::rowvec diff = v2 - v1;
-        // nfreqs x nblocks matrix
-        arma::mat specs(spec_params.nfreqs, spec_params.nblocks, arma::fill::zeros);
         // fill in the spec matrix with fft values
         STFT(diff, spec_params, specs);
       }
+      // TODO serialize specs output for each channel
+      specs /=  (NUM_DIFFS - 1); // average diff spectrograms
     }
 
   return 1; // success
