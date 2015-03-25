@@ -13,6 +13,7 @@ from tornado.web import Application
 from tornado.web import StaticFileHandler
 from tornado.web import RequestHandler
 
+from helpers import astype
 from helpers import from_bytes
 from helpers import to_bytes
 from helpers import grouper
