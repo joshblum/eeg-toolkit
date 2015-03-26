@@ -1,3 +1,4 @@
+#include <Python.h>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <stdio.h>
@@ -225,7 +226,7 @@ void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
 }
 
 
-int eeg_file_spectrogram(char * filename, float duration) {
+arma::mat eeg_file_spectrogram(char* filename, float duration) {
     edf_hdr_struct hdr;
     spec_params_t spec_params;
     load_edf( & hdr, filename);
@@ -263,6 +264,33 @@ int eeg_file_spectrogram(char * filename, float duration) {
       specs /=  (NUM_DIFFS - 1); // average diff spectrograms
     }
 
-  return 1; // success
+ return specs;
 }
 
+
+static PyObject *
+eeg_spectrogram(PyObject *self, PyObject *args)
+{
+  const char *filename;
+  float duration;
+  if (!PyArg_ParseTuple(args, "sf", &filename, &duration)) {
+    return NULL;
+
+  }
+  arma::mat = eeg_file_spectrogram(filename, duration);
+  return Py_BuildValue("");
+
+static PyMethodDef EEGMethods[] = {
+  {"eeg_spectrogram", eeg_spectrogram, METH_VARARGS,
+    "Compute an eeg spectrogram."},
+  {NULL, NULL, 0, NULL}
+};
+
+PyMODINIT_FUNC
+initeeg_spectrogram(void)
+{
+  (void) Py_InitModule("eeg_spectrogram", EEGMethods);
+}
+}
+}
+}

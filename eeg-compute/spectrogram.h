@@ -4,10 +4,6 @@
 #include <fftw3.h>
 #include <armadillo>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct spec_params {
   int spec_len; // length of the spectrogram
   int fs; // sample rate
@@ -98,13 +94,9 @@ double* create_buffer(int n, int hdl);
 int read_samples(int handle, int edfsignal, int n, double *buf);
 void hamming(int windowLength, double* buffer);
 void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs);
-int eeg_file_spectrogram(char* filename, float duration);
+arma::mat eeg_file_spectrogram(char* filename, float duration);
 void log_time_diff(unsigned long long ticks);
 double ticks_to_seconds(unsigned long long ticks);
 unsigned long long getticks();
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif // SPECTROGRAM_H
