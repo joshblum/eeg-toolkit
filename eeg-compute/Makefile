@@ -14,7 +14,7 @@ endif
 
 LDFLAGS = -Wall
 
-default: $(TARGET)
+default: spectrogram
 
 %.o : %.c
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
@@ -22,7 +22,11 @@ default: $(TARGET)
 %.o : %.cpp
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-main : main.o $(OBJ)
+spectrogram:
+	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c edflib.c spectrogram.cpp
+	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared edflib.o spectrogram.o -o libspectrogram.so
+
+main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@
 
 clean:

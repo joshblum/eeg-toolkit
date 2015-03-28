@@ -1,4 +1,3 @@
-#include <Python.h>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <stdio.h>
@@ -101,7 +100,7 @@ void load_edf(edf_hdr_struct* hdr, char* filename) {
     switch(hdr->filetype) {
       case EDFLIB_MALLOC_ERROR                : printf("\nmalloc error\n\n");
                                                 break;
-      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   : printf("\ncan not open file, no such file or directory\n\n");
+      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   : printf("\ncannot open file, no such file or directory: %s\n\n", filename);
                                                 break;
       case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS : printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
                                                        "(it contains format errors)\n\n");
@@ -226,7 +225,7 @@ void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
 }
 
 
-arma::mat eeg_file_spectrogram(char* filename, float duration) {
+void eeg_file_spectrogram(char* filename, float duration, double* out) {
     edf_hdr_struct hdr;
     spec_params_t spec_params;
     load_edf( & hdr, filename);
@@ -264,33 +263,10 @@ arma::mat eeg_file_spectrogram(char* filename, float duration) {
       specs /=  (NUM_DIFFS - 1); // average diff spectrograms
     }
 
- return specs;
-}
-
-
-static PyObject *
-eeg_spectrogram(PyObject *self, PyObject *args)
-{
-  const char *filename;
-  float duration;
-  if (!PyArg_ParseTuple(args, "sf", &filename, &duration)) {
-    return NULL;
-
+  for (int i = 0; i < spec_params.nblocks; i++) {
+    for (int j = 0; j < spec_params.nfft/2; j++){
+      *(out + i*spec_params.nfreqs + j) = specs(i, j);
+    }
   }
-  arma::mat = eeg_file_spectrogram(filename, duration);
-  return Py_BuildValue("");
+}
 
-static PyMethodDef EEGMethods[] = {
-  {"eeg_spectrogram", eeg_spectrogram, METH_VARARGS,
-    "Compute an eeg spectrogram."},
-  {NULL, NULL, 0, NULL}
-};
-
-PyMODINIT_FUNC
-initeeg_spectrogram(void)
-{
-  (void) Py_InitModule("eeg_spectrogram", EEGMethods);
-}
-}
-}
-}

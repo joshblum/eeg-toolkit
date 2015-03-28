@@ -16,8 +16,9 @@ int main(int argc, char *argv[])
       duration = 4.0; // default duration
     }
     printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
+    double* out = (double * ) malloc(sizeof(double[100]));
     unsigned long long start = getticks();
-    eeg_file_spectrogram(filename, duration);
+    eeg_file_spectrogram(filename, duration, out);
     unsigned long long end = getticks();
     log_time_diff(end - start);
   } else {
