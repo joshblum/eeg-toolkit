@@ -156,14 +156,14 @@ static inline double abs(fftw_complex* arr, int i) {
  * Fill the `specs` matrix with values for the spectrogram for the given diff.
  * `specs` is expected to be initialized and the results are added to allow averaging
  */
-void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
+void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs) {
 
     fftw_complex    *data, *fft_result;
     fftw_plan       plan_forward;
-    int nfft = spec_params.nfft;
-    int shift = spec_params.shift;
-    int nblocks = spec_params.nblocks;
-    int nsamples = spec_params.nsamples;
+    int nfft = spec_params->nfft;
+    int shift = spec_params->shift;
+    int nblocks = spec_params->nblocks;
+    int nsamples = spec_params->nsamples;
 
     data = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
     fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
@@ -225,23 +225,31 @@ void STFT(arma::rowvec diff, spec_params_t spec_params, arma::mat specs) {
 }
 
 
-void eeg_file_spectrogram(char* filename, float duration, double* out) {
+void eeg_file_spectrogram_handler(char* filename, float duration, double* out)
+{
     edf_hdr_struct hdr;
     spec_params_t spec_params;
-    load_edf( & hdr, filename);
-    get_eeg_spectrogram_params( & spec_params, & hdr, duration);
-    print_spec_params_t( & spec_params);
+    load_edf(&hdr, filename);
+    get_eeg_spectrogram_params(&spec_params, &hdr, duration);
+    print_spec_params_t(&spec_params);
+    if (out == NULL) {
+      out = (double *) malloc(sizeof(double[spec_params.nblocks*spec_params.nfreqs]));
+    }
+    eeg_spectrogram(&spec_params, &hdr, out);
+}
 
+void eeg_spectrogram(spec_params_t* spec_params, edf_hdr_struct* hdr, double* out)
+{
     // TODO reuse buffers
     // TODO chunking?
     // write edf method to do diff on the fly?
-    int hdl = hdr.handle;
-    int nsamples = spec_params.nsamples;
+    int hdl = hdr->handle;
+    int nsamples = spec_params->nsamples;
     double* buf1 = create_buffer(nsamples, hdl);
     double* buf2 = create_buffer(nsamples, hdl);
 
     // nfreqs x nblocks matrix
-    arma::mat specs(spec_params.nfreqs, spec_params.nblocks);
+    arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
 
     int ch1, ch2, n1, n2;
     for (int i = 0; i < NUM_CH; i++) {
@@ -263,9 +271,9 @@ void eeg_file_spectrogram(char* filename, float duration, double* out) {
       specs /=  (NUM_DIFFS - 1); // average diff spectrograms
     }
 
-  for (int i = 0; i < spec_params.nblocks; i++) {
-    for (int j = 0; j < spec_params.nfft/2; j++){
-      *(out + i*spec_params.nfreqs + j) = specs(i, j);
+  for (int i = 0; i < spec_params->nfreqs; i++) {
+    for (int j = 0; j < spec_params->nblocks; j++){
+      *(out + i + j*spec_params->nfreqs) = specs(i, j);
     }
   }
 }
