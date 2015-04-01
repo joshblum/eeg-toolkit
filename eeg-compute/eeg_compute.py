@@ -50,26 +50,25 @@ def get_eeg_spectrogram_params(filename, duration):
   return spec_params
 
 
-# eeg_file_spectrogram_handler
-_libspectrogram.eeg_file_spectrogram_handler.argtypes = [
-    ctypes.POINTER(ctypes.c_char),
-    ctypes.c_float,
+# eeg_spectrogram_handler
+_libspectrogram.eeg_spectrogram_handler.argtypes = [
+    spec_params_p,
     np.ctypeslib.ndpointer(dtype=np.float),
 ]
-_libspectrogram.eeg_file_spectrogram_handler.restype = ctypes.c_void_p
+_libspectrogram.eeg_spectrogram_handler.restype = ctypes.c_void_p
 
 
-def eeg_file_spectrogram_handler(filename, duration, spec_params):
+def eeg_spectrogram_handler(spec_params):
   out = np.zeros((spec_params.nfreqs, spec_params.nblocks), dtype=np.float64)
   out = np.asarray(out)
-  _libspectrogram.eeg_file_spectrogram_handler(filename, duration, out)
+  _libspectrogram.eeg_spectrogram_handler(spec_params, out)
   return out
 
 
 def main(filename, duration):
   spec_params = get_eeg_spectrogram_params(filename, duration)
   start = time.time()
-  specs = eeg_file_spectrogram_handler(filename, duration, spec_params)
+  specs = eeg_spectrogram_handler(spec_params)
   end = time.time()
   print 'Total time: ',  (end - start)
   print 'Spectrogram shape:',  str(specs.shape)

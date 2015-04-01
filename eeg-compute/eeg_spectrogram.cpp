@@ -146,7 +146,8 @@ double* create_buffer(int n, int hdl)
     return buf;
 }
 
-int read_samples(int hdl, int ch, int n, double *buf) {
+int read_samples(int hdl, int ch, int n, double *buf)
+{
   n = edfread_physical_samples(hdl, ch, n, buf);
 
   if (n == -1) {
@@ -159,7 +160,8 @@ int read_samples(int hdl, int ch, int n, double *buf) {
 }
 
 // Create a hamming window of windowLength samples in buffer
-void hamming(int windowLength, double* buffer) {
+void hamming(int windowLength, double* buffer)
+{
  for(int i = 0; i < windowLength; i++) {
    buffer[i] = 0.54 - (0.46 * cos( 2 * M_PI * (i / ((windowLength - 1) * 1.0))));
  }
@@ -247,13 +249,17 @@ void eeg_file_spectrogram_handler(char* filename, float duration, double* out)
 {
     spec_params_t spec_params;
     get_eeg_spectrogram_params(&spec_params, filename, duration);
-    print_spec_params_t(&spec_params);
-    if (out == NULL) {
-      out = (double *) malloc(sizeof(double[spec_params.nblocks*spec_params.nfreqs]));
-    }
-    eeg_spectrogram(&spec_params, out);
+    eeg_spectrogram_handler(&spec_params, out);
 }
 
+void eeg_spectrogram_handler(spec_params_t* spec_params, double* out)
+{
+    print_spec_params_t(spec_params);
+    if (out == NULL) {
+      out = (double *) malloc(sizeof(double[spec_params->nblocks*spec_params->nfreqs]));
+    }
+    eeg_spectrogram(spec_params, out);
+}
 void eeg_spectrogram(spec_params_t* spec_params, double* out)
 {
     // TODO reuse buffers
