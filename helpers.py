@@ -40,9 +40,9 @@ def downsample_extent(nblocks, nfreqs, n=DOWNSAMPLE_RATE):
   return int(nblocks), int(nfreqs)
 
 
-def astype(ndarray, _type='float32'):
+def astype(ndarray, _type='float64'):
   """
       Helper to chagne the type of a numpy array.
-      the `float32` type is necessary for correct parsing on the client
+      the `float64` type is necessary for correct parsing on the client
   """
   return ndarray.astype(_type)  # nececssary for type for diplay

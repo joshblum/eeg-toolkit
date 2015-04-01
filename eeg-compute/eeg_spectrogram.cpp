@@ -6,7 +6,7 @@
 #include <time.h>
 
 #include "edflib.h"
-#include "spectrogram.h"
+#include "eeg_spectrogram.h"
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -34,16 +34,22 @@ double ticks_to_seconds(unsigned long long ticks)
 }
 
 
-void log_time_diff(unsigned long long ticks) {
+void log_time_diff(unsigned long long ticks)
+{
   double diff = ticks_to_seconds(ticks);
   printf("Time taken %.2f seconds\n", diff);
 }
 
-void print_spec_params_t(spec_params_t* spec_params) {
+void print_spec_params_t(spec_params_t* spec_params)
+{
   printf("spec_params: {\n");
+  printf("\tfilename: %s\n", spec_params->filename);
+  printf("\tduration: %.2f\n", spec_params->duration);
+  printf("\thdl: %d\n", spec_params->hdl);
   printf("\tnfft: %d\n", spec_params->nfft);
   printf("\tNstep: %d\n", spec_params->Nstep);
   printf("\tshift: %d\n", spec_params->shift);
+  printf("\tnsamples: %d\n", spec_params->nsamples);
   printf("\tnblocks: %d\n", spec_params->nblocks);
   printf("\tnfreqs: %d\n", spec_params->nfreqs);
   printf("\tspec_len: %d\n", spec_params->spec_len);
@@ -51,11 +57,13 @@ void print_spec_params_t(spec_params_t* spec_params) {
   printf("}\n");
 }
 
-int get_nfreqs(int nfft) {
+int get_nfreqs(int nfft)
+{
   return nfft / 2 + 1;
 }
 
-int get_nblocks(int data_len, int nfft, int shift) {
+int get_nblocks(int data_len, int nfft, int shift)
+{
   return (data_len - nfft) / shift + 1;
 }
 
@@ -63,7 +71,8 @@ int get_nsamples(int data_len, int fs, float duration) {
   return min(data_len, fs * 60 * 60 * duration);
 }
 
-int get_next_pow_2(unsigned int v) {
+int get_next_pow_2(unsigned int v)
+{
   v--;
   v |= v >> 1;
   v |= v >> 2;
@@ -74,16 +83,23 @@ int get_next_pow_2(unsigned int v) {
   return v;
 }
 
-int get_fs(edf_hdr_struct* hdr) {
+int get_fs(edf_hdr_struct* hdr)
+{
   return ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-    edf_hdr_struct* hdr, float duration) {
+    char* filename, float duration)
+{
     // TODO(joshblum): implement full multitaper method
     // and remove hard coding
-    spec_params->fs = get_fs(hdr);
-    int data_len = hdr->datarecords_in_file;
+    spec_params->filename = filename;
+    spec_params->duration = duration;
+    edf_hdr_struct hdr;
+    load_edf(&hdr, filename);
+    spec_params->hdl = hdr.handle;
+    spec_params->fs = get_fs(&hdr);
+    int data_len = hdr.datarecords_in_file;
     int pad = 0;
     int Nwin = spec_params->fs * 1.5;
     spec_params->Nstep = spec_params->fs * 0.2;
@@ -95,7 +111,8 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
     spec_params->nfreqs = get_nfreqs(spec_params->nfft);
 }
 
-void load_edf(edf_hdr_struct* hdr, char* filename) {
+void load_edf(edf_hdr_struct* hdr, char* filename)
+{
   if(edfopen_file_readonly(filename, hdr, EDFLIB_READ_ALL_ANNOTATIONS)) {
     switch(hdr->filetype) {
       case EDFLIB_MALLOC_ERROR                : printf("\nmalloc error\n\n");
@@ -118,7 +135,8 @@ void load_edf(edf_hdr_struct* hdr, char* filename) {
   }
 }
 
-double* create_buffer(int n, int hdl) {
+double* create_buffer(int n, int hdl)
+{
     double* buf = (double * ) malloc(sizeof(double[n]));
     if (buf == NULL) {
         printf("\nmalloc error\n");
@@ -147,7 +165,8 @@ void hamming(int windowLength, double* buffer) {
  }
 }
 
-static inline double abs(fftw_complex* arr, int i) {
+static inline double abs(fftw_complex* arr, int i)
+{
   return sqrt(arr[i][0] * arr[i][0] + arr[i][1]*arr[i][1]);
 }
 
@@ -156,8 +175,8 @@ static inline double abs(fftw_complex* arr, int i) {
  * Fill the `specs` matrix with values for the spectrogram for the given diff.
  * `specs` is expected to be initialized and the results are added to allow averaging
  */
-void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs) {
-
+void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
+{
     fftw_complex    *data, *fft_result;
     fftw_plan       plan_forward;
     int nfft = spec_params->nfft;
@@ -224,29 +243,25 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs) {
   fftw_free( fft_result );
 }
 
-
 void eeg_file_spectrogram_handler(char* filename, float duration, double* out)
 {
-    edf_hdr_struct hdr;
     spec_params_t spec_params;
-    load_edf(&hdr, filename);
-    get_eeg_spectrogram_params(&spec_params, &hdr, duration);
+    get_eeg_spectrogram_params(&spec_params, filename, duration);
     print_spec_params_t(&spec_params);
     if (out == NULL) {
       out = (double *) malloc(sizeof(double[spec_params.nblocks*spec_params.nfreqs]));
     }
-    eeg_spectrogram(&spec_params, &hdr, out);
+    eeg_spectrogram(&spec_params, out);
 }
 
-void eeg_spectrogram(spec_params_t* spec_params, edf_hdr_struct* hdr, double* out)
+void eeg_spectrogram(spec_params_t* spec_params, double* out)
 {
     // TODO reuse buffers
     // TODO chunking?
     // write edf method to do diff on the fly?
-    int hdl = hdr->handle;
     int nsamples = spec_params->nsamples;
-    double* buf1 = create_buffer(nsamples, hdl);
-    double* buf2 = create_buffer(nsamples, hdl);
+    double* buf1 = create_buffer(nsamples, spec_params->hdl);
+    double* buf2 = create_buffer(nsamples, spec_params->hdl);
 
     // nfreqs x nblocks matrix
     arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
@@ -258,8 +273,8 @@ void eeg_spectrogram(spec_params_t* spec_params, edf_hdr_struct* hdr, double* ou
       for (int j = 0; j < NUM_DIFFS - 1; j++) {
         ch1 = DIFFERENCE_PAIRS[i].ch_idx[j];
         ch2 = DIFFERENCE_PAIRS[i].ch_idx[j+1];
-        n1 = read_samples(hdl, ch1, nsamples, buf1);
-        n2 = read_samples(hdl, ch2, nsamples, buf2);
+        n1 = read_samples(spec_params->hdl, ch1, nsamples, buf1);
+        n2 = read_samples(spec_params->hdl, ch2, nsamples, buf2);
         // TODO use arm::rowvec::fixed with fixed size chunks
         arma::rowvec v1 = arma::rowvec(buf1, nsamples);
         arma::rowvec v2 = arma::rowvec(buf2, nsamples);
@@ -270,11 +285,10 @@ void eeg_spectrogram(spec_params_t* spec_params, edf_hdr_struct* hdr, double* ou
       // TODO serialize specs output for each channel
       specs /=  (NUM_DIFFS - 1); // average diff spectrograms
     }
-
+  // todo output all vectors
   for (int i = 0; i < spec_params->nfreqs; i++) {
     for (int j = 0; j < spec_params->nblocks; j++){
       *(out + i + j*spec_params->nfreqs) = specs(i, j);
     }
   }
 }
-

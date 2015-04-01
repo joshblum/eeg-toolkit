@@ -1,7 +1,7 @@
 CXX = g++
 TARGET := main
 CSRC := edflib.c
-CPPSRC := spectrogram.cpp
+CPPSRC := eeg_spectrogram.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 
 CFLAGS = -Wall -Wextra -Wshadow -Wformat-nonliteral -Wformat-security -Wtype-limits -g -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
@@ -14,7 +14,7 @@ endif
 
 LDFLAGS = -Wall
 
-default: spectrogram
+default: eeg_spectrogram
 
 %.o : %.c
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
@@ -22,9 +22,9 @@ default: spectrogram
 %.o : %.cpp
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-spectrogram:
-	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c edflib.c spectrogram.cpp
-	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared edflib.o spectrogram.o -o libspectrogram.so
+eeg_spectrogram:
+	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c edflib.c eeg_spectrogram.cpp
+	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared edflib.o eeg_spectrogram.o -o lib_eeg_spectrogram.so
 
 main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@

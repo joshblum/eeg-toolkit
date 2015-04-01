@@ -3,7 +3,7 @@
 #include <time.h>
 
 #include "edflib.h"
-#include "spectrogram.h"
+#include "eeg_spectrogram.h"
 
 int main(int argc, char *argv[])
 {

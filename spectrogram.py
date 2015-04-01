@@ -334,7 +334,7 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   nfreqs = _get_nfreqs(nfft)
 
   window = _hann(nfft)
-  specs = np.zeros((nfreqs, nblocks), dtype=np.float32)
+  specs = np.zeros((nfreqs, nblocks), dtype=np.float64)
   for idx in xrange(nblocks):
     specs[:, idx] = np.abs(np.fft.rfft(
         data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
