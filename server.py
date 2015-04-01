@@ -13,7 +13,7 @@ from tornado.web import Application
 from tornado.web import StaticFileHandler
 from tornado.web import RequestHandler
 
-from eeg_compute.eeg_compute import eeg_file_spectrogram_handler
+import eeg_compute
 
 from helpers import astype
 from helpers import from_bytes
@@ -31,6 +31,7 @@ from spectrogram import CHANNELS
 
 AUDIO = 'audio'
 EEG = 'eeg'
+
 
 class JSONWebSocket(WebSocketHandler):
 
@@ -230,16 +231,16 @@ class SpectrogramWebSocket(JSONWebSocket):
 
   def on_eeg_file_spectrogram(self, filename, nfft, duration, overlap):
     t0 = time.time()
-    data, fs = load_h5py_spectrofile(filename)
-    spec_params = get_eeg_spectrogram_params(data, fs, duration)
+    spec_params = eeg_compute.get_eeg_spectrogram_params(filename, duration)
 
     t1 = time.time()
     print "Time for Loading file:", t1 - t0
 
     for ch in CHANNELS:
       self.send_spectrogram_new(spec_params, canvas_id=ch)
-
-    eeg_file_spectrogram_handler(filename, duration, spec_params)
+      # TODO(joshblum): chunk data?
+      spec = eeg_compute.eeg_spectrogram_handler(spec_params)
+      self.send_spectrogram_update(spec, canvas_id=ch)
 
     # for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
     #   chunk = np.array(chunk)

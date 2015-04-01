@@ -41,8 +41,6 @@
 
 
 #define EDFLIB_VERSION 111
-#define EDFLIB_MAXFILES 64
-
 
 #if defined(__APPLE__) || defined(__MACH__) || defined(__APPLE_CC__)
 
@@ -193,9 +191,6 @@ static int edflib_fprint_int_number_nonlocalized(FILE *, int, int, int);
 static int edflib_fprint_ll_number_nonlocalized(FILE *, long long, int, int);
 
 
-
-
-
 int edflib_is_file_used(const char *path)
 {
   int i, file_used=0;
@@ -252,7 +247,6 @@ int edfopen_file_readonly(const char *path, struct edf_hdr_struct *edfhdr, int r
 
   struct edfhdrblock *hdr;
 
-
   if(read_annotations<0)
   {
     edfhdr->filetype = EDFLIB_INVALID_READ_ANNOTS_VALUE;
@@ -269,6 +263,7 @@ int edfopen_file_readonly(const char *path, struct edf_hdr_struct *edfhdr, int r
 
   memset(edfhdr, 0, sizeof(struct edf_hdr_struct));
 
+  edfhdr->path = path;
   if(edf_files_open>=EDFLIB_MAXFILES)
   {
     edfhdr->filetype = EDFLIB_MAXFILES_REACHED;

@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
+
 // add fields for hdr, filename and duration
 typedef struct spec_params {
   char* filename; // filename data is read from (stream name)
@@ -24,7 +26,7 @@ typedef struct spec_params {
 } spec_params_t;
 
 typedef enum {
-  LL,
+  LL = 0,
   LP,
   RP,
   RL
@@ -89,6 +91,10 @@ static ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =  {
   {.ch=RL, .ch_idx={FP2, F8, T4, T6, O2}},
 };
 
+void print_hdr_cache();
+edf_hdr_struct* get_hdr_cache(const char *filename);
+void set_hdr_cache(edf_hdr_struct* hdr);
+void pop_hdr_cache(const char* filename);
 void log_time_diff(unsigned long long ticks);
 double ticks_to_seconds(unsigned long long ticks);
 unsigned long long getticks();
@@ -106,8 +112,8 @@ int read_samples(int handle, int edfsignal, int n, double *buf);
 void hamming(int windowLength, double* buffer);
 void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs);
 void eeg_file_spectrogram_handler(char* filename, float duration, double* out);
-void eeg_spectrogram_handler(spec_params_t* spec_params, double* out);
-void eeg_spectrogram(spec_params_t* spec_params, double* out);
+void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, double* out);
+void eeg_spectrogram(spec_params_t* spec_params, int ch, double* out);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -236,5 +236,5 @@ function reloadSpectrogram() {
 function getDataType(inputFile) {
     var fileName = inputFile.split(".");
     var fileExt = fileName[fileName.length - 1];
-    return fileExt === "eeg" ? "eeg" : "audio";
+    return fileExt === "edf" ? "eeg" : "audio";
 }

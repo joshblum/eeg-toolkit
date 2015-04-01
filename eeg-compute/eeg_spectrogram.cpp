@@ -21,6 +21,57 @@
 #include <time.h>
 #include <sys/time.h>
 
+// should use a hashmap + linked list implementation if the
+// list traversal becomes a bottleneck
+void print_hdr_cache()
+{
+  printf("[\n");
+  for(int i=0; i<EDFLIB_MAXFILES; i++)
+  {
+    if(EDF_HDR_CACHE[i] == NULL) {
+      printf("-,");
+    } else {
+      printf("%s,\n", EDF_HDR_CACHE[i]->path);
+    }
+  }
+  printf("]\n");
+}
+
+edf_hdr_struct* get_hdr_cache(const char *filename)
+{
+  for(int i=0; i<EDFLIB_MAXFILES; i++) {
+    if(EDF_HDR_CACHE[i]!=NULL) {
+      if(!(strcmp(filename, EDF_HDR_CACHE[i]->path))) {
+        return EDF_HDR_CACHE[i];
+      }
+    }
+  }
+
+  return NULL;
+}
+
+void set_hdr_cache(edf_hdr_struct* hdr)
+{
+  for (int i = 0; i < EDFLIB_MAXFILES; i++) {
+    if (EDF_HDR_CACHE[i] == NULL) {
+      EDF_HDR_CACHE[i] = hdr;
+      break;
+    }
+  }
+}
+
+void pop_hdr_cache(const char* filename)
+{
+  for(int i=0; i<EDFLIB_MAXFILES; i++) {
+    if(EDF_HDR_CACHE[i]!=NULL) {
+      if(!(strcmp(filename, EDF_HDR_CACHE[i]->path))) {
+        free(EDF_HDR_CACHE[i]);
+        EDF_HDR_CACHE[i] = NULL;
+      }
+    }
+  }
+}
+
 unsigned long long getticks()
 {
     struct timeval t;
@@ -113,6 +164,12 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
 
 void load_edf(edf_hdr_struct* hdr, char* filename)
 {
+  edf_hdr_struct* cached_hdr = get_hdr_cache(filename);
+  if (cached_hdr != NULL) {
+    // get the file from the cache
+    hdr = cached_hdr;
+    return;
+  }
   if(edfopen_file_readonly(filename, hdr, EDFLIB_READ_ALL_ANNOTATIONS)) {
     switch(hdr->filetype) {
       case EDFLIB_MALLOC_ERROR                : printf("\nmalloc error\n\n");
@@ -133,6 +190,16 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
     }
     exit(1);
   }
+  // set the file in the cache
+  set_hdr_cache(hdr);
+}
+
+// TODO(joshblum): implement a call to this on websocket close
+void close_edf(char* filename)
+{
+  edf_hdr_struct* hdr = get_hdr_cache(filename);
+  edfclose_file(hdr->handle);
+  pop_hdr_cache(filename);
 }
 
 double* create_buffer(int n, int hdl)
@@ -245,22 +312,22 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   fftw_free( fft_result );
 }
 
-void eeg_file_spectrogram_handler(char* filename, float duration, double* out)
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, double* out)
 {
     spec_params_t spec_params;
     get_eeg_spectrogram_params(&spec_params, filename, duration);
-    eeg_spectrogram_handler(&spec_params, out);
+    eeg_spectrogram_handler(&spec_params, ch, out);
 }
 
-void eeg_spectrogram_handler(spec_params_t* spec_params, double* out)
+void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, double* out)
 {
     print_spec_params_t(spec_params);
     if (out == NULL) {
       out = (double *) malloc(sizeof(double[spec_params->nblocks*spec_params->nfreqs]));
     }
-    eeg_spectrogram(spec_params, out);
+    eeg_spectrogram(spec_params, ch, out);
 }
-void eeg_spectrogram(spec_params_t* spec_params, double* out)
+void eeg_spectrogram(spec_params_t* spec_params, int ch, double* out)
 {
     // TODO reuse buffers
     // TODO chunking?
@@ -273,25 +340,20 @@ void eeg_spectrogram(spec_params_t* spec_params, double* out)
     arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
 
     int ch1, ch2, n1, n2;
-    for (int i = 0; i < NUM_CH; i++) {
-      // reset the rolling avgerage
-      specs.zeros();
-      for (int j = 0; j < NUM_DIFFS - 1; j++) {
-        ch1 = DIFFERENCE_PAIRS[i].ch_idx[j];
-        ch2 = DIFFERENCE_PAIRS[i].ch_idx[j+1];
-        n1 = read_samples(spec_params->hdl, ch1, nsamples, buf1);
-        n2 = read_samples(spec_params->hdl, ch2, nsamples, buf2);
-        // TODO use arm::rowvec::fixed with fixed size chunks
-        arma::rowvec v1 = arma::rowvec(buf1, nsamples);
-        arma::rowvec v2 = arma::rowvec(buf2, nsamples);
-        arma::rowvec diff = v2 - v1;
-        // fill in the spec matrix with fft values
-        STFT(diff, spec_params, specs);
-      }
-      // TODO serialize specs output for each channel
-      specs /=  (NUM_DIFFS - 1); // average diff spectrograms
+    for (int i = 0; i < NUM_DIFFS - 1; i++) {
+      ch1 = DIFFERENCE_PAIRS[ch].ch_idx[i];
+      ch2 = DIFFERENCE_PAIRS[ch].ch_idx[i+1];
+      n1 = read_samples(spec_params->hdl, ch1, nsamples, buf1);
+      n2 = read_samples(spec_params->hdl, ch2, nsamples, buf2);
+      // TODO use arm::rowvec::fixed with fixed size chunks
+      arma::rowvec v1 = arma::rowvec(buf1, nsamples);
+      arma::rowvec v2 = arma::rowvec(buf2, nsamples);
+      arma::rowvec diff = v2 - v1;
+      // fill in the spec matrix with fft values
+      STFT(diff, spec_params, specs);
     }
-  // todo output all vectors
+    // TODO serialize specs output for each channel
+    specs /=  (NUM_DIFFS - 1); // average diff spectrograms
   for (int i = 0; i < spec_params->nfreqs; i++) {
     for (int j = 0; j < spec_params->nblocks; j++){
       *(out + i + j*spec_params->nfreqs) = specs(i, j);

@@ -45,6 +45,8 @@
 #include <time.h>
 
 
+#define EDFLIB_MAXFILES 64
+
 
 #define EDFLIB_TIME_DIMENSION (10000000LL)
 #define EDFLIB_MAXSIGNALS 512
@@ -122,6 +124,7 @@ struct edf_annotation_struct{                           /* this structure is use
 
 
 struct edf_hdr_struct{                     /* this structure contains all the relevant EDF header info and will be filled when calling the function edf_open_file_readonly() */
+  const char* path;                              /* path to the file */
   int       handle;                        /* a handle (identifier) used to distinguish the different files */
   int       filetype;                      /* 0: EDF, 1: EDFplus, 2: BDF, 3: BDFplus, a negative number means an error */
   int       edfsignals;                    /* number of EDF signals in the file, annotation channels are NOT included */
@@ -261,6 +264,11 @@ int edfclose_file(int handle);
 int edflib_version(void);
 
 /* Returns the version number of this library, multiplied by hundred. if version is "1.00" than it will return 100 */
+
+edf_hdr_struct* edflib_get_hdr_from_path(const char *path);
+/* return a pointer to the hdr struct for the given path
+ * if it exists. Otherwise returns NULL
+ */
 
 
 int edflib_is_file_used(const char *path);

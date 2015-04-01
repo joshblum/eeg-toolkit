@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     }
     printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
     unsigned long long start = getticks();
-    eeg_file_spectrogram_handler(filename, duration, NULL);
+    eeg_file_spectrogram_handler(filename, duration, LL, NULL);
     unsigned long long end = getticks();
     log_time_diff(end - start);
   } else {

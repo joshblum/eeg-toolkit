@@ -1,6 +1,19 @@
 "use strict";
 
-var IDS = ["LL", "LP", "RP", "RL"];
+var CH_ENUM = {
+    LL: 0,
+    LP: 1,
+    RP: 2,
+    RL: 3,
+}
+
+var IDS = [
+    CH_ENUM.LL,
+    CH_ENUM.LP,
+    CH_ENUM.RP,
+    CH_ENUM.RL
+];
+
 // global data structure which holds spectrogram objects.
 // When a request for update comes in the sender must specify an id to update
 var SPECTROGRAMS = {};
@@ -140,13 +153,17 @@ Spectrogram.prototype.updateCanvasResolutions = function() {
 
 /* log version and memory information about WebGL */
 Spectrogram.prototype.logGLInfo = function() {
-    sendMessage("information",
-        "version: " + this.gl.getParameter(this.gl.VERSION) + "\n" +
-        "shading language version: " + this.gl.getParameter(this.gl.SHADING_LANGUAGE_VERSION) + "\n" +
-        "vendor: " + this.gl.getParameter(this.gl.VENDOR) + "\n" +
-        "renderer: " + this.gl.getParameter(this.gl.RENDERER) + "\n" +
-        "max texture size: " + this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) + "\n" +
-        "max combined texture image units: " + this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+    if (this.gl === null) {
+        sendMessage("information", "could not initialize webGl context");
+    } else {
+        sendMessage("information",
+            "version: " + this.gl.getParameter(this.gl.VERSION) + "\n" +
+            "shading language version: " + this.gl.getParameter(this.gl.SHADING_LANGUAGE_VERSION) + "\n" +
+            "vendor: " + this.gl.getParameter(this.gl.VENDOR) + "\n" +
+            "renderer: " + this.gl.getParameter(this.gl.RENDERER) + "\n" +
+            "max texture size: " + this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) + "\n" +
+            "max combined texture image units: " + this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS));
+    }
 };
 
 /* Update the start time when asking for a new spectrogram */

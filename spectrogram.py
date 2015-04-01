@@ -10,27 +10,32 @@ from spectrum import dpss
 
 from helpers import grouper
 
-CHANNELS = ['LL', 'LP', 'RP', 'RL']
+
+LL = 0
+LP = 1
+RP = 2
+RL = 3
+CHANNELS = [LL, LP, RP, RL]
 DIFFERENCE_PAIRS = {
-    'LL': [
+    LL: [
         ('fp1', 'f7'),
         ('f7', 't3'),
         ('t3', 't5'),
         ('t5', 'o1'),
     ],
-    'LP': [
+    LP: [
         ('fp1', 'f3'),
         ('f3', 'c3'),
         ('c3', 'p3'),
         ('p3', 'o1'),
     ],
-    'RP': [
+    RP: [
         ('fp2', 'f4'),
         ('f4', 'c4'),
         ('c4', 'p4'),
         ('p4', 'o2'),
     ],
-    'RL': [
+    RL: [
         ('fp2', 'f8'),
         ('f8', 't4'),
         ('t4', 't6'),
