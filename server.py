@@ -13,7 +13,7 @@ from tornado.web import Application
 from tornado.web import StaticFileHandler
 from tornado.web import RequestHandler
 
-import compute.eeg_compute
+import compute.eeg_compute as eeg_compute
 
 from helpers import astype
 from helpers import from_bytes
@@ -170,7 +170,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def send_spectrogram_new(self, spec_params, canvas_id=None):
     nblocks, nfreqs = downsample_extent(
         spec_params.nblocks, spec_params.nfreqs)
-    print "shape:", (nblocks, nfreqs), "ch:", canvas_id
+    print "spec_new:::shape:", (nblocks, nfreqs), "ch:", canvas_id
     self.send_message('spectrogram',
                       {'action': 'new',
                        'nblocks': nblocks,
@@ -184,7 +184,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     spec = downsample(spec)
     spec = astype(spec)
     nblocks, nfreqs = spec.shape
-    print "shape:", spec.shape, "ch:", canvas_id
+    print "spec_update:::shape:", spec.shape, "ch:", canvas_id
     self.send_message('spectrogram',
                       {'action': 'update',
                        'nblocks': nblocks,
@@ -230,16 +230,12 @@ class SpectrogramWebSocket(JSONWebSocket):
       print(error_msg)
 
   def on_eeg_file_spectrogram(self, filename, nfft, duration, overlap):
-    t0 = time.time()
     spec_params = eeg_compute.get_eeg_spectrogram_params(filename, duration)
 
-    t1 = time.time()
-    print "Time for Loading file:", t1 - t0
-
-    for ch in CHANNELS:
+    for ch, ch_id in CHANNELS.iteritems():
       self.send_spectrogram_new(spec_params, canvas_id=ch)
       # TODO(joshblum): chunk data?
-      spec = eeg_compute.eeg_spectrogram_handler(spec_params)
+      spec = eeg_compute.eeg_spectrogram_handler(spec_params, ch_id)
       self.send_spectrogram_update(spec, canvas_id=ch)
 
     # for chunk in grouper(data, spec_params.chunksize, spec_params.shift):

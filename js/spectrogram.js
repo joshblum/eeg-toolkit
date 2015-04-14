@@ -1,18 +1,6 @@
 "use strict";
 
-var CH_ENUM = {
-    LL: 0,
-    LP: 1,
-    RP: 2,
-    RL: 3,
-}
-
-var IDS = [
-    CH_ENUM.LL,
-    CH_ENUM.LP,
-    CH_ENUM.RP,
-    CH_ENUM.RL
-];
+var IDS = ["LL", "LP", "RP", "RL"];
 
 // global data structure which holds spectrogram objects.
 // When a request for update comes in the sender must specify an id to update

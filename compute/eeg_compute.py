@@ -7,6 +7,7 @@ from os.path import dirname as parent
 
 APPROOT = os.path.join(parent(os.path.realpath(__file__)), 'eeg-compute')
 
+
 class EEGSpecParams(ctypes.Structure):
   _fields_ = [
       ('filename', ctypes.POINTER(ctypes.c_char)),
@@ -48,10 +49,10 @@ _libspectrogram.get_eeg_spectrogram_params.restype = ctypes.c_void_p
 
 
 def get_eeg_spectrogram_params(filename, duration):
-  print "getting eeg spec params"
   spec_params = EEGSpecParams()
   _libspectrogram.get_eeg_spectrogram_params(spec_params,
                                              filename, duration)
+  print spec_params
   return spec_params
 
 
@@ -74,7 +75,7 @@ def eeg_spectrogram_handler(spec_params, ch):
 def main(filename, duration):
   spec_params = get_eeg_spectrogram_params(filename, duration)
   start = time.time()
-  specs = eeg_spectrogram_handler(spec_params, 0) # channel LL
+  specs = eeg_spectrogram_handler(spec_params, 0)  # channel LL
   end = time.time()
   print 'Total time: ',  (end - start)
   print 'Spectrogram shape:',  str(specs.shape)

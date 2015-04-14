@@ -321,7 +321,6 @@ void eeg_file_spectrogram_handler(char* filename, float duration, int ch, double
 
 void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, double* out)
 {
-    print_spec_params_t(spec_params);
     if (out == NULL) {
       out = (double *) malloc(sizeof(double[spec_params->nblocks*spec_params->nfreqs]));
     }

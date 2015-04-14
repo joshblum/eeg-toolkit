@@ -15,7 +15,12 @@ LL = 0
 LP = 1
 RP = 2
 RL = 3
-CHANNELS = [LL, LP, RP, RL]
+CHANNELS = {
+    'LL': LL,
+    'LP': LP,
+    'RP': RP,
+    'RL': RL,
+}
 DIFFERENCE_PAIRS = {
     LL: [
         ('fp1', 'f7'),
