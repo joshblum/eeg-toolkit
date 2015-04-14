@@ -1,4 +1,4 @@
-.PHONY: clean run installdeps lint pylint jslint prod-run install deploy libs
+.PHONY: clean run installdeps lint pylint jslint prod-run install deploy
 
 OS := $(shell uname)
 
@@ -13,10 +13,13 @@ ifeq ('$(OS)', 'Darwin')
 	PKG_INSTALLER = brew
 endif
 
+-include compute/Makefile
+
 run: clean
 	python server.py
 
 clean:
+	rm -f -r *.dSYM *.o *.d *~ $(TARGET)
 	find . -type f -name '*.py[cod]' -delete
 	find . -type f -name '*.*~' -delete
 
@@ -40,9 +43,6 @@ else
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	pip install -r requirements.txt
-
-libs:
-	$(shell cd compute && make)
 
 install: installdeps libs
 

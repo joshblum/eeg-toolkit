@@ -1,7 +1,10 @@
+ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
+
 CXX = g++
 TARGET := main
-CSRC := edflib.c
-CPPSRC := eeg_spectrogram.cpp
+CSRC := $(addprefix $(ROOT), edflib.c)
+CPPSRC := $(addprefix $(ROOT), eeg_spectrogram.cpp)
+
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 
 CFLAGS = -Wall -Wextra -Wshadow -Wformat-nonliteral -Wformat-security -Wtype-limits -g -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
@@ -14,7 +17,7 @@ endif
 
 LDFLAGS = -Wall
 
-default: eeg_spectrogram
+default: libs
 
 %.o : %.c
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
@@ -22,9 +25,9 @@ default: eeg_spectrogram
 %.o : %.cpp
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-eeg_spectrogram:
-	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c edflib.c eeg_spectrogram.cpp
-	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared edflib.o eeg_spectrogram.o -o lib_eeg_spectrogram.so
+libs:
+	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c $(CSRC) $(CPPSRC)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared $(OBJ) -o $(ROOT)lib_eeg_spectrogram.so
 
 main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@
