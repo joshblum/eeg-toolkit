@@ -158,10 +158,13 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   // and remove hard coding
   spec_params->filename = filename;
   spec_params->duration = duration;
+
   edf_hdr_struct hdr;
   load_edf(&hdr, filename);
   spec_params->hdl = hdr.handle;
+
   spec_params->fs = get_fs(&hdr);
+
   int data_len = hdr.datarecords_in_file;
   int pad = 0;
   int Nwin = spec_params->fs * 1.5;
@@ -172,6 +175,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->nblocks = get_nblocks(data_len,
                                      spec_params->nfft, spec_params->shift);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
+  spec_params->spec_len = spec_params->nsamples/spec_params->fs;
 }
 
 void load_edf(edf_hdr_struct* hdr, char* filename)
