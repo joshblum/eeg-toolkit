@@ -22,25 +22,25 @@ CHANNELS = {
     'RL': RL,
 }
 DIFFERENCE_PAIRS = {
-    LL: [
+    'LL': [
         ('fp1', 'f7'),
         ('f7', 't3'),
         ('t3', 't5'),
         ('t5', 'o1'),
     ],
-    LP: [
+    'LP': [
         ('fp1', 'f3'),
         ('f3', 'c3'),
         ('c3', 'p3'),
         ('p3', 'o1'),
     ],
-    RP: [
+    'RP': [
         ('fp2', 'f4'),
         ('f4', 'c4'),
         ('c4', 'p4'),
         ('p4', 'o2'),
     ],
-    RL: [
+    'RL': [
         ('fp2', 'f8'),
         ('f8', 't4'),
         ('t4', 't6'),
@@ -299,16 +299,15 @@ def on_eeg_file_spectrogram_profile(filename, duration):
   spec_params = get_eeg_spectrogram_params(data, fs, duration)
 
   data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
-  print 'loaded file'
 
   t0 = time.time()
   for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
     chunk = np.array(chunk)
     for ch in CHANNELS:
-      print 'computing channel %s' % ch
       spec = eeg_ch_spectrogram(ch, chunk, spec_params)
   t1 = time.time()
   print "Total time: %s" % (t1 - t0)
+  return spec
 
 
 def get_audio_spectrogram_params(data, fs, duration, nfft, overlap):
@@ -356,6 +355,13 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
     progress_fn(1, canvas_id=canvas_id)
   return specs.T
 
+
+def main(filename, duration):
+  spec = on_eeg_file_spectrogram_profile(args.filename, args.duration)
+  print 'Spectrogram shape:',  str(spec.shape)
+  print 'Sample data:',  spec[:10, :10]
+
+
 if __name__ == '__main__':
   import argparse
 
@@ -367,5 +373,4 @@ if __name__ == '__main__':
                       dest='duration', help='duration of the data')
 
   args = parser.parse_args()
-
-  on_eeg_file_spectrogram_profile(args.filename, args.duration)
+  main(args.filename, args.duration)

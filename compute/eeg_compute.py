@@ -75,11 +75,11 @@ def eeg_spectrogram_handler(spec_params, ch):
 def main(filename, duration):
   spec_params = get_eeg_spectrogram_params(filename, duration)
   start = time.time()
-  specs = eeg_spectrogram_handler(spec_params, 0)  # channel LL
+  spec = eeg_spectrogram_handler(spec_params, 0)  # channel LL
   end = time.time()
   print 'Total time: ',  (end - start)
-  print 'Spectrogram shape:',  str(specs.shape)
-  print 'Sample data:',  specs[:10, :10]
+  print 'Spectrogram shape:',  str(spec.shape)
+  print 'Sample data:',  spec[:10, :10]
 
 if __name__ == '__main__':
   import argparse
@@ -90,6 +90,5 @@ if __name__ == '__main__':
                       dest='filename', help='filename for spectrogram data.')
   parser.add_argument('-d', '--duration', default=4.0,
                       dest='duration', help='duration of the data')
-  # todo get args and build properly size out array first
   args = parser.parse_args()
   main(args.filename, args.duration)
