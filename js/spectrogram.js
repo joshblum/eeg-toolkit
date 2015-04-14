@@ -91,7 +91,7 @@ Spectrogram.prototype.init = function() {
     try {
         this.gl = this.specView.getContext("webgl");
     } catch (e) {
-        alert("Could not initialize WebGL");
+        console.log("Could not initialize WebGL");
         console.log(e);
         this.gl = null;
         return;
@@ -101,14 +101,14 @@ Spectrogram.prototype.init = function() {
     this.gl.getExtension("OES_texture_float");
     var error = this.gl.getError();
     if (error !== this.gl.NO_ERROR) {
-        alert("Could not enable float texture extension");
+        console.log("Could not enable float texture extension");
         return;
     }
 
     // needed for linear filtering of floating point textures
     this.gl.getExtension("OES_texture_float_linear");
     if (error !== this.gl.NO_ERROR) {
-        alert("Could not enable float texture linear extension");
+        console.log("Could not enable float texture linear extension");
         return;
     }
 
@@ -223,7 +223,7 @@ Spectrogram.prototype.loadSpectrogramShaders = function() {
     this.gl.linkProgram(shaderProgram);
 
     if (!this.gl.getProgramParameter(shaderProgram, this.gl.LINK_STATUS)) {
-        alert("unable to link shader program.");
+        console.log("unable to link shader program.");
     }
 
     this.gl.useProgram(shaderProgram);
@@ -265,7 +265,7 @@ Spectrogram.prototype.getShader = function(id) {
     this.gl.compileShader(shader);
 
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-        alert("An error occurred compiling the shaders: " + this.gl.getShaderInfoLog(shader));
+        console.log("An error occurred compiling the shaders: " + this.gl.getShaderInfoLog(shader));
         return null;
     }
 
@@ -283,7 +283,7 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
 
     // bail if too big for video memory
     if (Math.ceil(numTextures) > this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
-        alert("Not enough texture units to display spectrogram");
+        console.log("Not enough texture units to display spectrogram");
         return;
     }
 
