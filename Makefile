@@ -1,4 +1,4 @@
-.PHONY: clean run installdeps lint pylint jslint prod-run install deploy
+.PHONY: clean run installdeps lint pylint jslint prod-run install deploy libs
 
 OS := $(shell uname)
 
@@ -41,7 +41,10 @@ else
 endif
 	pip install -r requirements.txt
 
-install: installdeps
+libs:
+	$(shell cd compute && make)
+
+install: installdeps libs
 
 deploy:
 	fab prod deploy
