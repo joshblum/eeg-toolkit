@@ -2,6 +2,7 @@ ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
 
 CXX = g++
 TARGET := main
+SHARED_LIB = $(addprefix $(ROOT), lib_eeg_spectrogram.so)
 CSRC := $(addprefix $(ROOT), edflib.c)
 CPPSRC := $(addprefix $(ROOT), eeg_spectrogram.cpp)
 
@@ -17,8 +18,6 @@ endif
 
 LDFLAGS = -Wall
 
-default: libs
-
 %.o : %.c
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
@@ -27,10 +26,10 @@ default: libs
 
 libs:
 	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c $(CSRC) $(CPPSRC)
-	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared $(OBJ) -o $(ROOT)lib_eeg_spectrogram.so
+	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared $(OBJ) -o $(SHARED_LIB)
 
 main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@
 
 clean:
-	rm -f -r *.dSYM *.o *.d *~ $(TARGET)
+	rm -f -r *.dSYM *.o *.d *~ $(TARGET) $(SHARED_LIB)

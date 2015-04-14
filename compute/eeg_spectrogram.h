@@ -111,9 +111,9 @@ double* create_buffer(int n, int hdl);
 int read_samples(int handle, int edfsignal, int n, double *buf);
 void hamming(int windowLength, double* buffer);
 void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs);
-void eeg_file_spectrogram_handler(char* filename, float duration, double* out);
-void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, double* out);
-void eeg_spectrogram(spec_params_t* spec_params, int ch, double* out);
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, float* out);
+void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, float* out);
+void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out);
 
 #ifdef __cplusplus
 } /* extern "C" */

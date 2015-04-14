@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "edflib.h"
 #include "eeg_spectrogram.h"

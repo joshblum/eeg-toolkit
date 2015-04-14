@@ -349,23 +349,24 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   fftw_free( fft_result );
 }
 
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, double* out)
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, float* out)
 {
   spec_params_t spec_params;
   get_eeg_spectrogram_params(&spec_params, filename, duration);
+  print_spec_params_t(&spec_params);
   eeg_spectrogram_handler(&spec_params, ch, out);
 }
 
-void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, double* out)
+void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, float* out)
 {
   if (out == NULL)
   {
-    out = (double *) malloc(sizeof(double[spec_params->nblocks * spec_params->nfreqs]));
+    out = (float *) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
   }
   eeg_spectrogram(spec_params, ch, out);
 }
 
-void eeg_spectrogram(spec_params_t* spec_params, int ch, double* out)
+void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
 {
   // TODO reuse buffers
   // TODO chunking?
@@ -398,7 +399,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, double* out)
   {
     for (int j = 0; j < spec_params->nfreqs; j++)
     {
-      *(out + i + j * spec_params->nblocks) = specs(j, i);
+      *(out + i + j * spec_params->nblocks) = (float) specs(j, i);
     }
   }
 }

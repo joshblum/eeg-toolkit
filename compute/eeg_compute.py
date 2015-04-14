@@ -52,7 +52,7 @@ def get_eeg_spectrogram_params(filename, duration):
   spec_params = EEGSpecParams()
   _libspectrogram.get_eeg_spectrogram_params(spec_params,
                                              filename, duration)
-  print spec_params
+  print_spec_params_t(spec_params)
   return spec_params
 
 
@@ -60,13 +60,13 @@ def get_eeg_spectrogram_params(filename, duration):
 _libspectrogram.eeg_spectrogram_handler.argtypes = [
     spec_params_p,
     ctypes.c_int,
-    np.ctypeslib.ndpointer(dtype=np.float),
+    np.ctypeslib.ndpointer(dtype=np.float32),
 ]
 _libspectrogram.eeg_spectrogram_handler.restype = ctypes.c_void_p
 
 
 def eeg_spectrogram_handler(spec_params, ch):
-  out = np.zeros((spec_params.nblocks, spec_params.nfreqs), dtype=np.float64)
+  out = np.zeros((spec_params.nblocks, spec_params.nfreqs), dtype=np.float32)
   out = np.asarray(out)
   _libspectrogram.eeg_spectrogram_handler(spec_params, ch, out)
   return out

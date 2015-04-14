@@ -13,15 +13,15 @@ ifeq ('$(OS)', 'Darwin')
 	PKG_INSTALLER = brew
 endif
 
+# use `libs` directive for building shared library
 -include compute/Makefile
+
+clean:
+	find . -type f -name '*.py[cod]' -delete
+	find . -type f -name '*.*~' -delete
 
 run: clean
 	python server.py
-
-clean:
-	rm -f -r *.dSYM *.o *.d *~ $(TARGET)
-	find . -type f -name '*.py[cod]' -delete
-	find . -type f -name '*.*~' -delete
 
 pylint:
 	-flake8 .
