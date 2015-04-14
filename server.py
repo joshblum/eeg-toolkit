@@ -13,7 +13,7 @@ from tornado.web import Application
 from tornado.web import StaticFileHandler
 from tornado.web import RequestHandler
 
-import eeg_compute
+import compute.eeg_compute
 
 from helpers import astype
 from helpers import from_bytes
