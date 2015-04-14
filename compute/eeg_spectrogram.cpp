@@ -48,7 +48,14 @@ edf_hdr_struct* get_hdr_cache(const char *filename)
     {
       if (!(strcmp(filename, EDF_HDR_CACHE[i]->path)))
       {
-        return EDF_HDR_CACHE[i];
+        edf_hdr_struct* hdr = EDF_HDR_CACHE[i];
+        // TODO(joshblum): probably remove this once
+        // windowing is fully implemented
+        for (int signal= 0; signal < hdr->edfsignals; signal++)
+        {
+          edfrewind(hdr->handle, signal);
+        }
+        return hdr;
       }
     }
   }
@@ -175,7 +182,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->nblocks = get_nblocks(data_len,
                                      spec_params->nfft, spec_params->shift);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
-  spec_params->spec_len = spec_params->nsamples/spec_params->fs;
+  spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
 
 void load_edf(edf_hdr_struct* hdr, char* filename)
