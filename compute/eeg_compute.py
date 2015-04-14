@@ -66,7 +66,7 @@ _libspectrogram.eeg_spectrogram_handler.restype = ctypes.c_void_p
 
 
 def eeg_spectrogram_handler(spec_params, ch):
-  out = np.zeros((spec_params.nfreqs, spec_params.nblocks), dtype=np.float64)
+  out = np.zeros((spec_params.nblocks, spec_params.nfreqs), dtype=np.float64)
   out = np.asarray(out)
   _libspectrogram.eeg_spectrogram_handler(spec_params, ch, out)
   return out

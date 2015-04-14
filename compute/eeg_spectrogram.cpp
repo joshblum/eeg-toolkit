@@ -280,7 +280,7 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
 
   data = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
   fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
-  // TODO keep plans in memory until end
+  // TODO keep plans in memory until end, create plans once and cache?
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
                                   FFTW_FORWARD, FFTW_ESTIMATE);
 
@@ -390,11 +390,11 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, double* out)
   // TODO serialize specs output for each channel
   specs /=  (NUM_DIFFS - 1); // average diff spectrograms
 
-  for (int i = 0; i < spec_params->nfreqs; i++)
+  for (int i = 0; i < spec_params->nblocks; i++)
   {
-    for (int j = 0; j < spec_params->nblocks; j++)
+    for (int j = 0; j < spec_params->nfreqs; j++)
     {
-      *(out + i + j * spec_params->nfreqs) = specs(i, j);
+      *(out + i + j * spec_params->nblocks) = specs(j, i);
     }
   }
 }
