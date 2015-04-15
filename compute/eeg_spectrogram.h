@@ -19,7 +19,7 @@ typedef struct spec_params
   int spec_len; // length of the spectrogram
   int fs; // sample rate
   int nfft; // number of samples for fft
-  int Nstep; // number of steps
+  int nstep; // number of steps
   int shift; // shift size for windows
   int nsamples; // number of samples in the spectrogram
   int nblocks; // number of blocks
@@ -104,7 +104,7 @@ void log_time_diff(unsigned long long ticks);
 double ticks_to_seconds(unsigned long long ticks);
 unsigned long long getticks();
 void print_spec_params_t(spec_params_t* spec_params);
-int get_nfft(int Nwin, int pad);
+int get_nfft(int nwin, int pad);
 int get_nsamples(int data_len, int fs, float duration);
 int get_nblocks(int data_len, int fs, int shift);
 int get_nfreqs(int nfft);

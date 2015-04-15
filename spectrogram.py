@@ -75,7 +75,7 @@ CHUNK_HOURS = 1.0
 EEGSpecParams = namedtuple(
     'SpecParams', ['chunksize', 'fs',
                    'shift', 'spec_len',
-                   'Nstep', 'trial_avg',
+                   'nstep', 'trial_avg',
                    'nfft', 'nblocks', 'tapers',
                    'nfreqs', 'nsamples', 'findx'])
 AudioSpecParams = namedtuple(
@@ -119,8 +119,8 @@ def _get_shift(nfft, overlap):
   return int(round(nfft * overlap))
 
 
-def _get_nblocks(nsamples, shift, Nstep):
-  return int(math.ceil((nsamples - shift) / Nstep)) + 1
+def _get_nblocks(nsamples, shift, nstep):
+  return int(math.ceil((nsamples - shift) / nstep)) + 1
 
 
 def _get_nfreqs(nfft):
@@ -216,7 +216,7 @@ def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
     tapers = [3, 5]
 
   shift = int(round(fs * moving_win[0]))
-  Nstep = int(round(fs * moving_win[1]))
+  nstep = int(round(fs * moving_win[1]))
   nfft = _get_nfft(shift, pad)
 
   nsamples = _get_nsamples(data, fs, duration)
@@ -225,11 +225,11 @@ def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
 
   sfreqs, findx = _getfgrid(fs, nfft, fpass)
   nfreqs = len(sfreqs)
-  nblocks = _get_nblocks(nsamples, shift, Nstep)
+  nblocks = _get_nblocks(nsamples, shift, nstep)
   spec_len = int(nsamples / fs)
 
   return EEGSpecParams(fs=fs, shift=shift,
-                       Nstep=Nstep, nfft=nfft, findx=findx,
+                       nstep=nstep, nfft=nfft, findx=findx,
                        nfreqs=nfreqs, nblocks=nblocks,
                        nsamples=nsamples, tapers=tapers,
                        trial_avg=trial_avg,
@@ -270,10 +270,10 @@ def multitaper_spectrogram(data, spec_params):
   fs = spec_params.fs
   nfft = spec_params.nfft
 
-  Nstep = spec_params.Nstep
+  nstep = spec_params.nstep
   shift = spec_params.shift
 
-  nblocks = _get_nblocks(len(data), shift, Nstep)
+  nblocks = _get_nblocks(len(data), shift, nstep)
   nfreqs = spec_params.nfreqs
 
   if spec_params.trial_avg:
@@ -283,7 +283,7 @@ def multitaper_spectrogram(data, spec_params):
     S = np.zeros((nblocks, nfreqs))
   for idx in xrange(nblocks):
     datawin = signal.detrend(
-        data[idx * Nstep:idx * Nstep + shift], type == "constant")
+        data[idx * nstep:idx * nstep + shift], type == "constant")
     if idx < 2:
       N = len(datawin)
       taps = _dpsschk(spec_params.tapers, N, fs)

@@ -116,7 +116,7 @@ void print_spec_params_t(spec_params_t* spec_params)
   printf("\tduration: %.2f\n", spec_params->duration);
   printf("\thdl: %d\n", spec_params->hdl);
   printf("\tnfft: %d\n", spec_params->nfft);
-  printf("\tNstep: %d\n", spec_params->Nstep);
+  printf("\tnstep: %d\n", spec_params->nstep);
   printf("\tshift: %d\n", spec_params->shift);
   printf("\tnsamples: %d\n", spec_params->nsamples);
   printf("\tnblocks: %d\n", spec_params->nblocks);
@@ -126,9 +126,9 @@ void print_spec_params_t(spec_params_t* spec_params)
   printf("}\n");
 }
 
-int get_nfft(int Nwin, int pad)
+int get_nfft(int nwin, int pad)
 {
-  return max(get_next_pow_2(Nwin) + pad, Nwin);
+  return max(get_next_pow_2(nwin) + pad, nwin);
 }
 
 int get_nsamples(int data_len, int fs, float duration)
@@ -136,9 +136,9 @@ int get_nsamples(int data_len, int fs, float duration)
   return min(data_len, fs * 60 * 60 * duration);
 }
 
-int get_nblocks(int nsamples, int shift, int Nstep)
+int get_nblocks(int nsamples, int nfft, int shift)
 {
-  return (nsamples - shift) / Nstep + 1;
+  return (nsamples - nfft) / shift + 1;
 }
 
 int get_nfreqs(int nfft)
@@ -179,13 +179,13 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
 
   int data_len = hdr.datarecords_in_file;
   int pad = 0;
-  int Nwin = spec_params->fs * 4;
-  spec_params->Nstep = spec_params->fs * 1;
-  spec_params->nfft = get_nfft(Nwin, pad);
-  spec_params->shift = Nwin;
+  int nwin = spec_params->fs * 2;
+  spec_params->nstep = spec_params->fs * 0.5;
+  spec_params->nfft = get_nfft(nwin, pad);
+  spec_params->shift = nwin;
   spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
   spec_params->nblocks = get_nblocks(spec_params->nsamples,
-                                     spec_params->shift, spec_params->Nstep);
+                                     spec_params->nfft, spec_params->shift);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
@@ -344,7 +344,7 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
     // http://www.fftw.org/fftw2_doc/fftw_2.html
     for (int i = 0; i < nfft / 2 + 1; i++)
     {
-      specs(i, idx) += abs(fft_result, i);
+      specs(i, idx) += abs(fft_result, i) / nfft;
     }
 
     // Uncomment to see the raw-data output from the FFT calculation
@@ -407,6 +407,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
   // TODO serialize specs output for each channel
   specs /=  (NUM_DIFFS - 1); // average diff spectrograms
 
+  // tranpose the output
   for (int i = 0; i < spec_params->nblocks; i++)
   {
     for (int j = 0; j < spec_params->nfreqs; j++)

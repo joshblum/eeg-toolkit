@@ -16,7 +16,7 @@ class EEGSpecParams(ctypes.Structure):
       ('spec_len', ctypes.c_int),
       ('fs', ctypes.c_int),
       ('nfft', ctypes.c_int),
-      ('Nstep', ctypes.c_int),
+      ('nstep', ctypes.c_int),
       ('shift', ctypes.c_int),
       ('nsamples', ctypes.c_int),
       ('nblocks', ctypes.c_int),
