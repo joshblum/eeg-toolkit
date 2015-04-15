@@ -4,6 +4,33 @@
 #include "edflib.h"
 #include "eeg_spectrogram.h"
 
+int NUM_SAMPLES = 10;
+
+void example_spectrogram(char* filename, float duration)
+{
+  printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
+  unsigned long long start = getticks();
+  spec_params_t spec_params;
+  get_eeg_spectrogram_params(&spec_params, filename, duration);
+  float* out = (float *) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
+  eeg_spectrogram_handler(&spec_params, LL, out);
+  unsigned long long end = getticks();
+  log_time_diff(end - start);
+  printf("Spectrogram shape: (%d, %d)\n",
+         spec_params.nblocks, spec_params.nfreqs);
+
+  printf("Sample data: [[ ");
+  for (int i = 0; i < NUM_SAMPLES * NUM_SAMPLES; i++)
+  {
+    if (i != 0 && !(i % NUM_SAMPLES))
+    {
+      printf("],\n[ ");
+    }
+    printf("%.5f, ", *(out + i));
+  }
+  printf("]]\n");
+}
+
 int main(int argc, char *argv[])
 {
   if (argc <= 3)
@@ -27,11 +54,7 @@ int main(int argc, char *argv[])
     {
       duration = 4.0; // default duration
     }
-    printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
-    unsigned long long start = getticks();
-    eeg_file_spectrogram_handler(filename, duration, LL, NULL);
-    unsigned long long end = getticks();
-    log_time_diff(end - start);
+    example_spectrogram(filename, duration);
   }
   else
   {

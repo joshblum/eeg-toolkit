@@ -11,7 +11,8 @@ extern "C" {
 static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
 
 // add fields for hdr, filename and duration
-typedef struct spec_params {
+typedef struct spec_params
+{
   char* filename; // filename data is read from (stream name)
   float duration; // length of spectrogram produced
   int hdl; // file handler for hdr file
@@ -25,7 +26,8 @@ typedef struct spec_params {
   int nfreqs; // number of frequencies
 } spec_params_t;
 
-typedef enum {
+typedef enum
+{
   LL = 0,
   LP,
   RP,
@@ -33,29 +35,31 @@ typedef enum {
 } ch_t;
 
 // map channel names to index
-typedef enum {
-    FP1 = 0,
-    F3,
-    C3,
-    P3,
-    O1,
-    FP2,
-    F4,
-    C4,
-    P4,
-    O2,
-    F7,
-    T3,
-    T5,
-    F8,
-    T4,
-    T6,
-    FZ,
-    CZ,
-    PZ
+typedef enum
+{
+  FP1 = 0,
+  F3,
+  C3,
+  P3,
+  O1,
+  FP2,
+  F4,
+  C4,
+  P4,
+  O2,
+  F7,
+  T3,
+  T5,
+  F8,
+  T4,
+  T6,
+  FZ,
+  CZ,
+  PZ
 } ch_idx_t;
 static const int NUM_DIFFS = 5;
-typedef struct ch_diff {
+typedef struct ch_diff
+{
   ch_t ch; // channel name
   // store an array of channels used
   // in the diff. The diff is computed by
@@ -65,30 +69,31 @@ typedef struct ch_diff {
 
 
 static const int NUM_CH = 4;
-static ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =  {
+static ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
+{
   // (FP1 - F7)
   // (F7 - T3)
   // (T3 - T5)
   // (T5 - O1)
-  {.ch=LL, .ch_idx={FP1, F7, T3, T5, O1}},
+  {.ch = LL, .ch_idx = {FP1, F7, T3, T5, O1}},
 
   // (FP2 - F3)
   // (F3 - C3)
   // (C3 - P3)
   // (P3 - O1)
-  {.ch=LP, .ch_idx={FP1, F3, C3, P3, O1}},
+  {.ch = LP, .ch_idx = {FP1, F3, C3, P3, O1}},
 
   // (FP2 - F4)
   // (F4 - C4)
   // (C4 - P4)
   // (P4 - O2)
-  {.ch=RP, .ch_idx={FP2, F4, C4, P4, O2}},
+  {.ch = RP, .ch_idx = {FP2, F4, C4, P4, O2}},
 
   // (FP2 - F8)
   // (F8 - T4)
   // (T4 - T6)
   // (T6 - O2)
-  {.ch=RL, .ch_idx={FP2, F8, T4, T6, O2}},
+  {.ch = RL, .ch_idx = {FP2, F8, T4, T6, O2}},
 };
 
 void print_hdr_cache();
@@ -105,7 +110,7 @@ int get_nsamples(int data_len, int fs, float duration);
 int get_next_pow_2(unsigned int v);
 int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-    char* filename, float duration);
+                                char* filename, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
 double* create_buffer(int n, int hdl);
 int read_samples(int handle, int edfsignal, int n, double *buf);

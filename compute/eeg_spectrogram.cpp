@@ -51,7 +51,7 @@ edf_hdr_struct* get_hdr_cache(const char *filename)
         edf_hdr_struct* hdr = EDF_HDR_CACHE[i];
         // TODO(joshblum): probably remove this once
         // windowing is fully implemented
-        for (int signal= 0; signal < hdr->edfsignals; signal++)
+        for (int signal = 0; signal < hdr->edfsignals; signal++)
         {
           edfrewind(hdr->handle, signal);
         }
