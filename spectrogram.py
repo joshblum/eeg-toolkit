@@ -127,6 +127,10 @@ def _get_nfreqs(nfft):
   return nfft / 2 + 1
 
 
+def _get_nfft(shift, pad):
+  return int(max(_power_log(shift) + pad, shift))
+
+
 def _hann(n):
   return 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
 
@@ -213,21 +217,23 @@ def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
 
   shift = int(round(fs * moving_win[0]))
   Nstep = int(round(fs * moving_win[1]))
-  nfft = int(max(_power_log(shift) + pad, shift))
+  nfft = _get_nfft(shift, pad)
 
   nsamples = _get_nsamples(data, fs, duration)
+  nsamples = 90860
   chunksize = _get_chunksize(nsamples, fs, nfft)
 
   sfreqs, findx = _getfgrid(fs, nfft, fpass)
   nfreqs = len(sfreqs)
   nblocks = _get_nblocks(nsamples, shift, Nstep)
+  spec_len = int(nsamples / fs)
 
   return EEGSpecParams(fs=fs, shift=shift,
                        Nstep=Nstep, nfft=nfft, findx=findx,
                        nfreqs=nfreqs, nblocks=nblocks,
                        nsamples=nsamples, tapers=tapers,
                        trial_avg=trial_avg,
-                       spec_len=int(nsamples / fs),
+                       spec_len=spec_len,
                        chunksize=chunksize)
 
 

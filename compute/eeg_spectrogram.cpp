@@ -126,19 +126,24 @@ void print_spec_params_t(spec_params_t* spec_params)
   printf("}\n");
 }
 
-int get_nfreqs(int nfft)
+int get_nfft(int Nwin, int pad)
 {
-  return nfft / 2 + 1;
-}
-
-int get_nblocks(int data_len, int nfft, int shift)
-{
-  return (data_len - nfft) / shift + 1;
+  return max(get_next_pow_2(Nwin) + pad, Nwin);
 }
 
 int get_nsamples(int data_len, int fs, float duration)
 {
   return min(data_len, fs * 60 * 60 * duration);
+}
+
+int get_nblocks(int nsamples, int shift, int Nstep)
+{
+  return (nsamples - shift) / Nstep + 1;
+}
+
+int get_nfreqs(int nfft)
+{
+  return nfft / 2 + 1;
 }
 
 int get_next_pow_2(unsigned int v)
@@ -174,13 +179,13 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
 
   int data_len = hdr.datarecords_in_file;
   int pad = 0;
-  int Nwin = spec_params->fs * 1.5;
-  spec_params->Nstep = spec_params->fs * 0.2;
-  spec_params->nfft = max(get_next_pow_2(Nwin) + pad, Nwin);
-  spec_params->shift = spec_params->nfft * 0.5;
+  int Nwin = spec_params->fs * 4;
+  spec_params->Nstep = spec_params->fs * 1;
+  spec_params->nfft = get_nfft(Nwin, pad);
+  spec_params->shift = Nwin;
   spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
-  spec_params->nblocks = get_nblocks(data_len,
-                                     spec_params->nfft, spec_params->shift);
+  spec_params->nblocks = get_nblocks(spec_params->nsamples,
+                                     spec_params->shift, spec_params->Nstep);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
@@ -301,11 +306,10 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
 
   for (int idx = 0; idx < nblocks; idx++)
   {
-    // Copy the chunk into our buffer
+    // get the last chunk
     if (idx * shift + nfft > nsamples)
     {
-      // get the last chunk
-      int upper_bound = (nfft + idx * shift) - nsamples;
+      int upper_bound = nsamples - idx * shift - 1;
       for (int i = 0; i < upper_bound; i++)
       {
         data[i][0] = diff(idx * shift + i) * window[i];
@@ -317,6 +321,7 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
         data[i][0] = 0.0;
         data[i][1] = 0.0;
       }
+      break;
     }
     else
     {
