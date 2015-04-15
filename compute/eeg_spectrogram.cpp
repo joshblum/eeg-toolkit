@@ -344,8 +344,8 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
 
     // Uncomment to see the raw-data output from the FFT calculation
     // std::cout << "Column: " << idx << std::endl;
-    // for(int i = 0 ; i < nfft/2 ; i++ ) {
-    //  fprintf( stdout, "specc(%d, %d) = { %2.2f }\n", i,
+    // for(int i = 0 ; i < 10 ; i++ ) {
+    //  fprintf( stdout, "spec(%d, %d) = { %2.2f }\n", i,
     //    idx, specs(i, idx));
     // }
   }

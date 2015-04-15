@@ -13,6 +13,7 @@ void example_spectrogram(char* filename, float duration)
   spec_params_t spec_params;
   get_eeg_spectrogram_params(&spec_params, filename, duration);
   float* out = (float *) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
+  print_spec_params_t(&spec_params);
   eeg_spectrogram_handler(&spec_params, LL, out);
   unsigned long long end = getticks();
   log_time_diff(end - start);
