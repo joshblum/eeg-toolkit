@@ -66,19 +66,17 @@ CHANNEL_INDEX = {
     'f8': 13,
     't4': 14,
     't6': 15,
-    'fz': 16,
-    'cz': 17,
-    'pz': 18,
 }
 
 CHUNK_HOURS = 1.0
 
 EEGSpecParams = namedtuple(
-    'SpecParams', ['chunksize', 'fs',
+    'SpecParams', ['filename', 'duration',
+                   'chunksize', 'fs', 'data',
                    'shift', 'spec_len',
                    'nstep', 'trial_avg',
                    'nfft', 'nblocks', 'tapers',
-                   'nfreqs', 'nsamples', 'findx'])
+                   'nfreqs', 'nsamples', 'findx', ])
 AudioSpecParams = namedtuple(
     'SpecParams', ['chunksize', 'fs',
                    'shift', 'spec_len',
@@ -104,7 +102,7 @@ def _get_nsamples(data, fs, duration):
   if duration is None:
     return data_len
   nsamples = min(data_len, int(fs * 60 * 60 * duration))
-  print "Num samples:", nsamples
+  print 'Num samples:', nsamples
   return nsamples
 
 
@@ -191,7 +189,7 @@ def _mtfftc(data, tapers, nfft, fs):
   NC, C = data.shape
   NK, K = tapers.shape
   if NK != NC:
-    print "length of tapers is not compatible with length of data!!"
+    print 'length of tapers is not compatible with length of data!!'
   # to create the matrix which has n rows X K cols
   data = np.tile(data, (1, K))
   data_proj = np.multiply(data, tapers)
@@ -234,9 +232,10 @@ def load_spectrofile(filename):
   return spectrofile_map.get(file_ext, load_h5py_spectrofile)(filename)
 
 
-def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
+def get_eeg_spectrogram_params(filename, duration, pad=0, fpass=None,
                                trial_avg=False, moving_win=None, tapers=None):
 
+  data, fs = load_spectrofile(filename)
   if fpass is None:
     fpass = [0, 55]
   if moving_win is None:
@@ -249,7 +248,6 @@ def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
   nfft = _get_nfft(shift, pad)
 
   nsamples = _get_nsamples(data, fs, duration)
-  nsamples = 90860
   chunksize = _get_chunksize(nsamples, fs, nfft)
 
   sfreqs, findx = _getfgrid(fs, nfft, fpass)
@@ -257,13 +255,30 @@ def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
   nblocks = _get_nblocks(nsamples, shift, nstep)
   spec_len = int(nsamples / fs)
 
-  return EEGSpecParams(fs=fs, shift=shift,
-                       nstep=nstep, nfft=nfft, findx=findx,
-                       nfreqs=nfreqs, nblocks=nblocks,
-                       nsamples=nsamples, tapers=tapers,
-                       trial_avg=trial_avg,
-                       spec_len=spec_len,
-                       chunksize=chunksize)
+  return EEGSpecParams(
+      filename=filename, duration=duration,
+      fs=fs, shift=shift, data=data,
+      nstep=nstep, nfft=nfft, findx=findx,
+      nfreqs=nfreqs, nblocks=nblocks,
+      nsamples=nsamples, tapers=tapers,
+      trial_avg=trial_avg,
+      spec_len=spec_len,
+      chunksize=chunksize)
+
+
+def print_spec_params_t(spec_params):
+  print 'spec_params: {'
+  print '\tfilename %s' % spec_params.filename
+  print '\tduration %.2f' % spec_params.duration
+  print '\tnfft: %d' % spec_params.nfft
+  print '\tnstep: %d' % spec_params.nstep
+  print '\tshift: %d' % spec_params.shift
+  print '\tnsamples: %d' % spec_params.nsamples
+  print '\tnblocks: %d' % spec_params.nblocks
+  print '\tnfreqs: %d' % spec_params.nfreqs
+  print '\tspec_len: %d' % spec_params.spec_len
+  print '\tfs: %d' % spec_params.fs
+  print '}'
 
 
 @profile
@@ -287,7 +302,6 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
   # compute the regional average of the spectrograms for each channel
   res = sum(T) / 4
   t1 = time.time()
-  print "Time for ch %s: %s" % (ch, t1 - t0)
   return res
 
 
@@ -312,7 +326,7 @@ def multitaper_spectrogram(data, spec_params):
     S = np.zeros((nblocks, nfreqs))
   for idx in xrange(nblocks):
     datawin = signal.detrend(
-        data[idx * nstep:idx * nstep + shift], type == "constant")
+        data[idx * nstep:idx * nstep + shift], type == 'constant')
     if idx < 2:
       N = len(datawin)
       taps = _dpsschk(spec_params.tapers, N, fs)
@@ -330,10 +344,11 @@ def multitaper_spectrogram(data, spec_params):
 @profile
 def on_eeg_file_spectrogram_profile(filename, duration):
 
-  data, fs = load_spectrofile(filename)
-  spec_params = get_eeg_spectrogram_params(data, fs, duration)
+  spec_params = get_eeg_spectrogram_params(filename, duration)
+  print_spec_params_t(spec_params)
 
-  data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
+  # ok lets just chunk a bit of this mess
+  data = spec_params.data[:spec_params.nsamples]
 
   t0 = time.time()
   for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
@@ -341,7 +356,7 @@ def on_eeg_file_spectrogram_profile(filename, duration):
     for ch in CHANNELS:
       spec = eeg_ch_spectrogram(ch, chunk, spec_params)
   t1 = time.time()
-  print "Total time: %s" % (t1 - t0)
+  print 'Total time: %s' % (t1 - t0)
   return spec
 
 

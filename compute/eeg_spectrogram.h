@@ -37,26 +37,24 @@ typedef enum
 // map channel names to index
 typedef enum
 {
-  FP1 = 0,
-  F3,
-  C3,
-  P3,
-  O1,
-  FP2,
-  F4,
-  C4,
-  P4,
-  O2,
-  F7,
-  T3,
-  T5,
-  F8,
-  T4,
-  T6,
-  FZ,
-  CZ,
-  PZ
+  C3 =  0,
+  C4 =  1,
+  O1 =  2,
+  O2 =  3,
+  F3 =  7,
+  F4 =  8,
+  F7 =  9,
+  F8 =  10,
+  FP1 = 12,
+  FP2 =  13,
+  P3 =  15,
+  P4 =  16,
+  T3 =  18,
+  T4 =  19,
+  T5 =  20,
+  T6 =  21,
 } ch_idx_t;
+
 static const int NUM_DIFFS = 5;
 typedef struct ch_diff
 {

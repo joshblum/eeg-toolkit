@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(
       description='Profile spectrogram code.')
-  parser.add_argument('-f', '--filename', default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-001.edf',
+  parser.add_argument('-f', '--filename', default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf',
                       dest='filename', help='filename for spectrogram data.')
   parser.add_argument('-d', '--duration', default=4.0,
                       dest='duration', help='duration of the data')
