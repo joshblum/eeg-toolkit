@@ -24,8 +24,7 @@ LDFLAGS = -Wall
 %.o : %.cpp
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-libs:
-	$(CXX) $(CFLAGS) $(LDFLAGS) -fPIC -ansi -c $(CSRC) $(CPPSRC)
+libs: $(OBJ)
 	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared $(OBJ) -o $(SHARED_LIB)
 
 main: main.o $(OBJ)
