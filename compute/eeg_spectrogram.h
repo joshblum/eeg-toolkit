@@ -102,6 +102,7 @@ void log_time_diff(unsigned long long ticks);
 double ticks_to_seconds(unsigned long long ticks);
 unsigned long long getticks();
 void print_spec_params_t(spec_params_t* spec_params);
+int get_data_len(edf_hdr_struct* hdr);
 int get_nfft(int nwin, int pad);
 int get_nsamples(int data_len, int fs, float duration);
 int get_nblocks(int data_len, int fs, int shift);

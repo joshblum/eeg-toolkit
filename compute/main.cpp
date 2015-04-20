@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     else
     {
       // default filename
-      filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-001.edf";
+      filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
     }
     if (argc == 3)
     {

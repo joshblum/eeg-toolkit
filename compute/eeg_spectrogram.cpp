@@ -126,6 +126,12 @@ void print_spec_params_t(spec_params_t* spec_params)
   printf("}\n");
 }
 
+int get_data_len(edf_hdr_struct* hdr)
+{
+  // assume all signals have a uniform sample rate
+   return hdr->signalparam[0].smp_in_file;
+}
+
 int get_nfft(int nwin, int pad)
 {
   return max(get_next_pow_2(nwin) + pad, nwin);
@@ -177,7 +183,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
 
   spec_params->fs = get_fs(&hdr);
 
-  int data_len = hdr.datarecords_in_file;
+  int data_len = get_data_len(&hdr);
   int pad = 0;
   int nwin = spec_params->fs * 2;
   spec_params->nstep = spec_params->fs * 0.5;
