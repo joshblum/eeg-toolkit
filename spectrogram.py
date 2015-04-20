@@ -7,6 +7,7 @@ import numpy as np
 from collections import namedtuple
 from scipy import signal
 from spectrum import dpss
+from eegtools.io import load_edf
 
 from helpers import grouper
 
@@ -205,6 +206,34 @@ def load_h5py_spectrofile(filename):
   return data, fs
 
 
+def load_edf_spectrofile(filename):
+  edf = load_edf(filename)
+
+  fs = edf.sample_rate
+  # convert the edf channels to match the index
+  data = [None] * len(CHANNEL_INDEX)
+  for edf_idx, ch in enumerate(edf.chan_lab):
+    spec_idx = CHANNEL_INDEX.get(ch.lower())
+    if spec_idx is not None:
+      data[spec_idx] = edf.X[edf_idx, :]
+
+  return np.array(data).T, fs
+
+
+def load_spectrofile(filename):
+  spectrofile_map = {
+      'eeg': load_h5py_spectrofile,
+      'edf': load_edf_spectrofile,
+  }
+
+  try:
+    file_ext = filename.split('.')[-1]
+  except IndexError:
+    file_ext = ''
+
+  return spectrofile_map.get(file_ext, load_h5py_spectrofile)(filename)
+
+
 def get_eeg_spectrogram_params(data, fs, duration, pad=0, fpass=None,
                                trial_avg=False, moving_win=None, tapers=None):
 
@@ -301,7 +330,7 @@ def multitaper_spectrogram(data, spec_params):
 @profile
 def on_eeg_file_spectrogram_profile(filename, duration):
 
-  data, fs = load_h5py_spectrofile(filename)
+  data, fs = load_spectrofile(filename)
   spec_params = get_eeg_spectrogram_params(data, fs, duration)
 
   data = data[:spec_params.nsamples]  # ok lets just chunk a bit of this mess
@@ -373,7 +402,7 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(
       description='Profile spectrogram code.')
-  parser.add_argument('-f', '--filename', default='test.eeg',
+  parser.add_argument('-f', '--filename', default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf',
                       dest='filename', help='filename for spectrogram data.')
   parser.add_argument('-d', '--duration', default=4.0,
                       dest='duration', help='duration of the data')
