@@ -21,6 +21,8 @@
 #include <time.h>
 #include <sys/time.h>
 
+#define N 10
+
 // should use a hashmap + linked list implementation if the
 // list traversal becomes a bottleneck
 void print_hdr_cache()
@@ -129,12 +131,12 @@ void print_spec_params_t(spec_params_t* spec_params)
 int get_data_len(edf_hdr_struct* hdr)
 {
   // assume all signals have a uniform sample rate
-   return hdr->signalparam[0].smp_in_file;
+  return hdr->signalparam[0].smp_in_file;
 }
 
-int get_nfft(int nwin, int pad)
+int get_nfft(int shift, int pad)
 {
-  return max(get_next_pow_2(nwin) + pad, nwin);
+  return max(get_next_pow_2(shift) + pad, shift);
 }
 
 int get_nsamples(int data_len, int fs, float duration)
@@ -185,13 +187,12 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
 
   int data_len = get_data_len(&hdr);
   int pad = 0;
-  int nwin = spec_params->fs * 2;
-  spec_params->nstep = spec_params->fs * 0.5;
-  spec_params->nfft = get_nfft(nwin, pad);
-  spec_params->shift = nwin;
+  spec_params->shift = spec_params->fs * 4;
+  spec_params->nstep = spec_params->fs * 1;
+  spec_params->nfft = get_nfft(spec_params->shift, pad);
   spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
   spec_params->nblocks = get_nblocks(spec_params->nsamples,
-                                     spec_params->nfft, spec_params->shift);
+                                     spec_params->shift, spec_params->nstep);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
@@ -260,16 +261,20 @@ double* create_buffer(int n, int hdl)
 
 int read_samples(int hdl, int ch, int n, double *buf)
 {
-  n = edfread_physical_samples(hdl, ch, n, buf);
+  int bytes_read = edfread_physical_samples(hdl, ch, n, buf);
 
-  if (n == -1)
+  if (bytes_read == -1)
   {
     printf("\nerror: edf_read_physical_samples()\n");
     edfclose_file(hdl);
     free(buf);
     exit(1);
   }
-  return n;
+  // clear buffer in case we didn't read as much as we expected to
+  for (int i = bytes_read; i < n; i++) {
+    buf[i] = 0.0;
+  }
+  return bytes_read;
 }
 
 // Create a hamming window of windowLength samples in buffer
@@ -296,8 +301,12 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   fftw_complex    *data, *fft_result;
   fftw_plan       plan_forward;
   int nfft = spec_params->nfft;
+
+  int nstep = spec_params->nstep;
   int shift = spec_params->shift;
+
   int nblocks = spec_params->nblocks;
+  int nfreqs = spec_params->nfreqs;
   int nsamples = spec_params->nsamples;
 
   data = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
@@ -313,12 +322,12 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   for (int idx = 0; idx < nblocks; idx++)
   {
     // get the last chunk
-    if (idx * shift + nfft > nsamples)
+    if (idx * nstep + nfft > nsamples)
     {
-      int upper_bound = nsamples - idx * shift - 1;
+      int upper_bound = nsamples - idx * nstep;
       for (int i = 0; i < upper_bound; i++)
       {
-        data[i][0] = diff(idx * shift + i) * window[i];
+        data[i][0] = diff(idx * nstep + i) * window[i];
         data[i][1] = 0.0;
 
       }
@@ -328,37 +337,48 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
         data[i][1] = 0.0;
       }
       break;
+      // printf("diffwin:\n");
+      // printf("[ ");
+      // for (int i = 0 ; i < N; i++ )
+      // {
+      //   printf("%2.2f ", diff(idx * nstep + i));
+      // }
+      // printf("]\n");
     }
     else
     {
       for (int i = 0; i < nfft; i++)
       {
         // TODO vector multiplication?
-        data[i][0] = diff(idx * shift + i) * window[i];
+        data[i][0] = diff(idx * nstep  + i) * window[i];
         data[i][1] = 0.0;
       }
+      // printf("diffwin:\n");
+      // printf("[ ");
+      // for (int i = 0 ; i < N; i++ )
+      // {
+      //   printf("%2.2f ", diff(idx * nstep + i));
+      // }
+      // printf("]\n");
     }
 
     // Perform the FFT on our chunk
     fftw_execute( plan_forward );
 
-    // Copy the first (nfft/2 + 1) data points into your spectrogram.
-    // We do this because the FFT output is mirrored about the nyquist
-    // frequency, so the second half of the data is redundant. This is how
-    // Matlab's spectrogram routine works.
     // TODO: change maybe?
     // http://www.fftw.org/fftw2_doc/fftw_2.html
-    for (int i = 0; i < nfft / 2 + 1; i++)
+    for (int i = 0; i < nfreqs; i++)
     {
       specs(i, idx) += abs(fft_result, i) / nfft;
     }
 
     // Uncomment to see the raw-data output from the FFT calculation
-    // std::cout << "Column: " << idx << std::endl;
-    // for(int i = 0 ; i < 10 ; i++ ) {
-    //  fprintf( stdout, "spec(%d, %d) = { %2.2f }\n", i,
-    //    idx, specs(i, idx));
+    // printf("[ ");
+    // for (int i = 0 ; i < 10 ; i++ )
+    // {
+    //   printf("%2.2f ", specs(i, idx));
     // }
+    // printf("]\n");
   }
 
   fftw_destroy_plan( plan_forward );
@@ -394,21 +414,45 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
   double* buf2 = create_buffer(nsamples, spec_params->hdl);
 
   // nfreqs x nblocks matrix
-  arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
+  arma::mat specs(spec_params->nfreqs, spec_params->nblocks, arma::fill::zeros);
 
-  int ch1, ch2, n1, n2;
-  for (int i = 0; i < NUM_DIFFS - 1; i++)
+  int ch_idx1, ch_idx2;
+  ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
+  read_samples(spec_params->hdl, ch_idx1, nsamples, buf1);
+  for (int i = 1; i < NUM_DIFFS; i++)
   {
-    ch1 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    ch2 = DIFFERENCE_PAIRS[ch].ch_idx[i + 1];
-    n1 = read_samples(spec_params->hdl, ch1, nsamples, buf1);
-    n2 = read_samples(spec_params->hdl, ch2, nsamples, buf2);
+    ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
+    read_samples(spec_params->hdl, ch_idx2, nsamples, buf2);
+
     // TODO use arm::rowvec::fixed with fixed size chunks
     arma::rowvec v1 = arma::rowvec(buf1, nsamples);
     arma::rowvec v2 = arma::rowvec(buf2, nsamples);
+    // printf("v1:\n");
+    // printf("[ ");
+    // for (int x = 0 ; x < N; x++ )
+    // {
+    //   printf("%2.2f ", v1(x));
+    // }
+    // printf("]\n");
+    // printf("v2:\n");
+    // printf("[ ");
+    // for (int x = 0 ; x < N; x++ )
+    // {
+    //   printf("%2.2f ", v2(x));
+    // }
+    // printf("]\n");
     arma::rowvec diff = v2 - v1;
+    // printf("diffwin:\n");
+    // printf("[ ");
+    // for (int x = 0 ; x < N; x++ )
+    // {
+    //   printf("%2.2f ", diff(x));
+    // }
+    // printf("]\n");
+
     // fill in the spec matrix with fft values
     STFT(diff, spec_params, specs);
+    std::swap(buf1, buf2);
   }
   // TODO serialize specs output for each channel
   specs /=  (NUM_DIFFS - 1); // average diff spectrograms
@@ -418,7 +462,8 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
   {
     for (int j = 0; j < spec_params->nfreqs; j++)
     {
-      *(out + i + j * spec_params->nblocks) = (float) specs(j, i);
+      *(out + i*spec_params->nfreqs + j) = (float) specs(j, i);
     }
   }
+
 }

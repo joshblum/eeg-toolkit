@@ -131,7 +131,7 @@ def _get_nfft(shift, pad):
 
 
 def _hann(n):
-  return 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
+  return 0.54 - 0.46 * np.cos(2.0 * np.pi * np.arange(n) / (n - 1))
 
 
 @profile
@@ -251,7 +251,8 @@ def get_eeg_spectrogram_params(filename, duration, pad=0, fpass=None,
   chunksize = _get_chunksize(nsamples, fs, nfft)
 
   sfreqs, findx = _getfgrid(fs, nfft, fpass)
-  nfreqs = len(sfreqs)
+  # nfreqs = len(sfreqs)
+  nfreqs = _get_nfreqs(nfft)
   nblocks = _get_nblocks(nsamples, shift, nstep)
   spec_len = int(nsamples / fs)
 
@@ -293,15 +294,17 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
   for i, pair in enumerate(pairs):
     c1, c2 = pair
     # take differences between the channels in each of the regions
-    diff = data[:, CHANNEL_INDEX.get(c2)] - data[:, CHANNEL_INDEX.get(c1)]
-    T.append(multitaper_spectrogram(
+    v1 = data[:, CHANNEL_INDEX.get(c1)]
+    v2 = data[:, CHANNEL_INDEX.get(c2)]
+    diff = v2 - v1
+
+    T.append(spectrogram(
         diff, spec_params))
     if progress_fn:
       progress_fn((i + 1) / len(pairs), canvas_id=ch)
-
   # compute the regional average of the spectrograms for each channel
   res = sum(T) / 4
-  t1 = time.time()
+
   return res
 
 
@@ -351,9 +354,10 @@ def on_eeg_file_spectrogram_profile(filename, duration):
   data = spec_params.data[:spec_params.nsamples]
 
   t0 = time.time()
-  for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
+#  for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
+  for chunk in [data, ]:
     chunk = np.array(chunk)
-    for ch in CHANNELS:
+    for ch in ['LL']:  # CHANNELS:
       spec = eeg_ch_spectrogram(ch, chunk, spec_params)
   t1 = time.time()
   print 'Total time: %s' % (t1 - t0)
@@ -388,21 +392,42 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
 
   """
   nfft = spec_params.nfft
+
+  nstep = spec_params.nstep
   shift = spec_params.shift
-  nblocks = _get_nblocks(len(data), nfft, shift)
-  nfreqs = _get_nfreqs(nfft)
+
+  nblocks = spec_params.nblocks
+  nfreqs = spec_params.nfreqs
+  nsamples = spec_params.nsamples
 
   window = _hann(nfft)
   specs = np.zeros((nfreqs, nblocks), dtype=np.float32)
+  fft_data = np.zeros(nfft, dtype=np.float32)
   for idx in xrange(nblocks):
+    # if idx * nstep + nfft > nsamples:
+    #   upper_bound = nsamples - idx * nstep
+    #   for i in xrange(upper_bound):
+    #     fft_data[i] = data[idx * nstep + i] * window[i]
+    #   for i in xrange(upper_bound, nfft):
+    #     fft_data[i] = 0.0
+    # else:
+    #   for i in xrange(nfft):
+    #     fft_data[i] = data[idx * nstep + i] * window[i]
+
+    # fft_result = np.fft.rfft(fft_data, n=nfft)
+
+    # for i in xrange(nfreqs):
+    #   specs[i, idx] += np.abs(fft_result[i]) / nfft
+
     specs[:, idx] = np.abs(np.fft.rfft(
-        data[idx * shift:idx * shift + nfft] * window, n=nfft)) / nfft
+        data[idx * nstep:idx * nstep + shift] * window, n=nfft)) / nfft
     if progress_fn and idx % 10 == 0:
       progress_fn(idx / nblocks, canvas_id=canvas_id)
-  specs[:, -1] = np.abs(
-      np.fft.rfft(data[nblocks * shift:], n=nfft)) / nfft
-  if progress_fn:
-    progress_fn(1, canvas_id=canvas_id)
+
+    specs[:, -1] = np.abs(
+        np.fft.rfft(data[nblocks * nstep:], n=nfft)) / nfft
+    if progress_fn:
+      progress_fn(1, canvas_id=canvas_id)
   return specs.T
 
 

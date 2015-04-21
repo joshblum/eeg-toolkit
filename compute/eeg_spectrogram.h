@@ -37,22 +37,22 @@ typedef enum
 // map channel names to index
 typedef enum
 {
-  C3 =  0,
-  C4 =  1,
-  O1 =  2,
-  O2 =  3,
-  F3 =  7,
-  F4 =  8,
-  F7 =  9,
-  F8 =  10,
+  C3 = 0,
+  C4 = 1,
+  O1 = 2,
+  O2 = 3,
+  F3 = 7,
+  F4 = 8,
+  F7 = 9,
+  F8 = 10,
   FP1 = 12,
-  FP2 =  13,
-  P3 =  15,
-  P4 =  16,
-  T3 =  18,
-  T4 =  19,
-  T5 =  20,
-  T6 =  21,
+  FP2 = 13,
+  P3 = 15,
+  P4 = 16,
+  T3 = 18,
+  T4 = 19,
+  T5 = 20,
+  T6 = 21,
 } ch_idx_t;
 
 static const int NUM_DIFFS = 5;
@@ -103,7 +103,7 @@ double ticks_to_seconds(unsigned long long ticks);
 unsigned long long getticks();
 void print_spec_params_t(spec_params_t* spec_params);
 int get_data_len(edf_hdr_struct* hdr);
-int get_nfft(int nwin, int pad);
+int get_nfft(int shift, int pad);
 int get_nsamples(int data_len, int fs, float duration);
 int get_nblocks(int data_len, int fs, int shift);
 int get_nfreqs(int nfft);
