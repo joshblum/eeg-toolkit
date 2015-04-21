@@ -303,7 +303,6 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   int nfft = spec_params->nfft;
 
   int nstep = spec_params->nstep;
-  int shift = spec_params->shift;
 
   int nblocks = spec_params->nblocks;
   int nfreqs = spec_params->nfreqs;
@@ -410,7 +409,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
     read_samples(spec_params->hdl, ch_idx2, nsamples, buf2);
 
-    // TODO use arm::rowvec::fixed with fixed size chunks
+    // TODO use arma::rowvec::fixed with fixed size chunks
     arma::rowvec v1 = arma::rowvec(buf1, nsamples);
     arma::rowvec v2 = arma::rowvec(buf2, nsamples);
     arma::rowvec diff = v2 - v1;
@@ -423,11 +422,11 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
   specs /=  (NUM_DIFFS - 1); // average diff spectrograms
 
   // tranpose the output
-  for (int i = 0; i < spec_params->nblocks; i++)
+  for (int i = 0; i < spec_params->nfreqs; i++)
   {
-    for (int j = 0; j < spec_params->nfreqs; j++)
+    for (int j = 0; j < spec_params->nblocks; j++)
     {
-      *(out + i*spec_params->nfreqs + j) = (float) specs(j, i);
+      *(out + i + j*spec_params->nfreqs) = (float) specs(i, j);
     }
   }
 
