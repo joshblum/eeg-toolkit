@@ -251,8 +251,8 @@ def get_eeg_spectrogram_params(filename, duration, pad=0, fpass=None,
   chunksize = _get_chunksize(nsamples, fs, nfft)
 
   sfreqs, findx = _getfgrid(fs, nfft, fpass)
-  # nfreqs = len(sfreqs)
-  nfreqs = _get_nfreqs(nfft)
+  nfreqs = len(sfreqs)
+  # nfreqs = _get_nfreqs(nfft)
   nblocks = _get_nblocks(nsamples, shift, nstep)
   spec_len = int(nsamples / fs)
 
@@ -298,7 +298,7 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
     v2 = data[:, CHANNEL_INDEX.get(c2)]
     diff = v2 - v1
 
-    T.append(spectrogram(
+    T.append(multitaper_spectrogram(
         diff, spec_params))
     if progress_fn:
       progress_fn((i + 1) / len(pairs), canvas_id=ch)
@@ -306,6 +306,39 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
   res = sum(T) / 4
 
   return res
+
+
+@profile
+def on_eeg_file_spectrogram_profile(filename, duration):
+
+  spec_params = get_eeg_spectrogram_params(filename, duration)
+  print_spec_params_t(spec_params)
+
+  # ok lets just chunk a bit of this mess
+  data = spec_params.data[:spec_params.nsamples]
+
+  t0 = time.time()
+#  for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
+  for chunk in [data, ]:
+    chunk = np.array(chunk)
+    for ch in ['LL']:  # CHANNELS:
+      spec = eeg_ch_spectrogram(ch, chunk, spec_params)
+  t1 = time.time()
+  print 'Total time: %s' % (t1 - t0)
+  return spec
+
+
+def get_audio_spectrogram_params(data, fs, duration, nfft, overlap):
+  shift = _get_shift(nfft, overlap)
+  nsamples = _get_nsamples(data, fs, duration)
+  chunksize = _get_chunksize(nsamples, fs, nfft)
+  nblocks = _get_nblocks(nsamples, nfft, shift)
+  nfreqs = _get_nfreqs(nfft)
+  return AudioSpecParams(nfft=nfft, shift=shift,
+                         nsamples=nsamples,
+                         spec_len=nsamples / fs,
+                         nblocks=nblocks, nfreqs=nfreqs,
+                         fs=fs, chunksize=chunksize)
 
 
 @profile
@@ -344,39 +377,6 @@ def multitaper_spectrogram(data, spec_params):
   return spect
 
 
-@profile
-def on_eeg_file_spectrogram_profile(filename, duration):
-
-  spec_params = get_eeg_spectrogram_params(filename, duration)
-  print_spec_params_t(spec_params)
-
-  # ok lets just chunk a bit of this mess
-  data = spec_params.data[:spec_params.nsamples]
-
-  t0 = time.time()
-#  for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
-  for chunk in [data, ]:
-    chunk = np.array(chunk)
-    for ch in ['LL']:  # CHANNELS:
-      spec = eeg_ch_spectrogram(ch, chunk, spec_params)
-  t1 = time.time()
-  print 'Total time: %s' % (t1 - t0)
-  return spec
-
-
-def get_audio_spectrogram_params(data, fs, duration, nfft, overlap):
-  shift = _get_shift(nfft, overlap)
-  nsamples = _get_nsamples(data, fs, duration)
-  chunksize = _get_chunksize(nsamples, fs, nfft)
-  nblocks = _get_nblocks(nsamples, nfft, shift)
-  nfreqs = _get_nfreqs(nfft)
-  return AudioSpecParams(nfft=nfft, shift=shift,
-                         nsamples=nsamples,
-                         spec_len=nsamples / fs,
-                         nblocks=nblocks, nfreqs=nfreqs,
-                         fs=fs, chunksize=chunksize)
-
-
 def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   """Calculate a real spectrogram from audio data
 
@@ -404,21 +404,6 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   specs = np.zeros((nfreqs, nblocks), dtype=np.float32)
   fft_data = np.zeros(nfft, dtype=np.float32)
   for idx in xrange(nblocks):
-    # if idx * nstep + nfft > nsamples:
-    #   upper_bound = nsamples - idx * nstep
-    #   for i in xrange(upper_bound):
-    #     fft_data[i] = data[idx * nstep + i] * window[i]
-    #   for i in xrange(upper_bound, nfft):
-    #     fft_data[i] = 0.0
-    # else:
-    #   for i in xrange(nfft):
-    #     fft_data[i] = data[idx * nstep + i] * window[i]
-
-    # fft_result = np.fft.rfft(fft_data, n=nfft)
-
-    # for i in xrange(nfreqs):
-    #   specs[i, idx] += np.abs(fft_result[i]) / nfft
-
     specs[:, idx] = np.abs(np.fft.rfft(
         data[idx * nstep:idx * nstep + shift] * window, n=nfft)) / nfft
     if progress_fn and idx % 10 == 0:

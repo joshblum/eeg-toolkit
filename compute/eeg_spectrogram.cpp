@@ -337,13 +337,6 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
         data[i][1] = 0.0;
       }
       break;
-      // printf("diffwin:\n");
-      // printf("[ ");
-      // for (int i = 0 ; i < N; i++ )
-      // {
-      //   printf("%2.2f ", diff(idx * nstep + i));
-      // }
-      // printf("]\n");
     }
     else
     {
@@ -353,13 +346,6 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
         data[i][0] = diff(idx * nstep  + i) * window[i];
         data[i][1] = 0.0;
       }
-      // printf("diffwin:\n");
-      // printf("[ ");
-      // for (int i = 0 ; i < N; i++ )
-      // {
-      //   printf("%2.2f ", diff(idx * nstep + i));
-      // }
-      // printf("]\n");
     }
 
     // Perform the FFT on our chunk
@@ -427,28 +413,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
     // TODO use arm::rowvec::fixed with fixed size chunks
     arma::rowvec v1 = arma::rowvec(buf1, nsamples);
     arma::rowvec v2 = arma::rowvec(buf2, nsamples);
-    // printf("v1:\n");
-    // printf("[ ");
-    // for (int x = 0 ; x < N; x++ )
-    // {
-    //   printf("%2.2f ", v1(x));
-    // }
-    // printf("]\n");
-    // printf("v2:\n");
-    // printf("[ ");
-    // for (int x = 0 ; x < N; x++ )
-    // {
-    //   printf("%2.2f ", v2(x));
-    // }
-    // printf("]\n");
     arma::rowvec diff = v2 - v1;
-    // printf("diffwin:\n");
-    // printf("[ ");
-    // for (int x = 0 ; x < N; x++ )
-    // {
-    //   printf("%2.2f ", diff(x));
-    // }
-    // printf("]\n");
 
     // fill in the spec matrix with fft values
     STFT(diff, spec_params, specs);
