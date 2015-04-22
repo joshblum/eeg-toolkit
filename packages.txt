@@ -5,7 +5,7 @@ python-dev
 libhdf5-dev
 g++
 
- # install dependencies for scipy
+# install dependencies for scipy
 libblas-dev
 liblapack-dev
 gfortran
