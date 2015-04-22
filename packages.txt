@@ -1,15 +1,13 @@
 pkg-config
 libffi-dev
-libsndfile-dev
+libsndfile1-dev
 python-dev
-libhdf5-dev
+libhdf5-mpich-dev
 g++
 
-# install dependencies for scipy
 libblas-dev
 liblapack-dev
 gfortran
 
-# install dependencies for matplotlib
 libfreetype6-dev
-libpng-dev
+libpng12-dev
