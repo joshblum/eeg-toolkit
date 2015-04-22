@@ -3,3 +3,13 @@ libffi-dev
 libsndfile-dev
 python-dev
 libhdf5-dev
+g++
+
+ # install dependencies for scipy
+libblas-dev
+liblapack-dev
+gfortran
+
+# install dependencies for matplotlib
+libfreetype6-dev
+libpng-dev
