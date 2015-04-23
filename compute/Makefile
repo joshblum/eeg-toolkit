@@ -25,7 +25,7 @@ LDFLAGS = -Wall
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 libs: $(OBJ)
-	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared -o $(SHARED_LIB) $(OBJ)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -shared -o $(SHARED_LIB) $(OBJ) -lfftw3
 main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@
 
