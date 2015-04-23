@@ -56,6 +56,8 @@ endif
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	pip install -r requirements.txt
+	# start the supervisor daemon
+	supervisord
 
 install: installdeps libs
 
