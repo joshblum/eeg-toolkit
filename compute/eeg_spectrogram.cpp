@@ -399,7 +399,8 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
   double* buf2 = create_buffer(nsamples, spec_params->hdl);
 
   // nfreqs x nblocks matrix
-  arma::mat specs(spec_params->nfreqs, spec_params->nblocks, arma::fill::zeros);
+  arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
+  specs.fill(0);
 
   int ch_idx1, ch_idx2;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];

@@ -8,7 +8,7 @@ CPPSRC := $(addprefix $(ROOT), eeg_spectrogram.cpp)
 
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 
-CFLAGS = -Wall -Wextra -Wshadow -Wformat-nonliteral -Wformat-security -Wtype-limits -g -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
+CFLAGS = -Wall -Wextra -Wshadow -Wformat-nonliteral -Wformat-security -Wtype-limits -fPIC -std=c++11 -g -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
 
 ifeq ($(DEBUG),1)
 	 CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
@@ -25,7 +25,7 @@ LDFLAGS = -Wall
 	$(CXX) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 libs: $(OBJ)
-	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -shared $(OBJ) -o $(SHARED_LIB)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -lfftw3 -lm -fPIC -shared $(OBJ) -o $(SHARED_LIB)
 
 main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@

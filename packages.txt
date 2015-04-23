@@ -1,9 +1,7 @@
-g++
-
 cmake
 libopenblas-dev
 liblapack-dev
-libarpack-dev
+libboost-all-dev
 
 libarmadillo-dev
 libfftw3-dev

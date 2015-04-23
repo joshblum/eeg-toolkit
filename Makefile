@@ -39,11 +39,22 @@ ifeq ('$(OSX)', 'true')
 	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
+	# setup gcc 4.7
+	# TODO(joshblum): setup for yum as well
+ifeq ('$(PKG_INSTALLER)', 'apt-get')
+	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+	sudo apt-get update
+	sudo apt-get install gcc-4.7
+	sudo apt-get install g++-4.7
+	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 20
+	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.7 20
+	sudo update-alternatives --config gcc
+	sudo update-alternatives --config g++
+else
 	sudo $(PKG_INSTALLER) update
+endif
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
-	# try setting up a virtual env
-	-$(shell mkvirtualenv eeg-spectrogram)
 	pip install -r requirements.txt
 
 install: installdeps libs
