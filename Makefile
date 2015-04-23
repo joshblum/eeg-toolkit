@@ -62,7 +62,7 @@ install: installdeps libs
 deploy:
 	fab prod deploy
 
-prod-run:
+prod-run: libs
 	supervisorctl reread
 	supervisorctl update
 	supervisorctl restart eeg:eeg-8000

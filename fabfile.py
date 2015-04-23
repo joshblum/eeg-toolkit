@@ -2,10 +2,8 @@ from fabric.api import env, cd, run
 
 
 def prod():
-  env.user = 'joshblum'
-  env.gateway = 'tre.ef.technion.ac.il'
-  env.forward_agent = True
-  env.hosts = ['gpu-os05.ef.technion.ac.il']
+  env.user = 'ubuntu'
+  env.hosts = ['128.52.175.133']
   env.key_filename = '~/.ssh/id_rsa.pub'
   env.server_path = '~/eeg-spectrogram'
   env.python_path = '~/.virtualenvs/eeg-spectrogram'
