@@ -9,14 +9,14 @@
 #include "eeg_spectrogram.h"
 
 #define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
+  ({ __typeof__ (a) _a = (a); \
+   __typeof__ (b) _b = (b); \
+   _a > _b ? _a : _b; })
 
 #define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
+  ({ __typeof__ (a) _a = (a); \
+   __typeof__ (b) _b = (b); \
+   _a < _b ? _a : _b; })
 
 #include <time.h>
 #include <sys/time.h>
@@ -172,7 +172,7 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* filename, float duration)
+    char* filename, float duration)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
@@ -182,6 +182,11 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   edf_hdr_struct hdr;
   load_edf(&hdr, filename);
   spec_params->hdl = hdr.handle;
+  // check for errors
+  if (hdr.filetype < 0) {
+    spec_params->hdl = -1;
+    return;
+  }
 
   spec_params->fs = get_fs(&hdr);
 
@@ -192,7 +197,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->nfft = get_nfft(spec_params->shift, pad);
   spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
   spec_params->nblocks = get_nblocks(spec_params->nsamples,
-                                     spec_params->shift, spec_params->nstep);
+      spec_params->shift, spec_params->nstep);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
@@ -210,28 +215,28 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
   {
     switch (hdr->filetype)
     {
-    case EDFLIB_MALLOC_ERROR                :
-      printf("\nmalloc error\n\n");
-      break;
-    case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
-      printf("\ncannot open file, no such file or directory: %s\n\n", filename);
-      break;
-    case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
-      printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
-             "(it contains format errors)\n\n");
-      break;
-    case EDFLIB_MAXFILES_REACHED            :
-      printf("\nto many files opened\n\n");
-      break;
-    case EDFLIB_FILE_READ_ERROR             :
-      printf("\na read error occurred\n\n");
-      break;
-    case EDFLIB_FILE_ALREADY_OPENED         :
-      printf("\nfile has already been opened\n\n");
-      break;
-    default                                 :
-      printf("\nunknown error\n\n");
-      break;
+      case EDFLIB_MALLOC_ERROR                :
+        printf("\nmalloc error\n\n");
+        break;
+      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
+        printf("\ncannot open file, no such file or directory: %s\n\n", filename);
+        break;
+      case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
+        printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
+            "(it contains format errors)\n\n");
+        break;
+      case EDFLIB_MAXFILES_REACHED            :
+        printf("\nto many files opened\n\n");
+        break;
+      case EDFLIB_FILE_READ_ERROR             :
+        printf("\na read error occurred\n\n");
+        break;
+      case EDFLIB_FILE_ALREADY_OPENED         :
+        printf("\nfile has already been opened\n\n");
+        break;
+      default                                 :
+        printf("\nunknown error\n\n");
+        break;
     }
   }
   // set the file in the cache
@@ -266,7 +271,7 @@ int read_samples(int hdl, int ch, int n, double *buf)
     printf("\nerror: edf_read_physical_samples()\n");
     edfclose_file(hdl);
     free(buf);
-    exit(1);
+    return -1;
   }
   // clear buffer in case we didn't read as much as we expected to
   for (int i = bytes_read; i < n; i++) {
@@ -310,7 +315,7 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
   // TODO keep plans in memory until end, create plans once and cache?
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
-                                  FFTW_FORWARD, FFTW_ESTIMATE);
+      FFTW_FORWARD, FFTW_ESTIMATE);
 
   // Create a hamming window of appropriate length
   double window[nfft];
@@ -389,24 +394,36 @@ void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, float* out)
 
 void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
 {
+  if (spec_params->hdl == -1) {
+    return;
+  }
   // TODO reuse buffers
   // TODO chunking?
   // write edf method to do diff on the fly?
   int nsamples = spec_params->nsamples;
   double* buf1 = create_buffer(nsamples, spec_params->hdl);
   double* buf2 = create_buffer(nsamples, spec_params->hdl);
+  if (buf1 == NULL || buf2 == NULL) {
+    return;
+  }
 
   // nfreqs x nblocks matrix
   arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
   specs.fill(0);
 
-  int ch_idx1, ch_idx2;
+  int ch_idx1, ch_idx2, n;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
-  read_samples(spec_params->hdl, ch_idx1, nsamples, buf1);
+  n = read_samples(spec_params->hdl, ch_idx1, nsamples, buf1);
+  if (n == - 1) {
+    return;
+  }
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    read_samples(spec_params->hdl, ch_idx2, nsamples, buf2);
+    n = read_samples(spec_params->hdl, ch_idx2, nsamples, buf2);
+    if (n == -1 ) {
+      return;
+    }
 
     // TODO use arma::rowvec::fixed with fixed size chunks
     arma::rowvec v1 = arma::rowvec(buf1, nsamples);
