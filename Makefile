@@ -57,7 +57,7 @@ endif
 endif
 	pip install -r requirements.txt
 	# start the supervisor daemon
-	supervisord
+	-supervisord
 
 install: installdeps libs
 
