@@ -43,7 +43,7 @@ else
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	# try setting up a virtual env
-	-mkvirtualenv eeg-spectrogram
+	-$(shell mkvirtualenv eeg-spectrogram)
 	pip install -r requirements.txt
 
 install: installdeps libs

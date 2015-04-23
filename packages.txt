@@ -1,16 +1,22 @@
+g++
+
+cmake
+libopenblas-dev
+liblapack-dev
+libarpack-dev
+
+libarmadillo-dev
+libfftw3-dev
+libfftw3-doc
+
 pkg-config
 libffi-dev
 libsndfile1-dev
 python-dev
 libhdf5-serial-dev
-g++
 
 libblas-dev
-liblapack-dev
 gfortran
 
 libfreetype6-dev
 libpng12-dev
-
-libfftw3-dev
-libfftw3-doc
