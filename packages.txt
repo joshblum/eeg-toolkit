@@ -21,3 +21,4 @@ gfortran
 
 libfreetype6-dev
 libpng12-dev
+supervisor
