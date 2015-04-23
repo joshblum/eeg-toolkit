@@ -39,7 +39,7 @@ ifeq ('$(OSX)', 'true')
 	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
-	# setup gcc 4.7
+	# setup gcc 4.9
 	# TODO(joshblum): setup for yum as well
 ifeq ('$(PKG_INSTALLER)', 'apt-get')
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
