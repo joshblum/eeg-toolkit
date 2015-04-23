@@ -3,6 +3,9 @@ libopenblas-dev
 liblapack-dev
 libboost-all-dev
 
+python-numpy
+python-scipy
+
 libarmadillo-dev
 libfftw3-dev
 libfftw3-doc
