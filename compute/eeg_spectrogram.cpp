@@ -23,6 +23,8 @@
 
 #define N 10
 
+static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
+
 // should use a hashmap + linked list implementation if the
 // list traversal becomes a bottleneck
 void print_hdr_cache()
@@ -42,7 +44,7 @@ void print_hdr_cache()
   printf("]\n");
 }
 
-edf_hdr_struct* get_hdr_cache(const char *filename)
+edf_hdr_struct* get_hdr_cache(char *filename)
 {
   for (int i = 0; i < EDFLIB_MAXFILES; i++)
   {
@@ -179,18 +181,19 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->filename = filename;
   spec_params->duration = duration;
 
-  edf_hdr_struct hdr;
-  load_edf(&hdr, filename);
-  spec_params->hdl = hdr.handle;
+  edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
+  load_edf(hdr, filename);
+  spec_params->hdl = hdr->handle;
+  printf("handle: %d\n", hdr->filetype);
   // check for errors
-  if (hdr.filetype < 0) {
+  if (hdr->filetype < 0) {
     spec_params->hdl = -1;
     return;
   }
 
-  spec_params->fs = get_fs(&hdr);
+  spec_params->fs = get_fs(hdr);
 
-  int data_len = get_data_len(&hdr);
+  int data_len = get_data_len(hdr);
   int pad = 0;
   spec_params->shift = spec_params->fs * 4;
   spec_params->nstep = spec_params->fs * 1;
@@ -249,6 +252,12 @@ void close_edf(char* filename)
   edf_hdr_struct* hdr = get_hdr_cache(filename);
   edfclose_file(hdr->handle);
   pop_hdr_cache(filename);
+}
+
+void cleanup_spectrogram(char* filename, float* out)
+{
+  close_edf(filename);
+  free(out);
 }
 
 double* create_buffer(int n, int hdl)
@@ -445,5 +454,6 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
       *(out + i + j*spec_params->nfreqs) = (float) specs(i, j);
     }
   }
-
+  free(buf1);
+  free(buf2);
 }

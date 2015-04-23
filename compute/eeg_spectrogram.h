@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
-
 // add fields for hdr, filename and duration
 typedef struct spec_params
 {
@@ -67,7 +65,7 @@ typedef struct ch_diff
 
 
 static const int NUM_CH = 4;
-static ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
+const ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
 {
   // (FP1 - F7)
   // (F7 - T3)
@@ -112,6 +110,8 @@ int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
                                 char* filename, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
+void close_edf(char* filename);
+void cleanup_spectrogram(char* filename, float* out);
 double* create_buffer(int n, int hdl);
 int read_samples(int handle, int edfsignal, int n, double *buf);
 void hamming(int windowLength, double* buffer);

@@ -39,6 +39,15 @@ _libspectrogram.print_spec_params_t.restype = ctypes.c_void_p
 def print_spec_params_t(spec_params):
   _libspectrogram.print_spec_params_t(spec_params)
 
+# close_edf
+_libspectrogram.close_edf.argtypes = [
+    ctypes.POINTER(ctypes.c_char),
+]
+_libspectrogram.close_edf.restype = ctypes.c_void_p
+
+
+def close_edf(filename):
+  _libspectrogram.close_edf(filename)
 
 # get_eeg_spectrogram_params
 _libspectrogram.get_eeg_spectrogram_params.argtypes = [
@@ -81,13 +90,14 @@ def main(filename, duration):
   print 'Total time: ',  (end - start)
   print 'Spectrogram shape:',  str(spec.shape)
   print 'Sample data:',  spec[:10, :10]
+  close_edf(filename)
 
 if __name__ == '__main__':
   import argparse
 
   parser = argparse.ArgumentParser(
       description='Profile spectrogram code.')
-  parser.add_argument('-f', '--filename', default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf',
+  parser.add_argument('-f', '--filename', default='/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf',
                       dest='filename', help='filename for spectrogram data.')
   parser.add_argument('-d', '--duration', default=4.0,
                       dest='duration', help='duration of the data')

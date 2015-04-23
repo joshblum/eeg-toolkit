@@ -30,6 +30,7 @@ void example_spectrogram(char* filename, float duration)
     printf("%.5f, ", *(out + i));
   }
   printf("]]\n");
+  cleanup_spectrogram(filename, out);
 }
 
 int main(int argc, char *argv[])
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
     else
     {
       // default filename
-      filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
+      filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf";
     }
     if (argc == 3)
     {
