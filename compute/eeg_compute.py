@@ -4,8 +4,9 @@ import os
 import time
 
 from os.path import dirname as parent
+from sys import platform as _platform
 
-APPROOT = os.path.join(parent(os.path.realpath(__file__)), 'eeg-compute')
+APPROOT = parent(os.path.realpath(__file__))
 
 
 class EEGSpecParams(ctypes.Structure):
