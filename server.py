@@ -195,7 +195,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def send_progress(self, progress, canvas_id=None):
     self.send_message('loading_progress', {
         'progress': progress,
-        'canvas_id': canvas_id})
+        'canvasId': canvas_id})
 
   def on_file_spectrogram(self, filename, nfft=1024,
                           duration=None, overlap=0.5, dataType=AUDIO):
@@ -235,15 +235,13 @@ class SpectrogramWebSocket(JSONWebSocket):
     for ch, ch_id in CHANNELS.iteritems():
       self.send_spectrogram_new(spec_params, canvas_id=ch)
       # TODO(joshblum): chunk data?
+      self.send_progress(0.1, ch)
+      print "CH:", ch
       spec = eeg_compute.eeg_spectrogram_handler(spec_params, ch_id)
       self.send_spectrogram_update(spec, canvas_id=ch)
+      self.send_progress(1, ch)
 
-    # for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
-    #   chunk = np.array(chunk)
-    #   for ch in CHANNELS:
-    #     spec = eeg_ch_spectrogram(ch, chunk, spec_params, self.send_progress)
-    #     self.send_progress(1, ch)
-    #     self.send_spectrogram_update(spec, canvas_id=ch)
+    eeg_compute.close_edf(filename)
 
   def on_audio_file_spectrogram(self, filename, nfft, duration, overlap):
     _file = SoundFile(filename)
