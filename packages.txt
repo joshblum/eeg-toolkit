@@ -2,7 +2,7 @@ pkg-config
 libffi-dev
 libsndfile1-dev
 python-dev
-libhdf5-mpich-dev
+libhdf5-serial-dev
 g++
 
 libblas-dev
