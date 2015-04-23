@@ -233,7 +233,6 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
       printf("\nunknown error\n\n");
       break;
     }
-    exit(1);
   }
   // set the file in the cache
   set_hdr_cache(hdr);
@@ -254,7 +253,6 @@ double* create_buffer(int n, int hdl)
   {
     printf("\nmalloc error\n");
     edfclose_file(hdl);
-    exit(1);
   }
   return buf;
 }
