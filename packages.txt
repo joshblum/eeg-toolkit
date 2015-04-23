@@ -11,3 +11,6 @@ gfortran
 
 libfreetype6-dev
 libpng12-dev
+
+libfftw3-dev
+libfftw3-doc
