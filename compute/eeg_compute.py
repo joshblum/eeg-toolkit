@@ -99,7 +99,7 @@ if __name__ == '__main__':
       description='Profile spectrogram code.')
   parser.add_argument('-f', '--filename', default='/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf',
                       dest='filename', help='filename for spectrogram data.')
-  parser.add_argument('-d', '--duration', default=4.0,
+  parser.add_argument('-d', '--duration', default=4.0, type=float,
                       dest='duration', help='duration of the data')
   args = parser.parse_args()
   main(args.filename, args.duration)
