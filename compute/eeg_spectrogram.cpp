@@ -184,7 +184,6 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
   load_edf(hdr, filename);
   spec_params->hdl = hdr->handle;
-  printf("handle: %d\n", hdr->filetype);
   // check for errors
   if (hdr->filetype < 0) {
     spec_params->hdl = -1;
