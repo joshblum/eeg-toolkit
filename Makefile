@@ -1,4 +1,4 @@
-.PHONY: clean run installdeps lint pylint jslint prod-run install deploy
+.PHONY: clean jsoncpp server run installdeps lint pylint jslint prod-run install deploy
 
 OS := $(shell uname)
 
@@ -19,6 +19,30 @@ endif
 clean:
 	find . -type f -name '*.py[cod]' -delete
 	find . -type f -name '*.*~' -delete
+	rm -f -r *.dSYM *.o *.d *~ server
+
+jsoncpp:
+	cd jsoncpp && mkdir -p build\
+		&& cd build && cmake -DJSONCPP_LIB_BUILD_STATIC=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../\
+		&& make && make install
+
+CXX = g++
+CPPSRC := server.cpp json11/json11.cpp
+OBJ := $(CPPSRC:.cpp=.o)
+CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
+LDFLAGS = -lboost_system -lcrypto
+
+ifeq ($(DEBUG),1)
+	 CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
+else
+	CFLAGS += -O3 -DNDEBUG
+endif
+
+%.o : %.cpp
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+server: $(OBJ)
+	$(CXX) $(OBJ) $(LDFLAGS) -o $@
 
 run: clean libs
 	python server.py

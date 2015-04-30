@@ -3,3 +3,5 @@ libffi
 libsndfile
 homebrew/science/armadillo
 fftw
+boost
+cmake

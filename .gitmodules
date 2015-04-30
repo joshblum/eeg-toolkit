@@ -1,0 +1,6 @@
+[submodule "wslib"]
+	path = wslib
+	url = git@github.com:eidheim/Simple-WebSocket-Server.git
+[submodule "json11"]
+	path = json11
+	url = git@github.com:dropbox/json11.git
