@@ -3,6 +3,7 @@
 
 #include <fftw3.h>
 #include <armadillo>
+#include "edflib.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "edflib.h"
 #include "eeg_spectrogram.h"
 
 int NUM_SAMPLES = 10;

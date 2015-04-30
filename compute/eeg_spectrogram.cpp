@@ -5,7 +5,6 @@
 #include <iostream>
 #include <time.h>
 
-#include "edflib.h"
 #include "eeg_spectrogram.h"
 
 #define max(a,b) \
@@ -245,12 +244,13 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
   set_hdr_cache(hdr);
 }
 
-// TODO(joshblum): implement a call to this on websocket close
 void close_edf(char* filename)
 {
   edf_hdr_struct* hdr = get_hdr_cache(filename);
-  edfclose_file(hdr->handle);
-  pop_hdr_cache(filename);
+  if (hdr != NULL) {
+    edfclose_file(hdr->handle);
+    pop_hdr_cache(filename);
+  }
 }
 
 void cleanup_spectrogram(char* filename, float* out)
