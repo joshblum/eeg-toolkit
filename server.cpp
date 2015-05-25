@@ -12,7 +12,7 @@ using namespace json11;
 #define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
-void send_message(SocketServer<WS> server, shared_ptr<SocketServer<WS>::Connection> connection, char* filename, std::string type, Json content, float * data)
+void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, char* filename, std::string type, Json content, float * data)
 {
   std::string header = content.dump();
 
@@ -27,7 +27,7 @@ void send_message(SocketServer<WS> server, shared_ptr<SocketServer<WS>::Connecti
   data_ss << header_len << header << data;
 
   //server.send is an asynchronous function
-  server.send(connection, data_ss, [&filename, &data](const boost::system::error_code & ec)
+  server->send(connection, data_ss, [&filename, &data](const boost::system::error_code & ec)
   {
     if (ec)
     {
@@ -40,7 +40,7 @@ void send_message(SocketServer<WS> server, shared_ptr<SocketServer<WS>::Connecti
   }, BINARY_OPCODE);
 }
 
-void on_file_spectrogram(SocketServer<WS> server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
+void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
 {
   std::string filename = data["filename"].string_value();
   float duration = data["duration"].number_value();
@@ -62,7 +62,7 @@ void on_file_spectrogram(SocketServer<WS> server, shared_ptr<SocketServer<WS>::C
   send_message(server, connection, filename_c, "spectrogram", content, spec);
 }
 
-void receive_message(SocketServer<WS> server, shared_ptr<SocketServer<WS>::Connection> connection, std::string type, Json content)
+void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, std::string type, Json content)
 {
   if (type == "request_file_spectrogram")
   {
@@ -70,11 +70,11 @@ void receive_message(SocketServer<WS> server, shared_ptr<SocketServer<WS>::Conne
   }
   else if (type == "information")
   {
-    printf("%s", content.string_value());
+    cout << content.string_value() << endl;
   }
   else
   {
-    printf("Unkown type: %s and content: %s", type, content.string_value());
+    cout << "Unknown type: " << type << " and content: " << content.string_value() << endl;
   }
 }
 
@@ -83,52 +83,52 @@ int main()
   //WebSocket (WS)-server at PORT using NUM_THREADS threads
   SocketServer<WS> server(PORT, NUM_THREADS);
 
-  auto& spec_ws = server.endpoint["^/spectrogram/?$"];
+  auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 
-  spec_ws.onopen = [](auto connection)
+//C++14, lambda parameters declared with auto
+//For C++11 use: (shared_ptr<SocketServer<WS>::Connection> connection, shared_ptr<SocketServer<WS>::Message> message)
+  ws.onmessage = [&server](auto connection, auto message)
+  {
+    //To receive message from client as string (data_ss.str())
+    stringstream data_ss;
+    message->data >> data_ss.rdbuf();
+    std::string data_s, err;
+    data_s = data_ss.str();
+    Json json = Json::parse(data_s, err);
+    // TODO add error checking for null fields
+    std::string type = json["type"].string_value();
+    Json content = json["content"];
+
+    receive_message(&server, connection, type, content);
+  };
+
+  ws.onopen = [](auto connection)
   {
     cout << "WebSocket opened" << endl;
   };
 
-//C++14, lambda parameters declared with auto
-//For C++11 use: (shared_ptr<SocketServer<WS>::Connection> connection, shared_ptr<SocketServer<WS>::Message> message)
-  spec_ws.onmessage = [&server](auto connection, auto message)
+
+  //See RFC 6455 7.4.1. for status codes
+  ws.onclose = [](auto connection, int status, const string & reason)
   {
-    {
-      //To receive message from client as string (data_ss.str())
-      stringstream data_ss;
-      message->data >> data_ss.rdbuf();
-      std::string data_s, err;
-      data_s = data_ss.str();
-      Json json = Json::parse(data_s, err);
-      // TODO add error checking for null fields
-      std::string type = json["type"].string_value();
-      Json content = json["content"];
+    cout << "Server: Closed connection " << (size_t)connection.get() << " with status code " << status << endl;
+  };
 
-      receive_message(server, connection, type, content);
-    };
+  //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
+  ws.onerror = [](auto connection, const boost::system::error_code & ec)
+  {
+    cout << "Server: Error in connection " << (size_t)connection.get() << ". " <<
+         "Error: " << ec << ", error message: " << ec.message() << endl;
+  };
 
 
-//See RFC 6455 7.4.1. for status codes
-    spec_ws.onclose = [](auto connection, int status, const string & reason)
-    {
-      cout << "WebSocket closed" << endl;
-    };
+  thread server_thread([&server]()
+  {
+    //Start WS-server
+    server.start();
+  });
 
-//See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
-    spec_ws.onerror = [](auto connection, const boost::system::error_code & ec)
-    {
-      cout << "Error: " << ec << ", error message: " << ec.message() << endl;
-    };
+  server_thread.join();
 
-
-    thread server_thread([&server]()
-    {
-      //Start WS-server
-      server.start();
-    });
-
-    server_thread.join();
-
-    return 0;
-  }
+  return 0;
+}

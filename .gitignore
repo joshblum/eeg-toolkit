@@ -61,3 +61,4 @@ pip-delete-this-directory.txt
 *.out
 *.app
 main
+server

@@ -27,16 +27,20 @@ jsoncpp:
 		&& make && make install
 
 CXX = g++
-CPPSRC := server.cpp json11/json11.cpp
-OBJ := $(CPPSRC:.cpp=.o)
+CSRC := compute/edflib.c
+CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp server.cpp
+OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
-LDFLAGS = -lboost_system -lcrypto
+LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
 
 ifeq ($(DEBUG),1)
 	 CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
 else
 	CFLAGS += -O3 -DNDEBUG
 endif
+
+%.o : %.c
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 %.o : %.cpp
 	$(CXX) $(CFLAGS) -c $< -o $@
