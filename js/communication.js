@@ -1,5 +1,7 @@
 "use strict";
 
+var wsEndpoint = "/compute/spectrogram/";
+var wsPort = 8080;
 var ws = new WebSocket(getwsUrl());
 ws.binaryType = "arraybuffer";
 
@@ -13,8 +15,8 @@ function getwsUrl() {
     } else {
         newUri = "ws:";
     }
-    newUri += "//" + loc.host;
-    newUri += loc.pathname + "spectrogram";
+    newUri += "//" + loc.hostname + ":" + wsPort;
+    newUri += wsEndpoint;
     return newUri;
 }
 

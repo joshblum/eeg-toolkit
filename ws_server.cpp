@@ -12,22 +12,33 @@ using namespace json11;
 #define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
-void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, char* filename, std::string type, Json content, float * data)
+void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
+                  std::string msg_type, Json content, float* data, size_t data_size)
 {
-  std::string header = content.dump();
 
+  Json msg = Json::object
+  {
+    {"type", msg_type},
+    {"content", content}
+  };
+  std::string header = msg.dump();
 
+  uint32_t header_len = header.size() + (8 - ((header.size() + 4) % 8));
   // append enough spaces so that the payload starts at an 8-byte
   // aligned position. The first four bytes will be the length of
   // the header, encoded as a 32 bit signed integer:
-  unsigned header_len = header.size();
-  header.resize(header_len + (8 - ((header_len + 4) % 8)), ' ');
+  header.resize(header_len, ' ');
 
   stringstream data_ss;
-  data_ss << header_len << header << data;
+  data_ss.write((char*) &header_len, sizeof(uint32_t));
+  data_ss.write(header.c_str(), header_len);
+  if (data != NULL)
+  {
+    data_ss.write((char*) data, data_size);
+  }
 
-  //server.send is an asynchronous function
-  server->send(connection, data_ss, [&filename, &data](const boost::system::error_code & ec)
+  // server.send is an asynchronous function
+  server->send(connection, data_ss, [&data](const boost::system::error_code & ec)
   {
     if (ec)
     {
@@ -35,9 +46,41 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
            //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
            "Error: " << ec << ", error message: " << ec.message() << endl;
     }
-    cleanup_spectrogram(filename, data);
-    delete[] filename;
   }, BINARY_OPCODE);
+}
+
+void send_spectrogram_new(SocketServer<WS>* server,
+                          shared_ptr<SocketServer<WS>::Connection> connection,
+                          spec_params_t spec_params, std::string canvasId)
+{
+  Json content = Json::object
+  {
+    {"action", "new"},
+    {"nblocks", spec_params.nblocks},
+    {"nfreqs", spec_params.nfreqs},
+    {"fs", spec_params.fs},
+    {"length", spec_params.spec_len},
+    {"canvasId", canvasId}
+  };
+  cout << "Sending content " << content.dump() << endl;
+  send_message(server, connection, "spectrogram", content, NULL, -1);
+}
+
+void send_spectrogram_update(SocketServer<WS>* server,
+                             shared_ptr<SocketServer<WS>::Connection> connection,
+                             spec_params_t spec_params, std::string canvasId,
+                             float * spec, size_t data_size)
+{
+
+  Json content = Json::object
+  {
+    {"action", "update"},
+    {"nblocks", spec_params.nblocks},
+    {"nfreqs", spec_params.nfreqs},
+    {"canvasId", canvasId}
+  };
+  cout << "Sending content " << content.dump() << endl;
+  send_message(server, connection, "spectrogram", content, spec, data_size);
 }
 
 void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
@@ -49,17 +92,13 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   char *filename_c = new char[filename.length() + 1];
   strcpy(filename_c, filename.c_str());
   get_eeg_spectrogram_params(&spec_params, filename_c, duration);
-  float* spec = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
   print_spec_params_t(&spec_params);
+  send_spectrogram_new(server, connection, spec_params, "LL");
+
+  size_t data_size = sizeof(float) * spec_params.nblocks * spec_params.nfreqs;
+  float* spec = (float*) malloc(data_size);
   eeg_spectrogram_handler(&spec_params, LL, spec);
-  Json content = Json::object
-  {
-    {"action", "update"},
-    {"nblocks", spec_params.nblocks},
-    {"nfreqs", spec_params.nfreqs},
-    {"canvasId", LL}
-  };
-  send_message(server, connection, filename_c, "spectrogram", content, spec);
+  send_spectrogram_update(server, connection, spec_params, "LL", spec, data_size);
 }
 
 void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, std::string type, Json content)
@@ -124,6 +163,7 @@ int main()
 
   thread server_thread([&server]()
   {
+    cout << "WebSocket Server started at port: " << PORT << endl;
     //Start WS-server
     server.start();
   });

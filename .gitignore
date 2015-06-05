@@ -60,5 +60,6 @@ pip-delete-this-directory.txt
 *.exe
 *.out
 *.app
+
 main
-server
+ws_server

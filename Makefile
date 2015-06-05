@@ -1,5 +1,12 @@
-.PHONY: clean jsoncpp server run installdeps lint pylint jslint prod-run install deploy
+.PHONY: clean jsoncpp ws_server run installdeps lint pylint jslint prod-run install deploy
 
+CXX = g++
+CSRC := compute/edflib.c
+CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp ws_server.cpp
+OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
+TARGET := ws_server
+CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
+LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
 OS := $(shell uname)
 
 ifeq ($(RPM),1)
@@ -13,31 +20,19 @@ ifeq ('$(OS)', 'Darwin')
 	PKG_INSTALLER = brew
 endif
 
-# use `libs` directive for building shared library
--include compute/Makefile
-
-clean:
-	find . -type f -name '*.py[cod]' -delete
-	find . -type f -name '*.*~' -delete
-	rm -f -r *.dSYM *.o *.d *~ server
-
-jsoncpp:
-	cd jsoncpp && mkdir -p build\
-		&& cd build && cmake -DJSONCPP_LIB_BUILD_STATIC=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../\
-		&& make && make install
-
-CXX = g++
-CSRC := compute/edflib.c
-CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp server.cpp
-OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
-CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
-LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
-
 ifeq ($(DEBUG),1)
 	 CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
 else
 	CFLAGS += -O3 -DNDEBUG
 endif
+
+libs:
+	make -C compute/ libs
+
+jsoncpp:
+	cd jsoncpp && mkdir -p build\
+		&& cd build && cmake -DJSONCPP_LIB_BUILD_STATIC=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../\
+		&& make && make install
 
 %.o : %.c
 	$(CXX) $(CFLAGS) -c $< -o $@
@@ -45,19 +40,8 @@ endif
 %.o : %.cpp
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-server: $(OBJ)
+ws_server: $(OBJ)
 	$(CXX) $(OBJ) $(LDFLAGS) -o $@
-
-run: clean libs
-	python server.py
-
-pylint:
-	-flake8 .
-
-jslint:
-	-jshint -c .jshintrc --exclude-path .jshintignore .
-
-lint: clean pylint jslint
 
 installdeps: clean
 ifeq ('$(OSX)', 'true')
@@ -92,7 +76,24 @@ install: installdeps libs
 deploy:
 	fab prod deploy
 
-prod-run: libs
+run: clean libs ws_server
+	./ws_server & python server.py
+
+prod-run: clean libs
 	supervisorctl reread
 	supervisorctl update
+	# TODO(joshblum): update supervisor with ws_server
 	supervisorctl restart eeg:eeg-8000
+
+pylint:
+	-flake8 .
+
+jslint:
+	-jshint -c .jshintrc --exclude-path .jshintignore .
+
+lint: clean pylint jslint
+
+clean:
+	find . -type f -name '*.py[cod]' -delete
+	find . -type f -name '*.*~' -delete
+	rm -f -r *.dSYM *.o *.d *~ $(TARGET)
