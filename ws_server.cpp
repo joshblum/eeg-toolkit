@@ -12,6 +12,8 @@ using namespace json11;
 #define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
+const char* CH_ID_MAP[] = {"LL", "LP", "RP", "RL"};
+
 void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
                   std::string msg_type, Json content, float* data, size_t data_size)
 {
@@ -38,7 +40,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   }
 
   // server.send is an asynchronous function
-  server->send(connection, data_ss, [&data](const boost::system::error_code & ec)
+  server->send(connection, data_ss, [&data](const boost::system::error_code &ec)
   {
     if (ec)
     {
@@ -93,12 +95,18 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   strcpy(filename_c, filename.c_str());
   get_eeg_spectrogram_params(&spec_params, filename_c, duration);
   print_spec_params_t(&spec_params);
-  send_spectrogram_new(server, connection, spec_params, "LL");
-
   size_t data_size = sizeof(float) * spec_params.nblocks * spec_params.nfreqs;
-  float* spec = (float*) malloc(data_size);
-  eeg_spectrogram_handler(&spec_params, LL, spec);
-  send_spectrogram_update(server, connection, spec_params, "LL", spec, data_size);
+  const char* ch;
+  for (int ch_id=0; ch_id < NUM_CH; ch_id++) {
+    ch = CH_ID_MAP[ch_id];
+    send_spectrogram_new(server, connection, spec_params, ch);
+
+    float* spec = (float*) malloc(data_size);
+    eeg_spectrogram_handler(&spec_params, ch_id, spec);
+    send_spectrogram_update(server, connection, spec_params, ch, spec, data_size);
+    this_thread::sleep_for(chrono::seconds(1)); // TODO(joshblum): fix this..
+  }
+  close_edf(filename_c);
 }
 
 void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, std::string type, Json content)
