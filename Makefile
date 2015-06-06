@@ -6,7 +6,7 @@ CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 TARGET := ws_server
 CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
-LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
+LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm -lboost_thread -lboost_coroutine -lboost_context -pthread
 OS := $(shell uname)
 
 ifeq ($(RPM),1)
@@ -25,6 +25,8 @@ ifeq ($(DEBUG),1)
 else
 	CFLAGS += -O3 -DNDEBUG
 endif
+
+default: ws_server
 
 libs:
 	make -C compute/ libs
@@ -71,7 +73,7 @@ endif
 	# start the supervisor daemon
 	-supervisord
 
-install: installdeps libs
+install: installdeps libs ws_server
 
 deploy:
 	fab prod deploy
@@ -79,7 +81,7 @@ deploy:
 run: clean libs ws_server
 	./ws_server & python server.py
 
-prod-run: clean libs
+prod-run: clean libs ws_server
 	supervisorctl reread
 	supervisorctl update
 	# TODO(joshblum): update supervisor with ws_server
