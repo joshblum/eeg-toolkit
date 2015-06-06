@@ -104,7 +104,6 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
     float* spec = (float*) malloc(data_size);
     eeg_spectrogram_handler(&spec_params, ch_id, spec);
     send_spectrogram_update(server, connection, spec_params, ch, spec, data_size);
-    this_thread::sleep_for(chrono::seconds(1)); // TODO(joshblum): fix this..
   }
   close_edf(filename_c);
 }

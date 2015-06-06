@@ -6,7 +6,7 @@ CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 TARGET := ws_server
 CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
-LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm -lboost_thread -lboost_coroutine -lboost_context -pthread
+LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
 OS := $(shell uname)
 
 ifeq ($(RPM),1)
@@ -18,6 +18,8 @@ endif
 ifeq ('$(OS)', 'Darwin')
 	OSX = true
 	PKG_INSTALLER = brew
+else
+	LDFLAGS += -pthread -lboost_thread
 endif
 
 ifeq ($(DEBUG),1)
