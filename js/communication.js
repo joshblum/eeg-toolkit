@@ -187,8 +187,8 @@ ws.onopen = function() {
 /* Test the keyup event for a submission and then reload the spectrogram.
  */
 function submitSpectrogram(e) {
-    e.which = e.which || e.keyCode;
-    if (e.which === 13) {
+    var which = e.which || e.keyCode;
+    if (which === 13) {
         reloadSpectrogram();
     }
 }

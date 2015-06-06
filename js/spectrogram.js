@@ -642,8 +642,8 @@ Spectrogram.prototype.onmousemove = function(mouse) {
 /* update spectrogram display mode on keypress */
 window.onkeypress = function(e) {
     // prevent the default action of submitting the GET parameters.
-    e.which = e.which || e.keyCode;
-    if (e.which === 13) {
+    var which = e.which || e.keyCode;
+    if (which === 13) {
         e.preventDefault();
     }
 };
