@@ -82,7 +82,8 @@ run: clean libs ws_server
 prod-run: clean libs ws_server
 	supervisorctl reread
 	supervisorctl update
-	supervisorctl restart eeg:eeg-8000
+	supervisorctl restart eeg:eeg
+	supervisorctl restart ws:ws
 
 pylint:
 	-flake8 .
