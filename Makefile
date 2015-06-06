@@ -1,4 +1,4 @@
-.PHONY: clean jsoncpp ws_server run installdeps lint pylint jslint prod-run install deploy
+.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy
 
 CXX = g++
 CSRC := compute/edflib.c
@@ -33,11 +33,6 @@ default: ws_server
 libs:
 	make -C compute/ libs
 
-jsoncpp:
-	cd jsoncpp && mkdir -p build\
-		&& cd build && cmake -DJSONCPP_LIB_BUILD_STATIC=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../\
-		&& make && make install
-
 %.o : %.c
 	$(CXX) $(CFLAGS) -c $< -o $@
 
@@ -48,6 +43,7 @@ ws_server: $(OBJ)
 	$(CXX) $(OBJ) $(LDFLAGS) -o $@
 
 installdeps: clean
+	 git submodule update --init --recursive
 ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
 	brew update
