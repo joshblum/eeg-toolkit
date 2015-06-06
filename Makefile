@@ -86,7 +86,6 @@ run: clean libs ws_server
 prod-run: clean libs ws_server
 	supervisorctl reread
 	supervisorctl update
-	# TODO(joshblum): update supervisor with ws_server
 	supervisorctl restart eeg:eeg-8000
 
 pylint:

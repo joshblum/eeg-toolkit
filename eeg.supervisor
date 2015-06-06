@@ -3,7 +3,7 @@
 [program:eeg]
 process_name = eeg-%(process_num)s
 environment = PYTHONPATH="~/.virtualenvs/eeg-spectrogram"
-command = python server.py
+command = ./ws_server & python server.py
 # Increase numprocs to run multiple processes on different ports.
 numprocs = 1
 numprocs_start = 8000
