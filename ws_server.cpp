@@ -1,5 +1,5 @@
 #include "compute/edflib.h"
-#include "compute/eeg_spectrogram.h"
+#include "compute/eeg_spectrogram.hpp"
 #include "json11/json11.hpp"
 #include "wslib/server_ws.hpp"
 

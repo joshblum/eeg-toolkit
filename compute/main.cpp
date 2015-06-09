@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "eeg_spectrogram.h"
+#include "eeg_spectrogram.hpp"
 
 int NUM_SAMPLES = 10;
 

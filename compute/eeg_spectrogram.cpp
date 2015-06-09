@@ -5,7 +5,7 @@
 #include <iostream>
 #include <time.h>
 
-#include "eeg_spectrogram.h"
+#include "eeg_spectrogram.hpp"
 
 #define max(a,b) \
   ({ __typeof__ (a) _a = (a); \
