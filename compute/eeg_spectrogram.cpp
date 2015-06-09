@@ -20,10 +20,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define N 10
-
 static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
 
+// TODO(joshblum): this needs to be a concurrent structure
 // should use a hashmap + linked list implementation if the
 // list traversal becomes a bottleneck
 void print_hdr_cache()
