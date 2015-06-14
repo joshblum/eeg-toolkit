@@ -1,5 +1,4 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -7,22 +6,14 @@
 
 #include "eeg_spectrogram.hpp"
 
-#define max(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-   __typeof__ (b) _b = (b); \
-   _a > _b ? _a : _b; })
-
-#define min(a,b) \
-  ({ __typeof__ (a) _a = (a); \
-   __typeof__ (b) _b = (b); \
-   _a < _b ? _a : _b; })
-
 #include <time.h>
 #include <sys/time.h>
 
-static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
+using namespace arma;
 
 // TODO(joshblum): this needs to be a concurrent structure
+static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
+
 // should use a hashmap + linked list implementation if the
 // list traversal becomes a bottleneck
 void print_hdr_cache()
@@ -136,12 +127,12 @@ int get_data_len(edf_hdr_struct* hdr)
 
 int get_nfft(int shift, int pad)
 {
-  return max(get_next_pow_2(shift) + pad, shift);
+  return fmax(get_next_pow_2(shift) + pad, shift);
 }
 
 int get_nsamples(int data_len, int fs, float duration)
 {
-  return min(data_len, fs * 60 * 60 * duration);
+  return fmin(data_len, fs * 60 * 60 * duration);
 }
 
 int get_nblocks(int nsamples, int nfft, int shift)
@@ -172,7 +163,7 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-    char* filename, float duration)
+                                char* filename, float duration)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
@@ -183,7 +174,8 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   load_edf(hdr, filename);
   spec_params->hdl = hdr->handle;
   // check for errors
-  if (hdr->filetype < 0) {
+  if (hdr->filetype < 0)
+  {
     spec_params->hdl = -1;
     return;
   }
@@ -197,7 +189,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->nfft = get_nfft(spec_params->shift, pad);
   spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
   spec_params->nblocks = get_nblocks(spec_params->nsamples,
-      spec_params->shift, spec_params->nstep);
+                                     spec_params->shift, spec_params->nstep);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
@@ -215,28 +207,28 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
   {
     switch (hdr->filetype)
     {
-      case EDFLIB_MALLOC_ERROR                :
-        printf("\nmalloc error\n\n");
-        break;
-      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
-        printf("\ncannot open file, no such file or directory: %s\n\n", filename);
-        break;
-      case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
-        printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
-            "(it contains format errors)\n\n");
-        break;
-      case EDFLIB_MAXFILES_REACHED            :
-        printf("\nto many files opened\n\n");
-        break;
-      case EDFLIB_FILE_READ_ERROR             :
-        printf("\na read error occurred\n\n");
-        break;
-      case EDFLIB_FILE_ALREADY_OPENED         :
-        printf("\nfile has already been opened\n\n");
-        break;
-      default                                 :
-        printf("\nunknown error\n\n");
-        break;
+    case EDFLIB_MALLOC_ERROR                :
+      printf("\nmalloc error\n\n");
+      break;
+    case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
+      printf("\ncannot open file, no such file or directory: %s\n\n", filename);
+      break;
+    case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
+      printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
+             "(it contains format errors)\n\n");
+      break;
+    case EDFLIB_MAXFILES_REACHED            :
+      printf("\nto many files opened\n\n");
+      break;
+    case EDFLIB_FILE_READ_ERROR             :
+      printf("\na read error occurred\n\n");
+      break;
+    case EDFLIB_FILE_ALREADY_OPENED         :
+      printf("\nfile has already been opened\n\n");
+      break;
+    default                                 :
+      printf("\nunknown error\n\n");
+      break;
     }
   }
   // set the file in the cache
@@ -246,16 +238,17 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
 void close_edf(char* filename)
 {
   edf_hdr_struct* hdr = get_hdr_cache(filename);
-  if (hdr != NULL) {
+  if (hdr != NULL)
+  {
     edfclose_file(hdr->handle);
     pop_hdr_cache(filename);
   }
 }
 
-void cleanup_spectrogram(char* filename, float* out)
+void cleanup_spectrogram(char* filename, float* spec_arr)
 {
   close_edf(filename);
-  free(out);
+  free(spec_arr);
 }
 
 double* create_buffer(int n, int hdl)
@@ -281,7 +274,8 @@ int read_samples(int hdl, int ch, int n, double *buf)
     return -1;
   }
   // clear buffer in case we didn't read as much as we expected to
-  for (int i = bytes_read; i < n; i++) {
+  for (int i = bytes_read; i < n; i++)
+  {
     buf[i] = 0.0;
   }
   return bytes_read;
@@ -303,10 +297,10 @@ static inline double abs(fftw_complex* arr, int i)
 
 // copy pasta http://ofdsp.blogspot.co.il/2011/08/short-time-fourier-transform-with-fftw3.html
 /*
- * Fill the `specs` matrix with values for the spectrogram for the given diff.
- * `specs` is expected to be initialized and the results are added to allow averaging
+ * Fill the `spec_mat` matrix with values for the spectrogram for the given diff.
+ * `spec_mat` is expected to be initialized and the results are added to allow averaging
  */
-void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
+void STFT(rowvec& diff, spec_params_t* spec_params, mat& spec_mat)
 {
   fftw_complex    *data, *fft_result;
   fftw_plan       plan_forward;
@@ -322,7 +316,7 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
   fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
   // TODO keep plans in memory until end, create plans once and cache?
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
-      FFTW_FORWARD, FFTW_ESTIMATE);
+                                  FFTW_FORWARD, FFTW_ESTIMATE);
 
   // Create a hamming window of appropriate length
   double window[nfft];
@@ -364,7 +358,7 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
     // http://www.fftw.org/fftw2_doc/fftw_2.html
     for (int i = 0; i < nfreqs; i++)
     {
-      specs(i, idx) += abs(fft_result, i) / nfft;
+      spec_mat(idx, i) += abs(fft_result, i) / nfft;
     }
 
     // Uncomment to see the raw-data output from the FFT calculation
@@ -376,32 +370,42 @@ void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs)
     // printf("]\n");
   }
 
-  fftw_destroy_plan( plan_forward );
+  fftw_destroy_plan(plan_forward);
 
-  fftw_free( data );
-  fftw_free( fft_result );
+  fftw_free(data);
+  fftw_free(fft_result);
 }
 
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, float* out)
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, mat& spec_mat)
 {
   spec_params_t spec_params;
   get_eeg_spectrogram_params(&spec_params, filename, duration);
   print_spec_params_t(&spec_params);
-  eeg_spectrogram_handler(&spec_params, ch, out);
+  eeg_spectrogram_handler(&spec_params, ch, spec_mat);
 }
 
-void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, float* out)
+void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, mat& spec_mat)
 {
-  if (out == NULL)
+  spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
+  eeg_spectrogram(spec_params, ch, spec_mat);
+}
+
+void eeg_spectrogram_handler_as_arr(spec_params_t* spec_params, int ch, float* spec_arr)
+{
+  if (spec_arr == NULL)
   {
-    out = (float *) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
+    spec_arr = (float *) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
+
   }
-  eeg_spectrogram(spec_params, ch, out);
+  mat spec_mat = mat(spec_params->nblocks, spec_params->nfreqs);
+  eeg_spectrogram(spec_params, ch, spec_mat);
+  serialize_spec_mat(spec_mat, spec_params, spec_arr);
 }
 
-void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
+void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
 {
-  if (spec_params->hdl == -1) {
+  if (spec_params->hdl == -1)
+  {
     return;
   }
   // TODO reuse buffers
@@ -410,48 +414,58 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out)
   int nsamples = spec_params->nsamples;
   double* buf1 = create_buffer(nsamples, spec_params->hdl);
   double* buf2 = create_buffer(nsamples, spec_params->hdl);
-  if (buf1 == NULL || buf2 == NULL) {
+  if (buf1 == NULL || buf2 == NULL)
+  {
     return;
   }
 
   // nfreqs x nblocks matrix
-  arma::mat specs(spec_params->nfreqs, spec_params->nblocks);
-  specs.fill(0);
+  spec_mat.fill(0);
 
   int ch_idx1, ch_idx2, n;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
   n = read_samples(spec_params->hdl, ch_idx1, nsamples, buf1);
-  if (n == - 1) {
+  if (n == - 1)
+  {
     return;
   }
+
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
     n = read_samples(spec_params->hdl, ch_idx2, nsamples, buf2);
-    if (n == -1 ) {
+    if (n == -1 )
+    {
       return;
     }
 
-    // TODO use arma::rowvec::fixed with fixed size chunks
-    arma::rowvec v1 = arma::rowvec(buf1, nsamples);
-    arma::rowvec v2 = arma::rowvec(buf2, nsamples);
-    arma::rowvec diff = v2 - v1;
+    // TODO use rowvec::fixed with fixed size chunks
+    rowvec v1 = rowvec(buf1, nsamples);
+    rowvec v2 = rowvec(buf2, nsamples);
+    rowvec diff = v2 - v1;
 
     // fill in the spec matrix with fft values
-    STFT(diff, spec_params, specs);
+    STFT(diff, spec_params, spec_mat);
     std::swap(buf1, buf2);
   }
-  // TODO serialize specs output for each channel
-  specs /=  (NUM_DIFFS - 1); // average diff spectrograms
+  // TODO serialize spec_mat output for each channel
+  spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
+  // spec_mat.t(); // transpose the output
 
-  // tranpose the output
+  free(buf1);
+  free(buf2);
+}
+/*
+ * Transform the mat to a float* for transfer
+ * via websockets
+ */
+void serialize_spec_mat(mat& spec_mat, spec_params_t* spec_params, float* spec_arr)
+{
   for (int i = 0; i < spec_params->nfreqs; i++)
   {
     for (int j = 0; j < spec_params->nblocks; j++)
     {
-      *(out + i + j*spec_params->nfreqs) = (float) specs(i, j);
+      *(spec_arr + i + j * spec_params->nblocks) = (float) spec_mat(i, j);
     }
   }
-  free(buf1);
-  free(buf2);
 }

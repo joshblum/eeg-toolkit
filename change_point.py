@@ -24,10 +24,12 @@ def load_file(filename):
 
 
 def get_change_points(r, ch, t01):
+  minimum = 5000
+  stride = 10
   s = numpy.sum(r[ch], axis=0)
-  s = numpy.minimum(s, 5000)
-  s = s[::10]
-  tt = t01[::10]
+  s = numpy.minimum(s, minimum)
+  s = s[::stride]
+  tt = t01[::stride]
 
   Nt = len(tt)
 
@@ -52,7 +54,7 @@ def get_change_points(r, ch, t01):
   yp = []
   np = 0.
   nm = 0.
-  ct = 0.
+  ct = 0
   for j in xrange(1, Nt):
     ct += 1
 
@@ -71,7 +73,7 @@ def get_change_points(r, ch, t01):
     if cu[j] > H or cl[j] > H:
       cp.append(tt[j])
       yp.append(max_amp)
-      ct = 0.
+      ct = 0
       if cu[j] > H:
         mu[j] = mu[j] + K + cu[j] / np
         cu[j] = 0.

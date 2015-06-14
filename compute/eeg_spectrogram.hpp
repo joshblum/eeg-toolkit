@@ -2,12 +2,15 @@
 #define SPECTROGRAM_H
 
 #include <fftw3.h>
+// #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
 #include "edflib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+using namespace arma;
 
 // add fields for hdr, filename and duration
 typedef struct spec_params
@@ -112,15 +115,16 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
                                 char* filename, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
 void close_edf(char* filename);
-void cleanup_spectrogram(char* filename, float* out);
+void cleanup_spectrogram(char* filename, mat spec_mat);
 double* create_buffer(int n, int hdl);
 int read_samples(int handle, int edfsignal, int n, double *buf);
 void hamming(int windowLength, double* buffer);
-void STFT(arma::rowvec& diff, spec_params_t* spec_params, arma::mat& specs);
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, float* out);
-void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, float* out);
-void eeg_spectrogram(spec_params_t* spec_params, int ch, float* out);
-
+void STFT(rowvec& diff, spec_params_t* spec_params, mat& specs);
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, mat& spec_mat);
+void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, mat& spec_mat);
+void eeg_spectrogram_handler_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
+void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat);
+void serialize_spec_mat(mat& spec_mat, spec_params_t* spec_params, float* spec_arr);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -71,7 +71,7 @@ void send_spectrogram_new(SocketServer<WS>* server,
 void send_spectrogram_update(SocketServer<WS>* server,
                              shared_ptr<SocketServer<WS>::Connection> connection,
                              spec_params_t spec_params, std::string canvasId,
-                             float * spec, size_t data_size)
+                             float * spec_arr, size_t data_size)
 {
 
   Json content = Json::object
@@ -82,7 +82,7 @@ void send_spectrogram_update(SocketServer<WS>* server,
     {"canvasId", canvasId}
   };
   cout << "Sending content " << content.dump() << endl;
-  send_message(server, connection, "spectrogram", content, spec, data_size);
+  send_message(server, connection, "spectrogram", content, spec_arr, data_size);
 }
 
 void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
@@ -101,9 +101,9 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
     ch = CH_ID_MAP[ch_id];
     send_spectrogram_new(server, connection, spec_params, ch);
 
-    float* spec = (float*) malloc(data_size);
-    eeg_spectrogram_handler(&spec_params, ch_id, spec);
-    send_spectrogram_update(server, connection, spec_params, ch, spec, data_size);
+    float* spec_arr = (float*) malloc(data_size);
+    eeg_spectrogram_handler_as_arr(&spec_params, ch_id, spec_arr);
+    send_spectrogram_update(server, connection, spec_params, ch, spec_arr, data_size);
     this_thread::sleep_for(chrono::seconds(5)); // TODO(joshblum): fix this..
   }
   close_edf(filename_c);
