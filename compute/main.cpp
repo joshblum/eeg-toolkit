@@ -7,6 +7,7 @@
 #define NUM_SAMPLES 10
 using namespace arma;
 
+
 void example_spectrogram(char* filename, float duration,
                          mat& spec_mat, spec_params_t* spec_params)
 {
@@ -31,6 +32,31 @@ void example_spectrogram(char* filename, float duration,
   close_edf(filename);
 }
 
+void example_spectrogram_as_arr(char* filename, float duration,
+                                float* spec_arr, spec_params_t* spec_params)
+{
+  printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
+  unsigned long long start = getticks();
+  print_spec_params_t(spec_params);
+  eeg_spectrogram_handler_as_arr(spec_params, LL, spec_arr);
+  unsigned long long end = getticks();
+  log_time_diff(end - start);
+  printf("Spectrogram shape: (%d, %d)\n",
+         spec_params->nblocks, spec_params->nfreqs);
+
+  printf("Sample data: [\n[ ");
+  for (int i = 0; i < NUM_SAMPLES; i++)
+  {
+    for (int j = 0; j < NUM_SAMPLES; j++)
+    {
+      printf("%.5f, ", *(spec_arr + i + j * spec_params->nfreqs));
+    }
+    printf("],\n[ ");
+  }
+  printf("]]\n");
+  close_edf(filename);
+  free(spec_arr);
+}
 void example_change_points(mat& spec_mat, float duration)
 {
   cp_data_t cp_data;
@@ -67,8 +93,14 @@ int main(int argc, char *argv[])
     get_eeg_spectrogram_params(&spec_params, filename, duration);
     mat spec_mat = mat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(filename, duration, spec_mat, &spec_params);
-    example_change_points(spec_mat,
-                          get_nt(duration, spec_params.fs));
+    // example_change_points(spec_mat,
+    //                       get_nt(duration, spec_params.fs));
+
+    float* spec_arr = (float *) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
+    // reopen file
+    get_eeg_spectrogram_params(&spec_params, filename, duration);
+    example_spectrogram_as_arr(filename, duration, spec_arr, &spec_params);
+
   }
   else
   {

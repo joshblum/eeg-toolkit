@@ -386,7 +386,6 @@ void eeg_file_spectrogram_handler(char* filename, float duration, int ch, mat& s
 
 void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, mat& spec_mat)
 {
-  spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
   eeg_spectrogram(spec_params, ch, spec_mat);
 }
 
@@ -397,7 +396,7 @@ void eeg_spectrogram_handler_as_arr(spec_params_t* spec_params, int ch, float* s
     spec_arr = (float *) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
 
   }
-  mat spec_mat = mat(spec_params->nblocks, spec_params->nfreqs);
+  mat spec_mat;
   eeg_spectrogram(spec_params, ch, spec_mat);
   serialize_spec_mat(spec_mat, spec_params, spec_arr);
 }
@@ -408,6 +407,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
   {
     return;
   }
+  spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
   // TODO reuse buffers
   // TODO chunking?
   // write edf method to do diff on the fly?
@@ -450,7 +450,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
   }
   // TODO serialize spec_mat output for each channel
   spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
-  // spec_mat.t(); // transpose the output
+  spec_mat = spec_mat.t(); // transpose the output
 
   free(buf1);
   free(buf2);
@@ -461,11 +461,15 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
  */
 void serialize_spec_mat(mat& spec_mat, spec_params_t* spec_params, float* spec_arr)
 {
+  if (spec_params->hdl == -1)
+  {
+    return;
+  }
   for (int i = 0; i < spec_params->nfreqs; i++)
   {
     for (int j = 0; j < spec_params->nblocks; j++)
     {
-      *(spec_arr + i + j * spec_params->nblocks) = (float) spec_mat(i, j);
+      *(spec_arr + i + j * spec_params->nfreqs) = (float) spec_mat(i, j);
     }
   }
 }
