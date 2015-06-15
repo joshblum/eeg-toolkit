@@ -8,10 +8,8 @@
 using namespace arma;
 
 
-void example_spectrogram(char* filename, float duration,
-                         mat& spec_mat, spec_params_t* spec_params)
+void example_spectrogram(mat& spec_mat, spec_params_t* spec_params)
 {
-  printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
   unsigned long long start = getticks();
   print_spec_params_t(spec_params);
   eeg_spectrogram_handler(spec_params, LL, spec_mat);
@@ -29,13 +27,10 @@ void example_spectrogram(char* filename, float duration,
     printf("],\n[ ");
   }
   printf("]\n");
-  close_edf(filename);
 }
 
-void example_spectrogram_as_arr(char* filename, float duration,
-                                float* spec_arr, spec_params_t* spec_params)
+void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
 {
-  printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
   unsigned long long start = getticks();
   print_spec_params_t(spec_params);
   eeg_spectrogram_handler_as_arr(spec_params, LL, spec_arr);
@@ -54,8 +49,6 @@ void example_spectrogram_as_arr(char* filename, float duration,
     printf("],\n[ ");
   }
   printf("]]\n");
-  close_edf(filename);
-  free(spec_arr);
 }
 void example_change_points(mat& spec_mat, float duration)
 {
@@ -89,17 +82,21 @@ int main(int argc, char *argv[])
     {
       duration = 4.0; // default duration
     }
+    printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
     spec_params_t spec_params;
     get_eeg_spectrogram_params(&spec_params, filename, duration);
     mat spec_mat = mat(spec_params.nfreqs, spec_params.nblocks);
-    example_spectrogram(filename, duration, spec_mat, &spec_params);
+    example_spectrogram(spec_mat, &spec_params);
+  close_edf(filename);
     // example_change_points(spec_mat,
     //                       get_nt(duration, spec_params.fs));
 
     float* spec_arr = (float *) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
     get_eeg_spectrogram_params(&spec_params, filename, duration);
-    example_spectrogram_as_arr(filename, duration, spec_arr, &spec_params);
+    example_spectrogram_as_arr(spec_arr, &spec_params);
+  close_edf(filename);
+  free(spec_arr);
 
   }
   else

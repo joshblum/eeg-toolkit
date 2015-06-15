@@ -76,7 +76,8 @@ _libspectrogram.eeg_spectrogram_handler_as_arr.restype = ctypes.c_void_p
 
 
 def eeg_spectrogram_handler_as_arr(spec_params, ch):
-  spec_arr = np.zeros((spec_params.nblocks, spec_params.nfreqs), dtype=np.float32)
+  spec_arr = np.zeros(
+      (spec_params.nblocks, spec_params.nfreqs), dtype=np.float32)
   spec_arr = np.asarray(spec_arr)
   _libspectrogram.eeg_spectrogram_handler_as_arr(spec_params, ch, spec_arr)
   return spec_arr
@@ -97,7 +98,9 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(
       description='Profile spectrogram code.')
-  parser.add_argument('-f', '--filename', default='/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf',
+  parser.add_argument('-f', '--filename',
+                      # default='/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf',
+                      default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf',
                       dest='filename', help='filename for spectrogram data.')
   parser.add_argument('-d', '--duration', default=4.0, type=float,
                       dest='duration', help='duration of the data')
