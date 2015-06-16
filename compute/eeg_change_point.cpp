@@ -2,11 +2,6 @@
 #define NUM_SAMPLES 10
 using namespace arma;
 
-int get_nt(float duration, int fs)
-{
-  return 36000;
-  return (int) fs * duration * 60 * 60; // fs in Hz, duration in hrs
-}
 
 // TODO(joshblum): make real variable names
 void get_change_points(mat& spec_mat, int nt,

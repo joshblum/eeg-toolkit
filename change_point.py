@@ -3,15 +3,14 @@ import scipy.io
 
 from collections import namedtuple
 
+from compute.eeg_compute import eeg_spectrogram_handler_as_arr
+from compute.eeg_compute import get_eeg_spectrogram_params
+
 CpData = namedtuple(
     'CpData', ['r', 'ch', 't01',
                'cp', 'yp', 'cu',
                'cl', 'mu', 'm',
                'total_count'])
-
-
-def get_nt(duration, fs):
-  return 36000
 
 
 def load_file(filename):
@@ -33,17 +32,15 @@ def load_file(filename):
 def get_change_points_matlab(r, ch, t01):
   tt = t01[::10]  # stride = 10
   nt = len(tt)
-  cp_data = get_change_points(r[ch], nt)
-  cp_data = cp_data._replace(r=r)
-  cp_data = cp_data._replace(ch=ch)
-  cp_data = cp_data._replace(t01=t01)
-
-  return cp_data
+  return get_change_points(r[ch])
 
 
-def get_change_points(spec_mat, nt):
+def get_change_points(spec_mat):
+  s = numpy.sum(spec_mat, axis=0)
+
   minimum = 5000
   stride = 10
+  nt = (len(s) / stride) + 1
 
   b = 0.95
   bb = 0.995
@@ -70,8 +67,6 @@ def get_change_points(spec_mat, nt):
 
   np = 0.
   nm = 0.
-
-  s = numpy.sum(spec_mat, axis=0)
 
   for j in xrange(1, nt):
     ct += 1
@@ -120,6 +115,8 @@ def verify_result(cp_data, res):
   res = res._asdict()
   for k1, v1 in cp_data.iteritems():
     v2 = res[k1]
+    if v2 is None:
+        continue
     if isinstance(v1, numpy.ndarray):
       valid = numpy.array_equal(v1, v2)
       if not valid and len(v1) == len(v2):
@@ -139,11 +136,24 @@ def verify_result(cp_data, res):
   print 'Results verified.'
 
 
+def test_cpp():
+  # filename = '/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf'
+  filename = '/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf'
+  duration = 4.0
+  spec_params = get_eeg_spectrogram_params(filename, duration)
+  spec_mat = eeg_spectrogram_handler_as_arr(spec_params, 0)  # channel LL
+  cpp_res = get_change_points(spec_mat)
+  print 'Total count:', cpp_res.total_count
+
+
 def main():
-  filename = 'cp-io.mat'
-  cp_data = load_file(filename)
-  res = get_change_points_matlab(cp_data.r, cp_data.ch, cp_data.t01)
-  verify_result(cp_data, res)
+  test_cpp()
+
+  matlab_filename = 'cp-io.mat'
+  cp_data = load_file(matlab_filename)
+  matlab_res = get_change_points_matlab(cp_data.r, cp_data.ch, cp_data.t01)
+
+  verify_result(cp_data, matlab_res)
 
 if __name__ == '__main__':
   main()

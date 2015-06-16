@@ -86,11 +86,11 @@ def eeg_spectrogram_handler_as_arr(spec_params, ch):
 def main(filename, duration):
   spec_params = get_eeg_spectrogram_params(filename, duration)
   start = time.time()
-  spec = eeg_spectrogram_handler_as_arr(spec_params, 0)  # channel LL
+  spec_mat = eeg_spectrogram_handler_as_arr(spec_params, 0)  # channel LL
   end = time.time()
   print 'Total time: ',  (end - start)
-  print 'Spectrogram shape:',  str(spec.shape)
-  print 'Sample data:',  spec[:10, :10]
+  print 'Spectrogram shape:',  str(spec_mat.shape)
+  print 'Sample data:',  spec_mat[:10, :10]
   close_edf(filename)
 
 if __name__ == '__main__':
