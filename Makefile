@@ -96,4 +96,5 @@ lint: clean pylint jslint
 clean:
 	find . -type f -name '*.py[cod]' -delete
 	find . -type f -name '*.*~' -delete
-	rm -f -r *.dSYM *.o *.d *~ $(TARGET)
+	find . -type f -name $(TARGET) -delete
+	find . -type f -name '*.[dSYM|o|d]' -delete

@@ -35,4 +35,5 @@ main: main.o $(OBJ)
 	$(CXX) $^ $(LDFLAGS) -lfftw3 -lm -o $@
 
 clean:
-	rm -f -r *.dSYM *.o *.d *~ $(TARGET) $(SHARED_LIB)
+	find . -type f -name '*.[dSYM|o|d]' -delete
+	find . -type f -name [$(TARGET)|$(SHARED_LIB)] -delete
