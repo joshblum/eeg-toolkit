@@ -43,7 +43,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   }
 
   // server.send is an asynchronous function
-  server->send(connection, data_ss, [&data](const boost::system::error_code &ec)
+  server->send(connection, data_ss, [&data](const boost::system::error_code & ec)
   {
     if (ec)
     {
@@ -51,7 +51,10 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
            //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
            "Error: " << ec << ", error message: " << ec.message() << endl;
     }
-    free(data);
+    if (data != NULL)
+    {
+      free(data);
+    }
   }, BINARY_OPCODE);
 }
 
@@ -103,7 +106,8 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   print_spec_params_t(&spec_params);
   size_t data_size = sizeof(float) * spec_params.nblocks * spec_params.nfreqs;
   const char* ch_name;
-  for (int ch=0; ch < NUM_CH; ch++) {
+  for (int ch = 0; ch < NUM_CH; ch++)
+  {
     ch_name = CH_NAME_MAP[ch];
     send_spectrogram_new(server, connection, spec_params, ch_name);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);

@@ -121,8 +121,8 @@ int read_samples(int handle, int edfsignal, int n, float *buf);
 void hamming(int windowLength, float* buf);
 void STFT(frowvec& diff, spec_params_t* spec_params, fmat& specs);
 void eeg_file_spectrogram_handler(char* filename, float duration, int ch, fmat& spec_mat);
-void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
+void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
 #ifdef __cplusplus
 } /* extern "C" */

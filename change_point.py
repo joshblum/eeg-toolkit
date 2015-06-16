@@ -3,7 +3,7 @@ import scipy.io
 
 from collections import namedtuple
 
-from compute.eeg_compute import eeg_spectrogram_handler_as_arr
+from compute.eeg_compute import eeg_spectrogram_as_arr
 from compute.eeg_compute import get_eeg_spectrogram_params
 
 CpData = namedtuple(
@@ -141,7 +141,7 @@ def test_cpp():
   filename = '/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf'
   duration = 4.0
   spec_params = get_eeg_spectrogram_params(filename, duration)
-  spec_mat = eeg_spectrogram_handler_as_arr(spec_params, 0)  # channel LL
+  spec_mat = eeg_spectrogram_as_arr(spec_params, 0)  # channel LL
   cpp_res = get_change_points(spec_mat)
   print 'Total count:', cpp_res.total_count
 

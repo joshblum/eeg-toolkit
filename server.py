@@ -236,7 +236,7 @@ class SpectrogramWebSocket(JSONWebSocket):
       self.send_spectrogram_new(spec_params, canvas_id=ch)
       # TODO(joshblum): chunk data?
       self.send_progress(0.1, ch)
-      spec = eeg_compute.eeg_spectrogram_handler_as_arr(spec_params, ch_id)
+      spec = eeg_compute.eeg_spectrogram_as_arr(spec_params, ch_id)
       self.send_spectrogram_update(spec, canvas_id=ch)
       self.send_progress(1, ch)
 

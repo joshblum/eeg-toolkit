@@ -253,7 +253,7 @@ void cleanup_spectrogram(char* filename, float* spec_arr)
 
 float* create_buffer(int n)
 {
-  float* buf = (float*) malloc(sizeof(float) *n);
+  float* buf = (float*) malloc(sizeof(float) * n);
   if (buf == NULL)
   {
     printf("\nmalloc error\n");
