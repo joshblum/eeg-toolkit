@@ -50,10 +50,10 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
   }
   printf("]]\n");
 }
-void example_change_points(mat& spec_mat, float duration)
+void example_change_points(mat& spec_mat)
 {
   cp_data_t cp_data;
-  get_change_points(spec_mat, duration, &cp_data);
+  get_change_points(spec_mat, &cp_data);
   printf("Total change points found: %d\n", cp_data.total_count);
 }
 
@@ -87,16 +87,15 @@ int main(int argc, char *argv[])
     get_eeg_spectrogram_params(&spec_params, filename, duration);
     mat spec_mat = mat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
-  close_edf(filename);
-    // example_change_points(spec_mat,
-    //                       get_nt(duration, spec_params.fs));
+    close_edf(filename);
+    example_change_points(spec_mat);
 
     float* spec_arr = (float *) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
     get_eeg_spectrogram_params(&spec_params, filename, duration);
     example_spectrogram_as_arr(spec_arr, &spec_params);
-  close_edf(filename);
-  free(spec_arr);
+    close_edf(filename);
+    free(spec_arr);
 
   }
   else

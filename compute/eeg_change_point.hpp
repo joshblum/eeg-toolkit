@@ -18,8 +18,7 @@ typedef struct cp_data
   int total_count;
 } cp_data_t;
 
-int get_nt(float duration, int fs);
-void get_change_points(arma::mat& spec_mat, int nt, cp_data_t* cp_data);
+void get_change_points(arma::mat& spec_mat, cp_data_t* cp_data);
 
 #ifdef __cplusplus
 } /* extern "C" */

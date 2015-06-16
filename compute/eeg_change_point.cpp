@@ -4,11 +4,14 @@ using namespace arma;
 
 
 // TODO(joshblum): make real variable names
-void get_change_points(mat& spec_mat, int nt,
+void get_change_points(mat& spec_mat,
                        cp_data_t* cp_data)
 {
+  rowvec s = sum(spec_mat, 0); // sum rows
+
   int max_val = 5000;
   int stride = 10;
+  int nt = s.n_rows;
 
   float b = 0.95;
   float bb = 0.995;
@@ -36,12 +39,11 @@ void get_change_points(mat& spec_mat, int nt,
   float np = 0.;
   float nm = 0.;
 
-  rowvec s = sum(spec_mat, 0); // sum rows
   for (int j = 1; j < nt; j++)
   {
-    double s_j = s[j*stride] > max_val ? max_val : s[j*stride];
-    //printf("s_j: %f\n", s_j);
     ct++;
+    double s_j = s[j * stride] > max_val ? max_val : s[j * stride];
+    //printf("s_j: %f\n", s_j);
 
     // signal we are tracking -- short term mean
     m[j] = fmin(m[j - 1] * b + (1 - b) * s_j, max_amp);
