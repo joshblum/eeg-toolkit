@@ -1,8 +1,11 @@
+#include <armadillo>
+
 #include "compute/edflib.h"
 #include "compute/eeg_spectrogram.hpp"
 #include "json11/json11.hpp"
 #include "wslib/server_ws.hpp"
 
+using namespace arma;
 using namespace std;
 using namespace SimpleWeb;
 using namespace json11;
@@ -12,7 +15,7 @@ using namespace json11;
 #define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
-const char* CH_ID_MAP[] = {"LL", "LP", "RP", "RL"};
+const char* CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
 
 void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
                   std::string msg_type, Json content, float* data, size_t data_size)
@@ -48,6 +51,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
            //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
            "Error: " << ec << ", error message: " << ec.message() << endl;
     }
+    free(data);
   }, BINARY_OPCODE);
 }
 
@@ -71,7 +75,7 @@ void send_spectrogram_new(SocketServer<WS>* server,
 void send_spectrogram_update(SocketServer<WS>* server,
                              shared_ptr<SocketServer<WS>::Connection> connection,
                              spec_params_t spec_params, std::string canvasId,
-                             float * spec_arr, size_t data_size)
+                             fmat spec_mat, size_t data_size)
 {
 
   Json content = Json::object
@@ -81,6 +85,8 @@ void send_spectrogram_update(SocketServer<WS>* server,
     {"nfreqs", spec_params.nfreqs},
     {"canvasId", canvasId}
   };
+  float* spec_arr = (float*) malloc(data_size);
+  serialize_spec_mat(&spec_params, spec_mat, spec_arr);
   cout << "Sending content " << content.dump() << endl;
   send_message(server, connection, "spectrogram", content, spec_arr, data_size);
 }
@@ -96,14 +102,14 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   get_eeg_spectrogram_params(&spec_params, filename_c, duration);
   print_spec_params_t(&spec_params);
   size_t data_size = sizeof(float) * spec_params.nblocks * spec_params.nfreqs;
-  const char* ch;
-  for (int ch_id=0; ch_id < NUM_CH; ch_id++) {
-    ch = CH_ID_MAP[ch_id];
-    send_spectrogram_new(server, connection, spec_params, ch);
+  const char* ch_name;
+  for (int ch=0; ch < NUM_CH; ch++) {
+    ch_name = CH_NAME_MAP[ch];
+    send_spectrogram_new(server, connection, spec_params, ch_name);
+    fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
+    eeg_spectrogram(&spec_params, ch, spec_mat);
 
-    float* spec_arr = (float*) malloc(data_size);
-    eeg_spectrogram_handler_as_arr(&spec_params, ch_id, spec_arr);
-    send_spectrogram_update(server, connection, spec_params, ch, spec_arr, data_size);
+    send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat, data_size);
     this_thread::sleep_for(chrono::seconds(5)); // TODO(joshblum): fix this..
   }
   close_edf(filename_c);

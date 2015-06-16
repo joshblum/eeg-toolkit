@@ -115,16 +115,15 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
                                 char* filename, float duration);
 void load_edf(edf_hdr_struct* hdr, char* filename);
 void close_edf(char* filename);
-void cleanup_spectrogram(char* filename, mat spec_mat);
-double* create_buffer(int n, int hdl);
-int read_samples(int handle, int edfsignal, int n, double *buf);
-void hamming(int windowLength, double* buffer);
-void STFT(rowvec& diff, spec_params_t* spec_params, mat& specs);
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, mat& spec_mat);
-void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, mat& spec_mat);
-void eeg_spectrogram_handler_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
-void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat);
-void serialize_spec_mat(mat& spec_mat, spec_params_t* spec_params, float* spec_arr);
+void cleanup_spectrogram(char* filename, fmat spec_mat);
+float* create_buffer(int n);
+int read_samples(int handle, int edfsignal, int n, float *buf);
+void hamming(int windowLength, float* buf);
+void STFT(frowvec& diff, spec_params_t* spec_params, fmat& specs);
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, fmat& spec_mat);
+void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
+void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
+void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

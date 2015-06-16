@@ -7,18 +7,20 @@
 extern "C" {
 #endif
 
+using namespace arma;
+
 typedef struct cp_data
 {
-  arma::rowvec* cp; // name?
-  arma::rowvec* yp; // name?
-  arma::rowvec* cu; // name?
-  arma::rowvec* cl; // name?
-  arma::rowvec* mu; // name?
-  arma::rowvec* m; // name?
+  frowvec* cp; // name?
+  frowvec* yp; // name?
+  frowvec* cu; // name?
+  frowvec* cl; // name?
+  frowvec* mu; // name?
+  frowvec* m; // name?
   int total_count;
 } cp_data_t;
 
-void get_change_points(arma::mat& spec_mat, cp_data_t* cp_data);
+void get_change_points(fmat& spec_mat, cp_data_t* cp_data);
 
 #ifdef __cplusplus
 } /* extern "C" */

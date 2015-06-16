@@ -176,7 +176,7 @@ int edfopen_file_readonly(const char *path, struct edf_hdr_struct *edfhdr, int r
 
 
 
-int edfread_physical_samples(int handle, int edfsignal, int n, double *buf);
+int edfread_physical_samples(int handle, int edfsignal, int n, float *buf);
 
 /* reads n samples from edfsignal, starting from the current sample position indicator, into buf (edfsignal starts at 0) */
 /* the values are converted to their physical values e.g. microVolts, beats per minute, etc. */

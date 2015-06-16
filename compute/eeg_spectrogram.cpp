@@ -251,18 +251,17 @@ void cleanup_spectrogram(char* filename, float* spec_arr)
   free(spec_arr);
 }
 
-double* create_buffer(int n, int hdl)
+float* create_buffer(int n)
 {
-  double* buf = (double * ) malloc(sizeof(double[n]));
+  float* buf = (float*) malloc(sizeof(float) *n);
   if (buf == NULL)
   {
     printf("\nmalloc error\n");
-    edfclose_file(hdl);
   }
   return buf;
 }
 
-int read_samples(int hdl, int ch, int n, double *buf)
+int read_samples(int hdl, int ch, int n, float *buf)
 {
   int bytes_read = edfread_physical_samples(hdl, ch, n, buf);
 
@@ -282,15 +281,15 @@ int read_samples(int hdl, int ch, int n, double *buf)
 }
 
 // Create a hamming window of windowLength samples in buffer
-void hamming(int windowLength, double* buffer)
+void hamming(int windowLength, float* buf)
 {
   for (int i = 0; i < windowLength; i++)
   {
-    buffer[i] = 0.54 - (0.46 * cos( 2 * M_PI * (i / ((windowLength - 1) * 1.0))));
+    buf[i] = 0.54 - (0.46 * cos( 2 * M_PI * (i / ((windowLength - 1) * 1.0))));
   }
 }
 
-static inline double abs(fftw_complex* arr, int i)
+static inline float abs(fftw_complex* arr, int i)
 {
   return sqrt(arr[i][0] * arr[i][0] + arr[i][1] * arr[i][1]);
 }
@@ -300,7 +299,7 @@ static inline double abs(fftw_complex* arr, int i)
  * Fill the `spec_mat` matrix with values for the spectrogram for the given diff.
  * `spec_mat` is expected to be initialized and the results are added to allow averaging
  */
-void STFT(rowvec& diff, spec_params_t* spec_params, mat& spec_mat)
+void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
 {
   fftw_complex    *data, *fft_result;
   fftw_plan       plan_forward;
@@ -315,11 +314,12 @@ void STFT(rowvec& diff, spec_params_t* spec_params, mat& spec_mat)
   data = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
   fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
   // TODO keep plans in memory until end, create plans once and cache?
+  // TODO look into using arma memptr instead of copying data
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
                                   FFTW_FORWARD, FFTW_ESTIMATE);
 
   // Create a hamming window of appropriate length
-  double window[nfft];
+  float window[nfft];
   hamming(nfft, window);
 
   for (int idx = 0; idx < nblocks; idx++)
@@ -376,32 +376,27 @@ void STFT(rowvec& diff, spec_params_t* spec_params, mat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, mat& spec_mat)
+void eeg_file_spectrogram_handler(char* filename, float duration, int ch, fmat& spec_mat)
 {
   spec_params_t spec_params;
   get_eeg_spectrogram_params(&spec_params, filename, duration);
   print_spec_params_t(&spec_params);
-  eeg_spectrogram_handler(&spec_params, ch, spec_mat);
+  eeg_spectrogram(&spec_params, ch, spec_mat);
 }
 
-void eeg_spectrogram_handler(spec_params_t* spec_params, int ch, mat& spec_mat)
-{
-  eeg_spectrogram(spec_params, ch, spec_mat);
-}
-
-void eeg_spectrogram_handler_as_arr(spec_params_t* spec_params, int ch, float* spec_arr)
+void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr)
 {
   if (spec_arr == NULL)
   {
-    spec_arr = (float *) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
+    spec_arr = (float*) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
 
   }
-  mat spec_mat;
+  fmat spec_mat;
   eeg_spectrogram(spec_params, ch, spec_mat);
-  serialize_spec_mat(spec_mat, spec_params, spec_arr);
+  serialize_spec_mat(spec_params, spec_mat, spec_arr);
 }
 
-void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
+void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 {
   if (spec_params->hdl == -1)
   {
@@ -412,8 +407,8 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
   // TODO chunking?
   // write edf method to do diff on the fly?
   int nsamples = spec_params->nsamples;
-  double* buf1 = create_buffer(nsamples, spec_params->hdl);
-  double* buf2 = create_buffer(nsamples, spec_params->hdl);
+  float* buf1 = create_buffer(nsamples);
+  float* buf2 = create_buffer(nsamples);
   if (buf1 == NULL || buf2 == NULL)
   {
     return;
@@ -440,9 +435,9 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
     }
 
     // TODO use rowvec::fixed with fixed size chunks
-    rowvec v1 = rowvec(buf1, nsamples);
-    rowvec v2 = rowvec(buf2, nsamples);
-    rowvec diff = v2 - v1;
+    frowvec v1 = frowvec(buf1, nsamples);
+    frowvec v2 = frowvec(buf2, nsamples);
+    frowvec diff = v2 - v1;
 
     // fill in the spec matrix with fft values
     STFT(diff, spec_params, spec_mat);
@@ -459,7 +454,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, mat& spec_mat)
  * Transform the mat to a float* for transfer
  * via websockets
  */
-void serialize_spec_mat(mat& spec_mat, spec_params_t* spec_params, float* spec_arr)
+void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr)
 {
   if (spec_params->hdl == -1)
   {

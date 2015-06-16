@@ -4,10 +4,10 @@ using namespace arma;
 
 
 // TODO(joshblum): make real variable names
-void get_change_points(mat& spec_mat,
+void get_change_points(fmat& spec_mat,
                        cp_data_t* cp_data)
 {
-  rowvec s = sum(spec_mat, 0); // sum rows
+  frowvec s = sum(spec_mat, 0); // sum rows
 
   int max_val = 5000;
   int stride = 10;
@@ -23,15 +23,15 @@ void get_change_points(mat& spec_mat,
   int h = 5;
   int H = h * sigma;
 
-  rowvec m = zeros<rowvec>(nt);
+  frowvec m = zeros<frowvec>(nt);
   m(0) = 1000;
-  rowvec mu = zeros<rowvec>(nt);
+  frowvec mu = zeros<frowvec>(nt);
   mu(0) = 1000;
 
-  rowvec cu = zeros<rowvec>(nt);
-  rowvec cl = zeros<rowvec>(nt);
+  frowvec cu = zeros<frowvec>(nt);
+  frowvec cl = zeros<frowvec>(nt);
 
-  rowvec cp = rowvec(nt);
+  frowvec cp = frowvec(nt);
 
   int ct = 0;
   int total_count = 0;
@@ -83,7 +83,7 @@ void get_change_points(mat& spec_mat,
     }
   }
   cp.head(total_count);
-  rowvec yp = rowvec(total_count);
+  frowvec yp = frowvec(total_count);
   yp.fill(max_amp);
 
   cp_data->cp = &cp;

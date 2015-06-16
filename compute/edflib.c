@@ -809,7 +809,7 @@ void edfrewind(int handle, int edfsignal)
 }
 
 
-int edfread_physical_samples(int handle, int edfsignal, int n, double *buf)
+int edfread_physical_samples(int handle, int edfsignal, int n, float *buf)
 {
   int bytes_per_smpl=2,
       tmp,
@@ -948,7 +948,7 @@ int edfread_physical_samples(int handle, int edfsignal, int n, double *buf)
       }
       var.four[1] = tmp;
 
-      buf[i] = phys_bitvalue * (phys_offset + (double)var.two_signed[0]);
+      buf[i] = (float) phys_bitvalue * (phys_offset + (double)var.two_signed[0]);
 
       sample_pntr++;
     }
@@ -984,7 +984,7 @@ int edfread_physical_samples(int handle, int edfsignal, int n, double *buf)
         var.four[3] = 0x00;
       }
 
-      buf[i] = phys_bitvalue * (phys_offset + (double)var.one_signed);
+      buf[i] = (float) phys_bitvalue * (phys_offset + (double)var.one_signed);
 
       sample_pntr++;
     }

@@ -8,14 +8,14 @@
 using namespace arma;
 
 
-void example_spectrogram(mat& spec_mat, spec_params_t* spec_params)
+void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
 {
   unsigned long long start = getticks();
   print_spec_params_t(spec_params);
-  eeg_spectrogram_handler(spec_params, LL, spec_mat);
+  eeg_spectrogram(spec_params, LL, spec_mat);
   unsigned long long end = getticks();
   log_time_diff(end - start);
-  printf("Spectrogram shape: (%d, %d)\n",
+  printf("Spectrogram shape as_mat: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);
   printf("Sample data: [\n[ ");
   for (int i = 0; i < NUM_SAMPLES; i++)
@@ -33,13 +33,13 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
 {
   unsigned long long start = getticks();
   print_spec_params_t(spec_params);
-  eeg_spectrogram_handler_as_arr(spec_params, LL, spec_arr);
+  eeg_spectrogram_as_arr(spec_params, LL, spec_arr);
   unsigned long long end = getticks();
   log_time_diff(end - start);
   printf("Spectrogram shape: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);
 
-  printf("Sample data: [\n[ ");
+  printf("Sample data as_arr: [\n[ ");
   for (int i = 0; i < NUM_SAMPLES; i++)
   {
     for (int j = 0; j < NUM_SAMPLES; j++)
@@ -50,7 +50,7 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
   }
   printf("]]\n");
 }
-void example_change_points(mat& spec_mat)
+void example_change_points(fmat& spec_mat)
 {
   cp_data_t cp_data;
   get_change_points(spec_mat, &cp_data);
@@ -85,12 +85,12 @@ int main(int argc, char *argv[])
     printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
     spec_params_t spec_params;
     get_eeg_spectrogram_params(&spec_params, filename, duration);
-    mat spec_mat = mat(spec_params.nfreqs, spec_params.nblocks);
+    fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
     close_edf(filename);
     example_change_points(spec_mat);
 
-    float* spec_arr = (float *) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
+    float* spec_arr = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
     get_eeg_spectrogram_params(&spec_params, filename, duration);
     example_spectrogram_as_arr(spec_arr, &spec_params);
