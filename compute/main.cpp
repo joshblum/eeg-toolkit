@@ -10,14 +10,14 @@
 using namespace arma;
 
 
-void print_frowvec(char* name, frowvec* vector)
+void print_frowvec(char* name, frowvec vector)
 {
-  printf("%s: [\n", name);
+  printf("%s: [ ", name);
   for (int i = 0; i < NUM_SAMPLES; i++)
   {
-    printf("%.5f,", vector->at(i));
+    printf("%.2f, ", vector[i]);
   }
-  printf("\n]\n");
+  printf("]\n");
 }
 
 
@@ -66,14 +66,15 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
 void example_change_points(fmat& spec_mat)
 {
   cp_data_t cp_data;
+  init_cp_data_t(&cp_data, spec_mat.n_rows);
   get_change_points(spec_mat, &cp_data);
   printf("Total change points found: %d\n", cp_data.total_count);
   print_frowvec("cp", cp_data.cp);
-  print_frowvec("cp", cp_data.yp);
-  print_frowvec("cp", cp_data.cu);
-  print_frowvec("cp", cp_data.cl);
-  print_frowvec("cp", cp_data.mu);
-  print_frowvec("cp", cp_data.m);
+  print_frowvec("yp", cp_data.yp);
+  print_frowvec("cu", cp_data.cu);
+  print_frowvec("cl", cp_data.cl);
+  print_frowvec("mu", cp_data.mu);
+  print_frowvec("m", cp_data.m);
 }
 
 int main(int argc, char *argv[])
@@ -89,8 +90,8 @@ int main(int argc, char *argv[])
     else
     {
       // default filename
-      // filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf";
-      filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
+      filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf";
+      //filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
 
     }
     if (argc == 3)
@@ -104,6 +105,9 @@ int main(int argc, char *argv[])
     printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
     spec_params_t spec_params;
     get_eeg_spectrogram_params(&spec_params, filename, duration);
+    if (spec_params.hdl == -1) {
+      exit(1);
+    }
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
     close_edf(filename);

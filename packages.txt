@@ -1,6 +1,7 @@
 cmake
 libopenblas-dev
 liblapack-dev
+libboost-dev
 libboost-all-dev
 
 python-numpy

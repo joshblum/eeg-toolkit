@@ -11,15 +11,16 @@ using namespace arma;
 
 typedef struct cp_data
 {
-  frowvec* cp; // name?
-  frowvec* yp; // name?
-  frowvec* cu; // name?
-  frowvec* cl; // name?
-  frowvec* mu; // name?
-  frowvec* m; // name?
+  frowvec cp; // name?
+  frowvec yp; // name?
+  frowvec cu; // name?
+  frowvec cl; // name?
+  frowvec mu; // name?
+  frowvec m; // name?
   int total_count;
 } cp_data_t;
 
+void init_cp_data_t(cp_data_t* cp_data, int nt);
 void get_change_points(fmat& spec_mat, cp_data_t* cp_data);
 
 #ifdef __cplusplus
