@@ -2,7 +2,8 @@
 
 CXX = g++
 CSRC := compute/edflib.c
-CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp ws_server.cpp
+CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp\
+	compute/eeg_change_point.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 TARGET := ws_server
 CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations

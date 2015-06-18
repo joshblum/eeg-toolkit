@@ -2,6 +2,7 @@
 
 #include "compute/edflib.h"
 #include "compute/eeg_spectrogram.hpp"
+#include "compute/eeg_change_point.hpp"
 #include "json11/json11.hpp"
 #include "wslib/server_ws.hpp"
 
@@ -40,7 +41,6 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   if (data != NULL)
   {
     data_ss.write((char*) data, data_size);
-    free(data);
   }
 
   // server.send is an asynchronous function
@@ -49,10 +49,31 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
     if (ec)
     {
       cout << "Server: Error sending message. " <<
-           //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
+           // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html
+           // Error Codes for error code meanings
            "Error: " << ec << ", error message: " << ec.message() << endl;
     }
   }, BINARY_OPCODE);
+}
+
+void log_json(Json content) {
+  cout << "Sending content " << content.dump() << endl;
+}
+
+void send_frowvec(SocketServer<WS>* server,
+                  shared_ptr<SocketServer<WS>::Connection> connection,
+                  std::string canvasId, std::string type,
+                  frowvec* vector)
+{
+
+  Json content = Json::object
+  {
+    {"action", "change_points"},
+    {"type", type},
+    {"canvasId", canvasId}
+  };
+  log_json(content);
+  send_message(server, connection, "spectrogram", content, vector->memptr(), vector->n_elem);
 }
 
 void send_spectrogram_new(SocketServer<WS>* server,
@@ -68,14 +89,14 @@ void send_spectrogram_new(SocketServer<WS>* server,
     {"length", spec_params.spec_len},
     {"canvasId", canvasId}
   };
-  cout << "Sending content " << content.dump() << endl;
+  log_json(content);
   send_message(server, connection, "spectrogram", content, NULL, -1);
 }
 
 void send_spectrogram_update(SocketServer<WS>* server,
                              shared_ptr<SocketServer<WS>::Connection> connection,
                              spec_params_t spec_params, std::string canvasId,
-                             fmat spec_mat, size_t data_size)
+                             fmat& spec_mat)
 {
 
   Json content = Json::object
@@ -85,10 +106,21 @@ void send_spectrogram_update(SocketServer<WS>* server,
     {"nfreqs", spec_params.nfreqs},
     {"canvasId", canvasId}
   };
+  size_t data_size = sizeof(float) * spec_mat.n_elem;
   float* spec_arr = (float*) malloc(data_size);
   serialize_spec_mat(&spec_params, spec_mat, spec_arr);
-  cout << "Sending content " << content.dump() << endl;
+  log_json(content);
   send_message(server, connection, "spectrogram", content, spec_arr, data_size);
+  free(spec_arr);
+}
+
+void send_change_points(SocketServer<WS>* server,
+                        shared_ptr<SocketServer<WS>::Connection> connection,
+                        std::string canvasId,
+                        cp_data_t* cp_data)
+{
+  send_frowvec(server, connection, canvasId, "change_points", cp_data->cp);
+  send_frowvec(server, connection, canvasId, "summed_signal", cp_data->m);
 }
 
 void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
@@ -101,7 +133,6 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   strcpy(filename_c, filename.c_str());
   get_eeg_spectrogram_params(&spec_params, filename_c, duration);
   print_spec_params_t(&spec_params);
-  size_t data_size = sizeof(float) * spec_params.nblocks * spec_params.nfreqs;
   const char* ch_name;
   for (int ch = 0; ch < NUM_CH; ch++)
   {
@@ -110,7 +141,11 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     eeg_spectrogram(&spec_params, ch, spec_mat);
 
-    send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat, data_size);
+    cp_data_t cp_data;
+    get_change_points(spec_mat, &cp_data);
+
+    send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
+    send_change_points(server, connection, ch_name, &cp_data);
     this_thread::sleep_for(chrono::seconds(5)); // TODO(joshblum): fix this..
   }
   close_edf(filename_c);

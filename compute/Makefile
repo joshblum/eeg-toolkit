@@ -10,7 +10,8 @@ OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 
 CFLAGS = -Wall -Wextra -Wshadow -Wformat-nonliteral -Wformat-security\
 				 -Wtype-limits -fPIC -std=c++11 -g\
-				 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE
+				 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE\
+				 -Wno-c++11-compat-deprecated-writable-strings
 
 ifeq ($(DEBUG),1)
 	 CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions

@@ -1,7 +1,6 @@
 #include "eeg_change_point.hpp"
-#define NUM_SAMPLES 10
-using namespace arma;
 
+using namespace arma;
 
 // TODO(joshblum): make real variable names
 void get_change_points(fmat& spec_mat,

@@ -4,8 +4,21 @@
 
 #include "eeg_spectrogram.hpp"
 #include "eeg_change_point.hpp"
+
 #define NUM_SAMPLES 10
+
 using namespace arma;
+
+
+void print_frowvec(char* name, frowvec* vector)
+{
+  printf("%s: [\n", name);
+  for (int i = 0; i < NUM_SAMPLES; i++)
+  {
+    printf("%.5f,", vector->at(i));
+  }
+  printf("\n]\n");
+}
 
 
 void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
@@ -55,6 +68,12 @@ void example_change_points(fmat& spec_mat)
   cp_data_t cp_data;
   get_change_points(spec_mat, &cp_data);
   printf("Total change points found: %d\n", cp_data.total_count);
+  print_frowvec("cp", cp_data.cp);
+  print_frowvec("cp", cp_data.yp);
+  print_frowvec("cp", cp_data.cu);
+  print_frowvec("cp", cp_data.cl);
+  print_frowvec("cp", cp_data.mu);
+  print_frowvec("cp", cp_data.m);
 }
 
 int main(int argc, char *argv[])
