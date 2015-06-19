@@ -5,3 +5,4 @@ homebrew/science/armadillo
 fftw
 boost
 cmake
+valgrind

@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
     else
     {
       // default filename
-      filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf";
-      //filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
+      // filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf";
+      filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
 
     }
     if (argc == 3)

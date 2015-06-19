@@ -140,6 +140,7 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   const char* ch_name;
   for (int ch = 0; ch < NUM_CH; ch++)
   {
+    cout << endl; // print newline between each spectrogram computation
     ch_name = CH_NAME_MAP[ch];
     send_spectrogram_new(server, connection, spec_params, ch_name);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
