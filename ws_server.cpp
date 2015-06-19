@@ -1,4 +1,5 @@
 #include <armadillo>
+#include <mutex>
 
 #include "compute/edflib.h"
 #include "compute/eeg_spectrogram.hpp"
@@ -17,11 +18,12 @@ using namespace json11;
 #define BINARY_OPCODE 130
 
 const char* CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
+std::mutex server_send_mutex;
 
 void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
                   std::string msg_type, Json content, float* data, size_t data_size)
 {
-
+  server_send_mutex.lock();
   Json msg = Json::object
   {
     {"type", msg_type},
@@ -46,6 +48,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   // server.send is an asynchronous function
   server->send(connection, data_ss, [](const boost::system::error_code & ec)
   {
+    server_send_mutex.unlock();
     if (ec)
     {
       cout << "Server: Error sending message. " <<
@@ -146,7 +149,6 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
 
     send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
     send_change_points(server, connection, ch_name, &cp_data);
-    this_thread::sleep_for(chrono::seconds(5)); // TODO(joshblum): fix this..
   }
   close_edf(filename_c);
 }
