@@ -59,14 +59,15 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   }, BINARY_OPCODE);
 }
 
-void log_json(Json content) {
+void log_json(Json content)
+{
   cout << "Sending content " << content.dump() << endl;
 }
 
 void send_frowvec(SocketServer<WS>* server,
                   shared_ptr<SocketServer<WS>::Connection> connection,
                   std::string canvasId, std::string type,
-                  frowvec* vector)
+                  frowvec vector)
 {
 
   Json content = Json::object
@@ -76,7 +77,7 @@ void send_frowvec(SocketServer<WS>* server,
     {"canvasId", canvasId}
   };
   log_json(content);
-  send_message(server, connection, "spectrogram", content, vector->memptr(), vector->n_elem);
+  send_message(server, connection, "spectrogram", content, vector.memptr(), vector.n_elem);
 }
 
 void send_spectrogram_new(SocketServer<WS>* server,
