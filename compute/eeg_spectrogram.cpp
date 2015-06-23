@@ -177,6 +177,13 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   if (hdr->filetype < 0)
   {
     spec_params->hdl = -1;
+    spec_params->fs = 0;
+    spec_params->shift = 0;
+    spec_params->nstep = 0;
+    spec_params->nsamples = 0;
+    spec_params->nblocks = 0;
+    spec_params->nfreqs = 0;
+    spec_params->spec_len = 0;
     return;
   }
 
