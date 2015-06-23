@@ -23,7 +23,6 @@ std::mutex server_send_mutex;
 void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
                   std::string msg_type, Json content, float* data, size_t data_size)
 {
-  server_send_mutex.lock();
   Json msg = Json::object
   {
     {"type", msg_type},
@@ -45,6 +44,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
     data_ss.write((char*) data, data_size);
   }
 
+  server_send_mutex.lock();
   // server.send is an asynchronous function
   server->send(connection, data_ss, [](const boost::system::error_code & ec)
   {
@@ -141,6 +141,7 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   for (int ch = 0; ch < NUM_CH; ch++)
   {
     cout << endl; // print newline between each spectrogram computation
+    unsigned long long start = getticks();
     ch_name = CH_NAME_MAP[ch];
     send_spectrogram_new(server, connection, spec_params, ch_name);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
@@ -151,6 +152,8 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
 
     send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
     send_change_points(server, connection, ch_name, &cp_data);
+    unsigned long long end = getticks();
+    log_time_diff(end - start);
   }
   close_edf(filename_c);
 }
