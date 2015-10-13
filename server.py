@@ -26,8 +26,7 @@ from spectrogram import eeg_ch_spectrogram
 from spectrogram import get_audio_spectrogram_params
 from spectrogram import get_eeg_spectrogram_params
 from spectrogram import spectrogram
-from spectrogram import load_h5py_spectrofile
-from spectrogram import CHANNELS
+from constants import CHANNELS
 
 AUDIO = 'audio'
 EEG = 'eeg'
@@ -313,7 +312,7 @@ class MainHandler(RequestHandler):
 def make_app():
   handlers = [
       (r'/', MainHandler),
-      (r'/spectrogram', SpectrogramWebSocket),
+      (r'/compute/spectrogram/', SpectrogramWebSocket),
       (r'/(.*)', StaticFileHandler, {
           'path': ''
       }),

@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
     else
     {
       // default filename
-      // filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf";
-      filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf";
+      filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-005.edf";
+      // filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-005.edf";
 
     }
     if (argc == 3)
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-      duration = 4.0; // default duration
+      duration = 10.0; // default duration
     }
     printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
     spec_params_t spec_params;

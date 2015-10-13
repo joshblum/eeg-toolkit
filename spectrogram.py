@@ -7,71 +7,18 @@ import numpy as np
 from collections import namedtuple
 from scipy import signal
 from spectrum import dpss
-from eegtools.io import load_edf
 
 from helpers import grouper
+from helpers import get_array_data
+from constants import CHANNELS
+from constants import DIFFERENCE_PAIRS
+from constants import CHANNEL_INDEX
 
-
-LL = 0
-LP = 1
-RP = 2
-RL = 3
-CHANNELS = {
-    'LL': LL,
-    'LP': LP,
-    'RP': RP,
-    'RL': RL,
-}
-DIFFERENCE_PAIRS = {
-    'LL': [
-        ('fp1', 'f7'),
-        ('f7', 't3'),
-        ('t3', 't5'),
-        ('t5', 'o1'),
-    ],
-    'LP': [
-        ('fp1', 'f3'),
-        ('f3', 'c3'),
-        ('c3', 'p3'),
-        ('p3', 'o1'),
-    ],
-    'RP': [
-        ('fp2', 'f4'),
-        ('f4', 'c4'),
-        ('c4', 'p4'),
-        ('p4', 'o2'),
-    ],
-    'RL': [
-        ('fp2', 'f8'),
-        ('f8', 't4'),
-        ('t4', 't6'),
-        ('t6', 'o2'),
-    ],
-}
-
-CHANNEL_INDEX = {
-    'fp1': 0,
-    'f3': 1,
-    'c3': 2,
-    'p3': 3,
-    'o1': 4,
-    'fp2': 5,
-    'f4': 6,
-    'c4': 7,
-    'p4': 8,
-    'o2': 9,
-    'f7': 10,
-    't3': 11,
-    't5': 12,
-    'f8': 13,
-    't4': 14,
-    't6': 15,
-}
 
 CHUNK_HOURS = 1.0
 
 EEGSpecParams = namedtuple(
-    'SpecParams', ['filename', 'duration',
+    'SpecParams', ['mrn', 'duration',
                    'chunksize', 'fs', 'data',
                    'shift', 'spec_len',
                    'nstep', 'trial_avg',
@@ -197,45 +144,9 @@ def _mtfftc(data, tapers, nfft, fs):
   return J
 
 
-def load_h5py_spectrofile(filename):
-  f = h5py.File(filename, 'r')
-  data = f['data']
-  fs = f['Fs'][0][0]
-  return data, fs
-
-
-def load_edf_spectrofile(filename):
-  edf = load_edf(filename)
-
-  fs = edf.sample_rate
-  # convert the edf channels to match the index
-  data = [None] * len(CHANNEL_INDEX)
-  for edf_idx, ch in enumerate(edf.chan_lab):
-    spec_idx = CHANNEL_INDEX.get(ch.lower())
-    if spec_idx is not None:
-      data[spec_idx] = edf.X[edf_idx, :]
-
-  return np.array(data).T, fs
-
-
-def load_spectrofile(filename):
-  spectrofile_map = {
-      'eeg': load_h5py_spectrofile,
-      'edf': load_edf_spectrofile,
-  }
-
-  try:
-    file_ext = filename.split('.')[-1]
-  except IndexError:
-    file_ext = ''
-
-  return spectrofile_map.get(file_ext, load_h5py_spectrofile)(filename)
-
-
-def get_eeg_spectrogram_params(filename, duration, pad=0, fpass=None,
+def get_eeg_spectrogram_params(mrn, duration, pad=0, fpass=None,
                                trial_avg=False, moving_win=None, tapers=None):
-
-  data, fs = load_spectrofile(filename)
+  data, fs = get_array_data(mrn)
   if fpass is None:
     fpass = [0, 55]
   if moving_win is None:
@@ -257,7 +168,7 @@ def get_eeg_spectrogram_params(filename, duration, pad=0, fpass=None,
   spec_len = int(nsamples / fs)
 
   return EEGSpecParams(
-      filename=filename, duration=duration,
+      mrn=mrn, duration=duration,
       fs=fs, shift=shift, data=data,
       nstep=nstep, nfft=nfft, findx=findx,
       nfreqs=nfreqs, nblocks=nblocks,
@@ -269,7 +180,7 @@ def get_eeg_spectrogram_params(filename, duration, pad=0, fpass=None,
 
 def print_spec_params_t(spec_params):
   print 'spec_params: {'
-  print '\tfilename %s' % spec_params.filename
+  print '\tmrn %s' % spec_params.mrn
   print '\tduration %.2f' % spec_params.duration
   print '\tnfft: %d' % spec_params.nfft
   print '\tnstep: %d' % spec_params.nstep
@@ -309,9 +220,9 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
 
 
 @profile
-def on_eeg_file_spectrogram_profile(filename, duration):
+def on_eeg_file_spectrogram_profile(mrn, duration):
 
-  spec_params = get_eeg_spectrogram_params(filename, duration)
+  spec_params = get_eeg_spectrogram_params(mrn, duration)
   print_spec_params_t(spec_params)
 
   # ok lets just chunk a bit of this mess
@@ -321,7 +232,7 @@ def on_eeg_file_spectrogram_profile(filename, duration):
 #  for chunk in grouper(data, spec_params.chunksize, spec_params.shift):
   for chunk in [data, ]:
     chunk = np.array(chunk)
-    for ch in ['LL']:  # CHANNELS:
+    for ch in CHANNELS:
       spec = eeg_ch_spectrogram(ch, chunk, spec_params)
   t1 = time.time()
   print 'Total time: %s' % (t1 - t0)
@@ -416,8 +327,8 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
   return specs.T
 
 
-def main(filename, duration):
-  spec = on_eeg_file_spectrogram_profile(args.filename, args.duration)
+def main(mrn, duration):
+  spec = on_eeg_file_spectrogram_profile(mrn, duration)
   print 'Spectrogram shape:',  str(spec.shape)
   print 'Sample data:',  spec[:10, :10]
 
@@ -427,10 +338,12 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(
       description='Profile spectrogram code.')
-  parser.add_argument('-f', '--filename', default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf',
-                      dest='filename', help='filename for spectrogram data.')
+  parser.add_argument('-mrn', '--medical-record-number',
+                      default='007',
+                      dest='mrn',
+                      help='medical record number for spectrogram data.')
   parser.add_argument('-d', '--duration', default=4.0, type=float,
                       dest='duration', help='duration of the data')
 
   args = parser.parse_args()
-  main(args.filename, args.duration)
+  main(args.mrn, args.duration)

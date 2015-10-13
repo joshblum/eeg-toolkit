@@ -141,19 +141,19 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   for (int ch = 0; ch < NUM_CH; ch++)
   {
     cout << endl; // print newline between each spectrogram computation
-    unsigned long long start = getticks();
     ch_name = CH_NAME_MAP[ch];
     send_spectrogram_new(server, connection, spec_params, ch_name);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
+    unsigned long long start = getticks();
     eeg_spectrogram(&spec_params, ch, spec_mat);
+    unsigned long long end = getticks();
+    log_time_diff(end - start);
 
     cp_data_t cp_data;
     get_change_points(spec_mat, &cp_data);
 
     send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
     send_change_points(server, connection, ch_name, &cp_data);
-    unsigned long long end = getticks();
-    log_time_diff(end - start);
   }
   close_edf(filename_c);
 }
