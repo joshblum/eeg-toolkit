@@ -10,7 +10,6 @@
 #include <sys/time.h>
 
 using namespace arma;
-using namespace std;
 
 // TODO(joshblum): this needs to be a concurrent structure
 static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
