@@ -169,7 +169,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   def send_spectrogram_new(self, spec_params, canvas_id=None):
     nblocks, nfreqs = downsample_extent(
         spec_params.nblocks, spec_params.nfreqs)
-    print "spec_new:::shape:", (nblocks, nfreqs), "ch:", canvas_id
+    print 'spec_new:::shape:', (nblocks, nfreqs), 'ch:', canvas_id
     self.send_message('spectrogram',
                       {'action': 'new',
                        'nblocks': nblocks,
@@ -183,7 +183,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     spec = downsample(spec)
     spec = astype(spec)
     nblocks, nfreqs = spec.shape
-    print "spec_update:::shape:", spec.shape, "ch:", canvas_id
+    print 'spec_update:::shape:', spec.shape, 'ch:', canvas_id
     self.send_message('spectrogram',
                       {'action': 'update',
                        'nblocks': nblocks,
@@ -220,7 +220,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     try:
       handler(filename, nfft, duration, overlap)
       t1 = time.time()
-      print "Total time:", t1 - t0
+      print 'Total time:', t1 - t0
     except RuntimeError as e:  # error loading file
       error_msg = 'Filename: {} could not be loaded.\n{}'.format(filename, e)
       self.send_message('error', {
