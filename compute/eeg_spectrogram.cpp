@@ -10,6 +10,7 @@
 #include <sys/time.h>
 
 using namespace arma;
+using namespace std;
 
 // TODO(joshblum): this needs to be a concurrent structure
 static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
@@ -105,7 +106,7 @@ void log_time_diff(unsigned long long ticks)
 void print_spec_params_t(spec_params_t* spec_params)
 {
   printf("spec_params: {\n");
-  printf("\tfilename: %s\n", spec_params->filename);
+  printf("\tmrn: %s\n", spec_params->mrn);
   printf("\tduration: %.2f\n", spec_params->duration);
   printf("\thdl: %d\n", spec_params->hdl);
   printf("\tnfft: %d\n", spec_params->nfft);
@@ -163,15 +164,15 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* filename, float duration)
+                                char* mrn, float duration)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
-  spec_params->filename = filename;
+  spec_params->mrn = mrn;
   spec_params->duration = duration;
 
   edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
-  load_edf(hdr, filename);
+  load_edf(hdr, mrn);
   spec_params->hdl = hdr->handle;
   // check for errors
   if (hdr->filetype < 0)
@@ -202,8 +203,10 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
 
-void load_edf(edf_hdr_struct* hdr, char* filename)
+void load_edf(edf_hdr_struct* hdr, char* mrn)
 {
+  char* filename = (char*) malloc(sizeof(char)*100);
+  mrn_to_filename(mrn, filename);
   edf_hdr_struct* cached_hdr = get_hdr_cache(filename);
   if (cached_hdr != NULL)
   {
@@ -243,8 +246,10 @@ void load_edf(edf_hdr_struct* hdr, char* filename)
   set_hdr_cache(hdr);
 }
 
-void close_edf(char* filename)
+void close_edf(char* mrn)
 {
+  char* filename = (char*) malloc(sizeof(char)*100);
+  mrn_to_filename(mrn, filename);
   edf_hdr_struct* hdr = get_hdr_cache(filename);
   if (hdr != NULL)
   {
@@ -253,9 +258,11 @@ void close_edf(char* filename)
   }
 }
 
-void cleanup_spectrogram(char* filename, float* spec_arr)
+void cleanup_spectrogram(char* mrn, float* spec_arr)
 {
-  close_edf(filename);
+  // TODO(joshblum): convert to class method `close_stream` based on the
+  // backend used
+  close_edf(mrn);
   free(spec_arr);
 }
 
@@ -269,8 +276,16 @@ float* create_buffer(int n)
   return buf;
 }
 
-int read_samples(int hdl, int ch, int n, float *buf)
+void get_array_data(spec_params_t* spec_params, int ch, int n, float *buf)
 {
+  //TODO(joshblum): support different types of backends
+  //global config? variable passed in?
+  read_edf_data(spec_params->hdl, ch, n, buf);
+}
+
+int read_edf_data(int hdl, int ch, int n, float* buf)
+{
+
   int bytes_read = edfread_physical_samples(hdl, ch, n, buf);
 
   if (bytes_read == -1)
@@ -384,10 +399,10 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, fmat& spec_mat)
+void eeg_file_spectrogram_handler(char* mrn, float duration, int ch, fmat& spec_mat)
 {
   spec_params_t spec_params;
-  get_eeg_spectrogram_params(&spec_params, filename, duration);
+  get_eeg_spectrogram_params(&spec_params, mrn, duration);
   print_spec_params_t(&spec_params);
   eeg_spectrogram(&spec_params, ch, spec_mat);
 }
@@ -425,22 +440,14 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   // nfreqs x nblocks matrix
   spec_mat.fill(0);
 
-  int ch_idx1, ch_idx2, n;
+  int ch_idx1, ch_idx2;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
-  n = read_samples(spec_params->hdl, ch_idx1, nsamples, buf1);
-  if (n == - 1)
-  {
-    return;
-  }
+  get_array_data(spec_params, ch_idx1, nsamples, buf1);
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    n = read_samples(spec_params->hdl, ch_idx2, nsamples, buf2);
-    if (n == -1 )
-    {
-      return;
-    }
+    get_array_data(spec_params, ch_idx2, nsamples, buf2);
 
     // TODO use rowvec::fixed with fixed size chunks
     frowvec v1 = frowvec(buf1, nsamples);
@@ -475,4 +482,23 @@ void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_
       *(spec_arr + i + j * spec_params->nfreqs) = (float) spec_mat(i, j);
     }
   }
+}
+
+/*
+ * Transform a medical record number (mrn) to a filename. This
+ * should only be used for temporary testing before a real backend is
+ * implemented.
+ */
+
+void mrn_to_filename(char* mrn, char* filename) {
+  char* basedir;
+#ifdef __APPLE__
+    basedir = "/Users/joshblum/Dropbox (MIT)";
+#elif __linux__
+    basedir = "/home/ubuntu";
+#endif
+   sprintf(filename,
+       "%s/MIT-EDFs/MIT-CSAIL-%s.edf",
+       basedir,
+       mrn);
 }

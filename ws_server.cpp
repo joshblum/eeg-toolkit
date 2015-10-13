@@ -129,13 +129,13 @@ void send_change_points(SocketServer<WS>* server,
 
 void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
 {
-  std::string filename = data["filename"].string_value();
+  std::string mrn = data["mrn"].string_value();
   float duration = data["duration"].number_value();
 
   spec_params_t spec_params;
-  char *filename_c = new char[filename.length() + 1];
-  strcpy(filename_c, filename.c_str());
-  get_eeg_spectrogram_params(&spec_params, filename_c, duration);
+  char *mrn_c = new char[mrn.length() + 1];
+  strcpy(mrn_c, mrn.c_str());
+  get_eeg_spectrogram_params(&spec_params, mrn_c, duration);
   print_spec_params_t(&spec_params);
   const char* ch_name;
   for (int ch = 0; ch < NUM_CH; ch++)
@@ -155,7 +155,7 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
     send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
     send_change_points(server, connection, ch_name, &cp_data);
   }
-  close_edf(filename_c);
+  close_edf(mrn_c);
 }
 
 void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, std::string type, Json content)

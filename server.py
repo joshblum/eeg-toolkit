@@ -138,7 +138,7 @@ class SpectrogramWebSocket(JSONWebSocket):
   data blob, or as a file name.
 
   This implements two message types:
-  - request_file_spectrogram, which needs a filename, and optionally
+  - request_file_spectrogram, which needs a data identifier, and optionally
     `nfft` and `overlap`.
   - request_data_spectrogram, which needs the file as a binary data
     blob, and optionally `nfft` and `overlap`.
@@ -196,12 +196,12 @@ class SpectrogramWebSocket(JSONWebSocket):
         'progress': progress,
         'canvasId': canvas_id})
 
-  def on_file_spectrogram(self, filename, nfft=1024,
-                          duration=None, overlap=0.5, dataType=AUDIO):
+  def on_file_spectrogram(self, mrn, nfft=1024,
+                          duration=None, overlap=0.5, dataType=EEG):
     """Loads an audio file and calculates a spectrogram.
 
     Arguments:
-    filename  the file name from which to load the audio data.
+    mrn       the medical record number from which to load the data.
     nfft      the FFT length used for calculating the spectrogram.
     duration  the duration (in hours) to compute. If `None` the entire
     overlap   the amount of overlap between consecutive spectra.
@@ -218,18 +218,18 @@ class SpectrogramWebSocket(JSONWebSocket):
       return
 
     try:
-      handler(filename, nfft, duration, overlap)
+      handler(mrn, nfft, duration, overlap)
       t1 = time.time()
       print 'Total time:', t1 - t0
     except RuntimeError as e:  # error loading file
-      error_msg = 'Filename: {} could not be loaded.\n{}'.format(filename, e)
+      error_msg = 'Data: {} could not be loaded.\n{}'.format(mrn, e)
       self.send_message('error', {
           'error_msg': error_msg
       })
       print(error_msg)
 
-  def on_eeg_file_spectrogram(self, filename, nfft, duration, overlap):
-    spec_params = eeg_compute.get_eeg_spectrogram_params(filename, duration)
+  def on_eeg_file_spectrogram(self, mrn, nfft, duration, overlap):
+    spec_params = eeg_compute.get_eeg_spectrogram_params(mrn, duration)
 
     for ch, ch_id in CHANNELS.iteritems():
       self.send_spectrogram_new(spec_params, canvas_id=ch)
@@ -239,7 +239,7 @@ class SpectrogramWebSocket(JSONWebSocket):
       self.send_spectrogram_update(spec, canvas_id=ch)
       self.send_progress(1, ch)
 
-    eeg_compute.close_edf(filename)
+    eeg_compute.close_edf(mrn)
 
   def on_audio_file_spectrogram(self, filename, nfft, duration, overlap):
     _file = SoundFile(filename)
@@ -260,7 +260,7 @@ class SpectrogramWebSocket(JSONWebSocket):
       self.send_spectrogram_update(spec)
 
   def on_data_spectrogram(self, data, nfft=1024, duration=None,
-                          overlap=0.5, dataType=AUDIO):
+                          overlap=0.5, dataType=EEG):
     """Loads an audio file and calculates a spectrogram.
 
     Arguments:

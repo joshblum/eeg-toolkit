@@ -82,17 +82,15 @@ int main(int argc, char *argv[])
   if (argc <= 3)
   {
     float duration;
-    char* filename;
+    char* mrn;
     if (argc >= 2)
     {
-      filename = argv[1];
+      mrn = argv[1];
     }
     else
     {
-      // default filename
-      filename = "/home/ubuntu/MIT-EDFs/MIT-CSAIL-005.edf";
-      // filename = "/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-005.edf";
-
+      // default medial record number
+      mrn = "007";
     }
     if (argc == 3)
     {
@@ -100,30 +98,31 @@ int main(int argc, char *argv[])
     }
     else
     {
-      duration = 10.0; // default duration
+      duration = 4.0; // default duration
     }
-    printf("Using filename: %s, duration: %.2f hours\n", filename, duration);
+    printf("Using mrn: %s, duration: %.2f hours\n", mrn, duration);
     spec_params_t spec_params;
-    get_eeg_spectrogram_params(&spec_params, filename, duration);
+    get_eeg_spectrogram_params(&spec_params, mrn, duration);
     if (spec_params.hdl == -1) {
       exit(1);
     }
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
-    close_edf(filename);
+    close_edf(mrn);
+
     example_change_points(spec_mat);
 
     float* spec_arr = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
-    get_eeg_spectrogram_params(&spec_params, filename, duration);
+    get_eeg_spectrogram_params(&spec_params, mrn, duration);
     example_spectrogram_as_arr(spec_arr, &spec_params);
-    close_edf(filename);
+    close_edf(mrn);
     free(spec_arr);
 
   }
   else
   {
-    printf("\nusage: spectrogram <filename> <duration>\n\n");
+    printf("\nusage: spectrogram <mrn> <duration>\n\n");
   }
   return 1;
 }

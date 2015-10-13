@@ -11,7 +11,7 @@ APPROOT = parent(os.path.realpath(__file__))
 
 class EEGSpecParams(ctypes.Structure):
   _fields_ = [
-      ('filename', ctypes.POINTER(ctypes.c_char)),
+      ('mrn', ctypes.POINTER(ctypes.c_char)),
       ('duration', ctypes.c_float),
       ('hdl', ctypes.c_int),
       ('spec_len', ctypes.c_int),
@@ -46,8 +46,8 @@ _libspectrogram.close_edf.argtypes = [
 _libspectrogram.close_edf.restype = ctypes.c_void_p
 
 
-def close_edf(filename):
-  _libspectrogram.close_edf(filename)
+def close_edf(mrn):
+  _libspectrogram.close_edf(mrn)
 
 # get_eeg_spectrogram_params
 _libspectrogram.get_eeg_spectrogram_params.argtypes = [
@@ -58,10 +58,10 @@ _libspectrogram.get_eeg_spectrogram_params.argtypes = [
 _libspectrogram.get_eeg_spectrogram_params.restype = ctypes.c_void_p
 
 
-def get_eeg_spectrogram_params(filename, duration):
+def get_eeg_spectrogram_params(mrn, duration):
   spec_params = EEGSpecParams()
   _libspectrogram.get_eeg_spectrogram_params(spec_params,
-                                             filename, duration)
+                                             mrn, duration)
   print_spec_params_t(spec_params)
   return spec_params
 
@@ -82,27 +82,39 @@ def eeg_spectrogram_as_arr(spec_params, ch):
   _libspectrogram.eeg_spectrogram_as_arr(spec_params, ch, spec_arr)
   return spec_arr
 
+# mrn_to_filename
+_libspectrogram.mrn_to_filename.argtypes = [
+    ctypes.POINTER(ctypes.c_char),
+    ctypes.POINTER(ctypes.c_char),
+]
+_libspectrogram.mrn_to_filename.restype = ctypes.c_void_p
 
-def main(filename, duration):
-  spec_params = get_eeg_spectrogram_params(filename, duration)
+def mrn_to_filename(mrn):
+    filename = ""
+    _libspectrogram.mrn_to_filename(mrn, filename)
+    return filename
+
+
+def main(mrn, duration):
+  spec_params = get_eeg_spectrogram_params(mrn, duration)
   start = time.time()
   spec_mat = eeg_spectrogram_as_arr(spec_params, 0)  # channel LL
   end = time.time()
   print 'Total time: ',  (end - start)
   print 'Spectrogram shape:',  str(spec_mat.shape)
   print 'Sample data:',  spec_mat[:10, :10]
-  close_edf(filename)
+  close_edf(mrn)
 
 if __name__ == '__main__':
   import argparse
 
   parser = argparse.ArgumentParser(
       description='Profile spectrogram code.')
-  parser.add_argument('-f', '--filename',
-                      # default='/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf',
-                      default='/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf',
-                      dest='filename', help='filename for spectrogram data.')
-  parser.add_argument('-d', '--duration', default=4.0, type=float,
+  parser.add_argument('-mrn', '--medical-record-number',
+                      default='007',
+                      dest='mrn',
+                      help='medical record number for spectrogram data.')
+  parser.add_argument('-d', '--duration', default=10.0, type=float,
                       dest='duration', help='duration of the data')
   args = parser.parse_args()
-  main(args.filename, args.duration)
+  main(args.mrn, args.duration)

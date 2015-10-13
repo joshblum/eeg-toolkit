@@ -12,10 +12,9 @@ extern "C" {
 
 using namespace arma;
 
-// add fields for hdr, filename and duration
 typedef struct spec_params
 {
-  char* filename; // filename data is read from (stream name)
+  char* mrn; // patient medical record number
   float duration; // length of spectrogram produced
   int hdl; // file handler for hdr file
   int spec_len; // length of the spectrogram
@@ -112,18 +111,20 @@ int get_nfreqs(int nfft);
 int get_next_pow_2(unsigned int v);
 int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* filename, float duration);
-void load_edf(edf_hdr_struct* hdr, char* filename);
+                                char* mrn, float duration);
+void load_edf(edf_hdr_struct* hdr, char* mrn);
 void close_edf(char* filename);
-void cleanup_spectrogram(char* filename, fmat spec_mat);
+void cleanup_spectrogram(char* mrn, fmat spec_mat);
 float* create_buffer(int n);
-int read_samples(int handle, int edfsignal, int n, float *buf);
+void get_array_data(spec_params_t* spec_params, int edfsignal, int n, float *buf);
+int read_edf_data(int hdl, int ch, int n, float* buf);
 void hamming(int windowLength, float* buf);
 void STFT(frowvec& diff, spec_params_t* spec_params, fmat& specs);
-void eeg_file_spectrogram_handler(char* filename, float duration, int ch, fmat& spec_mat);
+void eeg_file_spectrogram_handler(char* mrn, float duration, int ch, fmat& spec_mat);
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
 void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
+void mrn_to_filename(char* mrn, char* filename);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

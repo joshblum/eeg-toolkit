@@ -96,16 +96,15 @@ def mrn_to_filename(mrn):
       should only be used for temporary testing before a real backend is
       implemented.
   """
-  filename = ''
+  basedir = ''
   system = platform.system()
   if system == 'Linux':
-    filename = '/home/ubuntu'
+    basedir = '/home/ubuntu'
   elif system == 'Darwin':
-    filename = '/Users/joshblum/Dropbox (MIT)'
-  return '%(filename)s/MIT-EDFs/MIT-CSAIL-%(mrn)s%(file_ext)s' % {
-      'filename': filename,
+    basedir = '/Users/joshblum/Dropbox (MIT)'
+  return '%(basedir)s/MIT-EDFs/MIT-CSAIL-%(mrn)s.edf' % {
+      'basedir': basedir,
       'mrn': mrn,
-      'file_ext': '.edf'
   }
 
 

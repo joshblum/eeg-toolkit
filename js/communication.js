@@ -84,20 +84,19 @@ function sendMessage(type, content, payload) {
 /* Request the spectrogram for a file.
 
    Arguments:
-   filename  the file name from which to load audio data.
+   mrn       the medical record number from which to load data.
    nfft      the FFT length used for calculating the spectrogram.
    duration  the length (in hours) to display.
    overlap   the amount of overlap between consecutive spectra.
 */
-function requestFileSpectrogram(filename, nfft, duration, overlap, dataType) {
+function requestFileSpectrogram(mrn, nfft, duration, overlap) {
     updateSpectrogramStartTimes();
     // TODO (joshblum): need a new field for request action to allow updates for panning
     sendMessage("request_file_spectrogram", {
-        filename: filename,
+        mrn: mrn,
         nfft: nfft,
         duration: duration,
         overlap: overlap,
-        dataType: dataType
     });
 }
 
@@ -109,13 +108,12 @@ function requestFileSpectrogram(filename, nfft, duration, overlap, dataType) {
    duration  the length (in hours) to display.
    overlap   the amount of overlap between consecutive spectra.
 */
-function requestDataSpectrogram(data, nfft, duration, overlap, dataType) {
+function requestDataSpectrogram(data, nfft, duration, overlap) {
     updateSpectrogramStartTimes();
     sendMessage("request_data_spectrogram", {
         nfft: nfft,
         duration: duration,
         overlap: overlap,
-        dataType: dataType
     }, data);
 }
 
@@ -202,41 +200,28 @@ function submitSpectrogram(e) {
    spectrogram is up to the server.
 */
 function reloadSpectrogram() {
-    var audioFile = getElementById("audioFileByData").files[0];
+    // This really is obsolete..
+    var patientIdentifier = getElementById("patientIdentifierByData").files[0];
     var fftLen = parseFloat(getElementById("fftLen").value);
     var duration = parseFloat(getElementById("specDuration").value);
-    var dataType;
     // first we try to load a file
-    if (audioFile) {
+    if (patientIdentifier) {
         var reader = new FileReader();
-        dataType = getDataType(audioFile.name);
-        reader.readAsArrayBuffer(audioFile);
+        reader.readAsArrayBuffer(patientIdentifier);
         reader.onloadend = function() {
             requestDataSpectrogram(reader.result, fftLen, duration,
-                OVERLAP, dataType);
+                OVERLAP);
         };
     } else { // otherwise see if there is a filename
-        audioFile = getElementById("audioFileByName").value;
-        if (audioFile) {
-            dataType = getDataType(audioFile);
-            console.log("Requesting spectrogram for: " + audioFile);
-            requestFileSpectrogram(audioFile, fftLen, duration,
-                OVERLAP, dataType);
+        patientIdentifier = getElementById("patientIdentifierByName").value;
+        if (patientIdentifier) {
+            console.log("Requesting spectrogram for: " + patientIdentifier);
+            requestFileSpectrogram(patientIdentifier, fftLen, duration,
+                OVERLAP);
         }
     }
-    if (!audioFile) {
+    if (!patientIdentifier) {
         console.log("Could not load spectrogram: No file selected");
         return;
     }
-}
-
-/*
- * Determines the type of input file the server has to handle based on the filename.
- * Currently handles audio and eeg type files.
- * TODO (joshblum): Document file types/allow other types
- */
-function getDataType(inputFile) {
-    var fileName = inputFile.split(".");
-    var fileExt = fileName[fileName.length - 1];
-    return fileExt === "edf" ? "eeg" : "audio";
 }
