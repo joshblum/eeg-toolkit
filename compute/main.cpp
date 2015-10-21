@@ -10,16 +10,6 @@
 using namespace arma;
 
 
-void print_frowvec(char* name, frowvec vector)
-{
-  printf("%s: [ ", name);
-  for (int i = 0; i < NUM_SAMPLES; i++)
-  {
-    printf("%.2f, ", vector[i]);
-  }
-  printf("]\n");
-}
-
 
 void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
 {
@@ -62,19 +52,6 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
     printf("],\n[ ");
   }
   printf("]]\n");
-}
-void example_change_points(fmat& spec_mat)
-{
-  cp_data_t cp_data;
-  init_cp_data_t(&cp_data, spec_mat.n_rows);
-  get_change_points(spec_mat, &cp_data);
-  printf("Total change points found: %d\n", cp_data.total_count);
-  print_frowvec("cp", cp_data.cp);
-  print_frowvec("yp", cp_data.yp);
-  print_frowvec("cu", cp_data.cu);
-  print_frowvec("cl", cp_data.cl);
-  print_frowvec("mu", cp_data.mu);
-  print_frowvec("m", cp_data.m);
 }
 
 int main(int argc, char *argv[])

@@ -2,6 +2,11 @@
 
 using namespace arma;
 
+static inline int round_up(int num_to_round, int multiple)
+{
+   return ((num_to_round + multiple - 1) / multiple) * multiple;
+}
+
 void init_cp_data_t(cp_data_t* cp_data, int nt)
 {
 
@@ -25,16 +30,23 @@ void init_cp_data_t(cp_data_t* cp_data, int nt)
   cp_data->total_count = 0;
 }
 
+void get_change_points_as_arr(float* spec_arr, int n_rows, int n_cols, cp_data_t* cp_data)
+{
+  fmat spec_mat = fmat(spec_arr, n_rows, n_cols);
+  get_change_points(spec_mat, cp_data);
+}
+
 // TODO(joshblum): make real variable names
 void get_change_points(fmat& spec_mat,
     cp_data_t* cp_data)
 {
   frowvec s = sum(spec_mat, 0); // sum rows
+  int stride = 10;
+  int nt = round_up(s.n_cols/stride, 10);
+  init_cp_data_t(cp_data, nt);
 
   int max_val = 5000;
-  int nt = s.n_rows;
 
-  int stride = 10;
   float b = 0.95;
   float bb = 0.995;
   int max_amp = 3000;
@@ -51,7 +63,6 @@ void get_change_points(fmat& spec_mat,
 
   float np = 0.;
   float nm = 0.;
-
   for (int j = 1; j < nt; j++)
   {
     ct++;
@@ -77,8 +88,8 @@ void get_change_points(fmat& spec_mat,
 
     if (cp_data->cu[j] > H || cp_data->cl[j] > H)
     {
+      cp_data->cp[total_count] = j*stride; // time of change point
       total_count++;
-      cp_data->cp[j] = j * stride; // time of change point
       ct = 0;
 
       if (cp_data->cu[j] > H)
@@ -95,9 +106,45 @@ void get_change_points(fmat& spec_mat,
       }
     }
   }
-  // cp_data->cp.head(total_count);
-  // cp_data->yp.head(total_count);
+  // TODO(joshblum): ensure we are clipping the array properly here
+  cp_data->cp.head(total_count);
+  cp_data->yp.head(total_count);
   cp_data->yp.fill(max_amp);
   cp_data->total_count = total_count;
 
+}
+
+void print_frowvec(char* name, frowvec vector, int num_samples)
+{
+  printf("%s: [ ", name);
+  for (int i = 0; i < num_samples; i++)
+  {
+    printf("%.2f, ", vector[i]);
+  }
+  printf("]\n");
+}
+
+void example_change_points_as_arr(float* spec_arr, int n_rows, int n_cols)
+{
+  cp_data_t cp_data;
+  get_change_points_as_arr(spec_arr, n_rows, n_cols, &cp_data);
+  print_cp_data_t(&cp_data);
+}
+
+void example_change_points(fmat& spec_mat)
+{
+  cp_data_t cp_data;
+  get_change_points(spec_mat, &cp_data);
+  print_cp_data_t(&cp_data);
+}
+
+void print_cp_data_t(cp_data_t* cp_data)
+{
+  printf("Total change points found: %d\n", cp_data->total_count);
+  print_frowvec("cp", cp_data->cp, cp_data->total_count);
+  print_frowvec("yp", cp_data->yp, cp_data->total_count);
+  print_frowvec("cu", cp_data->cu, cp_data->total_count);
+  print_frowvec("cl", cp_data->cl, cp_data->total_count);
+  print_frowvec("mu", cp_data->mu, cp_data->total_count);
+  print_frowvec("m", cp_data->m, cp_data->total_count);
 }

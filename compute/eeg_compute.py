@@ -5,6 +5,7 @@ import time
 
 from os.path import dirname as parent
 from sys import platform as _platform
+from helpers import astype
 
 APPROOT = parent(os.path.realpath(__file__))
 
@@ -23,6 +24,7 @@ class EEGSpecParams(ctypes.Structure):
       ('nblocks', ctypes.c_int),
       ('nfreqs', ctypes.c_int),
   ]
+
 
 spec_params_p = ctypes.POINTER(EEGSpecParams)
 
@@ -89,10 +91,25 @@ _libspectrogram.mrn_to_filename.argtypes = [
 ]
 _libspectrogram.mrn_to_filename.restype = ctypes.c_void_p
 
+
 def mrn_to_filename(mrn):
-    filename = ""
-    _libspectrogram.mrn_to_filename(mrn, filename)
-    return filename
+  filename = ""
+  _libspectrogram.mrn_to_filename(mrn, filename)
+  return filename
+
+# get_change_points
+_libspectrogram.example_change_points_as_arr.argtypes = [
+    np.ctypeslib.ndpointer(dtype=np.float32),
+    ctypes.c_int,
+    ctypes.c_int,
+]
+_libspectrogram.example_change_points_as_arr.restype = ctypes.c_void_p
+
+
+def example_change_points_as_arr(spec_mat):
+  spec_mat = astype(spec_mat)
+  n_rows, n_cols = spec_mat.shape
+  _libspectrogram.example_change_points_as_arr(spec_mat, n_rows, n_cols)
 
 
 def main(mrn, duration):

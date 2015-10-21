@@ -3,8 +3,7 @@ import scipy.io
 
 from collections import namedtuple
 
-from compute.eeg_compute import eeg_spectrogram_as_arr
-from compute.eeg_compute import get_eeg_spectrogram_params
+import compute.eeg_compute as compute
 
 CpData = namedtuple(
     'CpData', ['r', 'ch', 't01',
@@ -29,18 +28,12 @@ def load_file(filename):
   return CpData(r, ch, t01, cp, yp, cu, cl, mu, m, total_count)
 
 
-def get_change_points_matlab(r, ch, t01):
-  tt = t01[::10]  # stride = 10
-  nt = len(tt)
-  return get_change_points(r[ch])
-
-
 def get_change_points(spec_mat):
   s = numpy.sum(spec_mat, axis=0)
 
   minimum = 5000
   stride = 10
-  nt = (len(s) / stride) + 1
+  nt = int(round(len(s) / stride, -1)) # round to the tens place
 
   b = 0.95
   bb = 0.995
@@ -67,7 +60,6 @@ def get_change_points(spec_mat):
 
   np = 0.
   nm = 0.
-
   for j in xrange(1, nt):
     ct += 1
     s_j = s[j * stride]
@@ -89,7 +81,7 @@ def get_change_points(spec_mat):
 
     if cu[j] > H or cl[j] > H:
       total_count += 1
-      cp.append(j * stride)
+      cp.append(j*stride)
       ct = 0
 
       if cu[j] > H:
@@ -108,19 +100,22 @@ def get_change_points(spec_mat):
                 cu, cl, mu, m, total_count)
 
 
-def verify_result(cp_data, res):
+def verify_result(res1, res2, src=''):
   print 'Verifying results.'
   print '-' * 45
-  cp_data = cp_data._asdict()
-  res = res._asdict()
-  for k1, v1 in cp_data.iteritems():
-    v2 = res[k1]
+  res1 = res1._asdict()
+  res2 = res2._asdict()
+  for k1, v1 in res1.iteritems():
+    v2 = res2.get(k1)
     if v2 is None:
-        continue
+      continue
     if isinstance(v1, numpy.ndarray):
       valid = numpy.array_equal(v1, v2)
       if not valid and len(v1) == len(v2):
         valid = numpy.allclose(v1, v2)
+        if not valid:
+            print 'invalid', v1[:5]
+            print 'invalid', v2[:5]
       r1 = v1.shape
       r2 = v2.shape
     else:
@@ -133,27 +128,16 @@ def verify_result(cp_data, res):
       print 'original: %s, computed: %s' % (r1, r2)
       print '-' * 45
 
-  print 'Results verified.'
-
-
-def test_cpp():
-  # filename = '/home/ubuntu/MIT-EDFs/MIT-CSAIL-007.edf'
-  filename = '/Users/joshblum/Dropbox (MIT)/MIT-EDFs/MIT-CSAIL-007.edf'
-  duration = 4.0
-  spec_params = get_eeg_spectrogram_params(filename, duration)
-  spec_mat = eeg_spectrogram_as_arr(spec_params, 0)  # channel LL
-  cpp_res = get_change_points(spec_mat)
-  print 'Total count:', cpp_res.total_count
+  print 'Results %s verified.' % src
 
 
 def main():
-  test_cpp()
-
-  matlab_filename = 'cp-io.mat'
-  cp_data = load_file(matlab_filename)
-  matlab_res = get_change_points_matlab(cp_data.r, cp_data.ch, cp_data.t01)
-
-  verify_result(cp_data, matlab_res)
+  ml_filename = 'cp-io.mat'
+  ml_res = load_file(ml_filename)
+  spec_mat = ml_res.r[ml_res.ch]
+  #py_res = get_change_points(spec_mat)
+  cpp_res = compute.example_change_points_as_arr(spec_mat)
+  #verify_result(ml_res, py_res, 'py_res')
 
 if __name__ == '__main__':
   main()

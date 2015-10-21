@@ -22,6 +22,10 @@ typedef struct cp_data
 
 void init_cp_data_t(cp_data_t* cp_data, int nt);
 void get_change_points(fmat& spec_mat, cp_data_t* cp_data);
+void get_change_points_as_arr(float* spec_arr, int n_rows, int n_cols, cp_data_t* cp_data);
+void example_change_points_as_arr(float* spec_arr, int n_rows, int n_cols);
+void example_change_points(fmat& spec_mat);
+void print_cp_data_t(cp_data_t* cp_data);
 
 #ifdef __cplusplus
 } /* extern "C" */
