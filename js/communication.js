@@ -2,12 +2,12 @@
 
 var wsEndpoint = "/compute/spectrogram/";
 var wsPort = 8080;
-var ws = new WebSocket(getwsUrl());
+var ws = new WebSocket(getwsUrl(wsPort));
 ws.binaryType = "arraybuffer";
 
 var OVERLAP = 0.5;
 
-function getwsUrl() {
+function getwsUrl(wsPort) {
     var loc = window.location,
         newUri;
     if (loc.protocol === "https:") {
