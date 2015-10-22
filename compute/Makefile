@@ -13,6 +13,7 @@ OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 
 CFLAGS = -Wall -Wextra -Wshadow -Wformat-nonliteral -Wformat-security\
 				 -Wtype-limits -fPIC -std=c++11 \
+				 -Wno-writable-strings\
 				 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE\
 	
 ifeq ('$(OS)', 'Darwin')
