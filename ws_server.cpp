@@ -44,6 +44,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
     data_ss.write((char*) data, data_size);
   }
 
+  // TODO(joshblum): is this necessary?
   server_send_mutex.lock();
   // server.send is an asynchronous function
   server->send(connection, data_ss, [](const boost::system::error_code & ec)

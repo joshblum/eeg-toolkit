@@ -163,7 +163,7 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* mrn, float duration)
+    char* mrn, float duration)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
@@ -197,7 +197,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   spec_params->nfft = get_nfft(spec_params->shift, pad);
   spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
   spec_params->nblocks = get_nblocks(spec_params->nsamples,
-                                     spec_params->shift, spec_params->nstep);
+      spec_params->shift, spec_params->nstep);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
   spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
@@ -217,28 +217,28 @@ void load_edf(edf_hdr_struct* hdr, char* mrn)
   {
     switch (hdr->filetype)
     {
-    case EDFLIB_MALLOC_ERROR                :
-      printf("\nmalloc error\n\n");
-      break;
-    case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
-      printf("\ncannot open file, no such file or directory: %s\n\n", filename);
-      break;
-    case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
-      printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
-             "(it contains format errors)\n\n");
-      break;
-    case EDFLIB_MAXFILES_REACHED            :
-      printf("\nto many files opened\n\n");
-      break;
-    case EDFLIB_FILE_READ_ERROR             :
-      printf("\na read error occurred\n\n");
-      break;
-    case EDFLIB_FILE_ALREADY_OPENED         :
-      printf("\nfile has already been opened\n\n");
-      break;
-    default                                 :
-      printf("\nunknown error\n\n");
-      break;
+      case EDFLIB_MALLOC_ERROR                :
+        printf("\nmalloc error\n\n");
+        break;
+      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
+        printf("\ncannot open file, no such file or directory: %s\n\n", filename);
+        break;
+      case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
+        printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
+            "(it contains format errors)\n\n");
+        break;
+      case EDFLIB_MAXFILES_REACHED            :
+        printf("\nto many files opened\n\n");
+        break;
+      case EDFLIB_FILE_READ_ERROR             :
+        printf("\na read error occurred\n\n");
+        break;
+      case EDFLIB_FILE_ALREADY_OPENED         :
+        printf("\nfile has already been opened\n\n");
+        break;
+      default                                 :
+        printf("\nunknown error\n\n");
+        break;
     }
   }
   // set the file in the cache
@@ -338,7 +338,7 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   // TODO keep plans in memory until end, create plans once and cache?
   // TODO look into using arma memptr instead of copying data
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
-                                  FFTW_FORWARD, FFTW_ESTIMATE);
+      FFTW_FORWARD, FFTW_ESTIMATE);
 
   // Create a hamming window of appropriate length
   float window[nfft];
@@ -492,12 +492,12 @@ void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_
 void mrn_to_filename(char* mrn, char* filename) {
   char* basedir;
 #ifdef __APPLE__
-    basedir = "/Users/joshblum/Dropbox (MIT)";
+  basedir = "/Users/joshblum/Dropbox (MIT)";
 #elif __linux__
-    basedir = "/home/ubuntu";
+  basedir = "/home/ubuntu";
 #endif
-   sprintf(filename,
-       "%s/MIT-EDFs/MIT-CSAIL-%s.edf",
-       basedir,
-       mrn);
+  sprintf(filename,
+      "%s/MIT-EDFs/MIT-CSAIL-%s.edf",
+      basedir,
+      mrn);
 }
