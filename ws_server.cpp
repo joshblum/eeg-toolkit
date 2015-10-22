@@ -21,7 +21,7 @@ const char* CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
 std::mutex server_send_mutex;
 
 void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
-                  std::string msg_type, Json content, float* data, size_t data_size)
+    std::string msg_type, Json content, float* data, size_t data_size)
 {
   Json msg = Json::object
   {
@@ -48,16 +48,16 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   server_send_mutex.lock();
   // server.send is an asynchronous function
   server->send(connection, data_ss, [](const boost::system::error_code & ec)
-  {
-    server_send_mutex.unlock();
-    if (ec)
-    {
+      {
+      server_send_mutex.unlock();
+      if (ec)
+      {
       cout << "Server: Error sending message. " <<
-           // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html
-           // Error Codes for error code meanings
-           "Error: " << ec << ", error message: " << ec.message() << endl;
-    }
-  }, BINARY_OPCODE);
+      // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html
+      // Error Codes for error code meanings
+      "Error: " << ec << ", error message: " << ec.message() << endl;
+      }
+      }, BINARY_OPCODE);
 }
 
 void log_json(Json content)
@@ -66,9 +66,9 @@ void log_json(Json content)
 }
 
 void send_frowvec(SocketServer<WS>* server,
-                  shared_ptr<SocketServer<WS>::Connection> connection,
-                  std::string canvasId, std::string type,
-                  frowvec vector)
+    shared_ptr<SocketServer<WS>::Connection> connection,
+    std::string canvasId, std::string type,
+    frowvec vector)
 {
 
   Json content = Json::object
@@ -82,8 +82,8 @@ void send_frowvec(SocketServer<WS>* server,
 }
 
 void send_spectrogram_new(SocketServer<WS>* server,
-                          shared_ptr<SocketServer<WS>::Connection> connection,
-                          spec_params_t spec_params, std::string canvasId)
+    shared_ptr<SocketServer<WS>::Connection> connection,
+    spec_params_t spec_params, std::string canvasId)
 {
   Json content = Json::object
   {
@@ -99,9 +99,9 @@ void send_spectrogram_new(SocketServer<WS>* server,
 }
 
 void send_spectrogram_update(SocketServer<WS>* server,
-                             shared_ptr<SocketServer<WS>::Connection> connection,
-                             spec_params_t spec_params, std::string canvasId,
-                             fmat& spec_mat)
+    shared_ptr<SocketServer<WS>::Connection> connection,
+    spec_params_t spec_params, std::string canvasId,
+    fmat& spec_mat)
 {
 
   Json content = Json::object
@@ -120,18 +120,20 @@ void send_spectrogram_update(SocketServer<WS>* server,
 }
 
 void send_change_points(SocketServer<WS>* server,
-                        shared_ptr<SocketServer<WS>::Connection> connection,
-                        std::string canvasId,
-                        cp_data_t* cp_data)
+    shared_ptr<SocketServer<WS>::Connection> connection,
+    std::string canvasId,
+    cp_data_t* cp_data)
 {
   send_frowvec(server, connection, canvasId, "change_points", cp_data->cp);
   send_frowvec(server, connection, canvasId, "summed_signal", cp_data->m);
 }
 
+
 void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
 {
   std::string mrn = data["mrn"].string_value();
   float duration = data["duration"].number_value();
+  int ch = data["channel"].number_value();
 
   spec_params_t spec_params;
   char *mrn_c = new char[mrn.length() + 1];
@@ -139,23 +141,21 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   get_eeg_spectrogram_params(&spec_params, mrn_c, duration);
   print_spec_params_t(&spec_params);
   const char* ch_name;
-  for (int ch = 0; ch < NUM_CH; ch++)
-  {
-    cout << endl; // print newline between each spectrogram computation
-    ch_name = CH_NAME_MAP[ch];
-    send_spectrogram_new(server, connection, spec_params, ch_name);
-    fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
-    unsigned long long start = getticks();
-    eeg_spectrogram(&spec_params, ch, spec_mat);
-    unsigned long long end = getticks();
-    log_time_diff(end - start);
+  cout << endl; // print newline between each spectrogram computation
+  ch_name = CH_NAME_MAP[ch];
+  send_spectrogram_new(server, connection, spec_params, ch_name);
+  fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
+  unsigned long long start = getticks();
+  eeg_spectrogram(&spec_params, ch, spec_mat);
+  unsigned long long end = getticks();
+  log_time_diff(end - start);
 
-    cp_data_t cp_data;
-    get_change_points(spec_mat, &cp_data);
+  cp_data_t cp_data;
+  get_change_points(spec_mat, &cp_data);
 
-    send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
-    send_change_points(server, connection, ch_name, &cp_data);
-  }
+  send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
+  send_change_points(server, connection, ch_name, &cp_data);
+
   close_edf(mrn_c);
 }
 
@@ -222,16 +222,16 @@ int main(int argc, char* argv[])
   ws.onerror = [](auto connection, const boost::system::error_code & ec)
   {
     cout << "Server: Error in connection " << (size_t)connection.get() << ". " <<
-         "Error: " << ec << ", error message: " << ec.message() << endl;
+      "Error: " << ec << ", error message: " << ec.message() << endl;
   };
 
 
   thread server_thread([&server, port]()
-  {
-    cout << "WebSocket Server started at port: " << port << endl;
-    // Start WS-server
-    server.start();
-  });
+      {
+      cout << "WebSocket Server started at port: " << port << endl;
+      // Start WS-server
+      server.start();
+      });
 
   server_thread.join();
 

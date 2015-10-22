@@ -88,8 +88,9 @@ function sendMessage(type, content, payload) {
    nfft      the FFT length used for calculating the spectrogram.
    duration  the length (in hours) to display.
    overlap   the amount of overlap between consecutive spectra.
+   channel   the channel (LP, LP,...) we are requesting
 */
-function requestFileSpectrogram(mrn, nfft, duration, overlap) {
+function requestFileSpectrogram(mrn, nfft, duration, overlap, channel) {
     updateSpectrogramStartTimes();
     // TODO (joshblum): need a new field for request action to allow updates for panning
     sendMessage("request_file_spectrogram", {
@@ -97,6 +98,7 @@ function requestFileSpectrogram(mrn, nfft, duration, overlap) {
         nfft: nfft,
         duration: duration,
         overlap: overlap,
+        channel: channel,
     });
 }
 
@@ -216,8 +218,10 @@ function reloadSpectrogram() {
         patientIdentifier = getElementById("patientIdentifierByName").value;
         if (patientIdentifier) {
             console.log("Requesting spectrogram for: " + patientIdentifier);
-            requestFileSpectrogram(patientIdentifier, fftLen, duration,
-                OVERLAP);
+            for (var ch = 0; ch < IDS.length; ch++) {
+              requestFileSpectrogram(patientIdentifier, fftLen, duration,
+                OVERLAP, ch);
+            }
         }
     }
     if (!patientIdentifier) {
