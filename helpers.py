@@ -2,6 +2,7 @@ import struct
 import platform
 
 import numpy as np
+#import h5py
 
 from eegtools.io import load_edf
 from constants import CHANNEL_INDEX
@@ -57,6 +58,7 @@ def astype(ndarray, _type='float32'):
 
 
 def load_h5py_spectrofile(filename):
+  raise NotImplementedError
   f = h5py.File(filename, 'r')
   data = f['data']
   fs = f['Fs'][0][0]
