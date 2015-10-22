@@ -6,7 +6,6 @@ import numpy as np
 
 from eegtools.io import load_edf
 from constants import CHANNEL_INDEX
-from scidbpy import connect
 
 DOWNSAMPLE_RATE = 10
 MAX_SIZE = 10 * 100**3  # arbitrarily 10 MB limit
@@ -111,19 +110,6 @@ def mrn_to_filename(mrn):
   }
 
 
-def load_scidb_array(mrn):
-    # TODO(joshblum): have a connection cached globally?
-    sdb = connect()
-    return sdb.wrap_array(mrn)
-
-
-def insert_scidb_array(mrn):
-    # TODO(joshblum): load without going through python
-    array_data, fs = load_spectrofile(mrn_to_filename(filename))
-    sdb = connect()
-    sdb.from_array(array_data)
-
-
 def get_array_data(mrn, backend=None):
   """
   Converts a medical record number (mrn) to array data for the specified
@@ -136,6 +122,6 @@ def get_array_data(mrn, backend=None):
   elif backend == TILEDB:
     raise NotImplementedError
   elif backend == SCIDB:
-      load_scidb_array(mrn)
+    raise NotImplementedError
   else:
     raise Exception('Unknown backend %s' % backend)
