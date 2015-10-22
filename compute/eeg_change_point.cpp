@@ -107,8 +107,9 @@ void get_change_points(fmat& spec_mat,
     }
   }
   // TODO(joshblum): ensure we are clipping the array properly here
-  cp_data->cp.head(total_count);
-  cp_data->yp.head(total_count);
+  // TODO(joshblum): head method missing on ubuntu package?
+  // cp_data->cp.head(total_count);
+  // cp_data->yp.head(total_count);
   cp_data->yp.fill(max_amp);
   cp_data->total_count = total_count;
 

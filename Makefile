@@ -6,7 +6,7 @@ CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp\
 	compute/eeg_change_point.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 TARGET := ws_server
-CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations -Wno-writable-strings
+CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
 LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
 OS := $(shell uname)
 
@@ -20,9 +20,10 @@ ifeq ('$(OS)', 'Darwin')
 	OSX = true
 	PKG_INSTALLER = brew
 	LDFLAGS += -L/usr/local/opt/openssl/lib
-	CFLAGS += -I/usr/local/opt/openssl/include
+	CFLAGS += -I/usr/local/opt/openssl/include -Wno-writable-strings
 else
 	LDFLAGS += -pthread -lboost_thread
+	CFLAGS += -Wno-write-strings
 endif
 
 ifeq ($(DEBUG),1)
