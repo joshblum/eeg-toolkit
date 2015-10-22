@@ -174,15 +174,22 @@ void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Conn
   }
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  //WebSocket (WS)-server at PORT using NUM_THREADS threads
-  SocketServer<WS> server(PORT, NUM_THREADS);
+  int port;
+  if (argc == 2) {
+    port = atoi(argv[1]);
+  } else {
+    port = PORT;
+  }
+
+  // WebSocket (WS)-server at port using NUM_THREADS threads
+  SocketServer<WS> server(port, NUM_THREADS);
 
   auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 
-//C++14, lambda parameters declared with auto
-//For C++11 use: (shared_ptr<SocketServer<WS>::Connection> connection, shared_ptr<SocketServer<WS>::Message> message)
+  // C++14, lambda parameters declared with auto
+  // For C++11 use: (shared_ptr<SocketServer<WS>::Connection> connection, shared_ptr<SocketServer<WS>::Message> message)
   ws.onmessage = [&server](auto connection, auto message)
   {
     //To receive message from client as string (data_ss.str())
@@ -204,13 +211,13 @@ int main()
   };
 
 
-  //See RFC 6455 7.4.1. for status codes
+  // See RFC 6455 7.4.1. for status codes
   ws.onclose = [](auto connection, int status, const string & reason)
   {
     cout << "Server: Closed connection " << (size_t)connection.get() << " with status code " << status << endl;
   };
 
-  //See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
+  // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
   ws.onerror = [](auto connection, const boost::system::error_code & ec)
   {
     cout << "Server: Error in connection " << (size_t)connection.get() << ". " <<
@@ -218,10 +225,10 @@ int main()
   };
 
 
-  thread server_thread([&server]()
+  thread server_thread([&server, port]()
   {
-    cout << "WebSocket Server started at port: " << PORT << endl;
-    //Start WS-server
+    cout << "WebSocket Server started at port: " << port << endl;
+    // Start WS-server
     server.start();
   });
 
