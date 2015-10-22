@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy
+.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy kill-all
 
 CXX = g++
 CSRC := compute/edflib.c
@@ -79,8 +79,13 @@ install: installdeps libs ws_server
 deploy:
 	fab prod deploy
 
+kill-all:
+	pkill ws_server
+	pkill python server.py
+
 run: clean libs ws_server
-	./ws_server & python server.py
+	./ws_server 8080 & \
+	python server.py
 
 prod-run: clean libs ws_server
 	supervisorctl reread
