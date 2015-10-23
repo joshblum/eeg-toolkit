@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy
+.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy update
 
 CXX = g++
 CSRC := compute/edflib.c
@@ -45,6 +45,9 @@ libs:
 
 ws_server: $(OBJ)
 	$(CXX) $(OBJ) $(LDFLAGS) -o $@
+
+update:
+	git submodule foreach git checkout master; git pull
 
 installdeps: clean
 	 git submodule update --init --recursive
