@@ -2,9 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <time.h>
 #include <fftw3.h>
-#include <sys/time.h>
 
 #include "eeg_spectrogram.hpp"
 
@@ -81,25 +79,6 @@ void pop_hdr_cache(const char* filename)
       }
     }
   }
-}
-
-unsigned long long getticks()
-{
-  struct timeval t;
-  gettimeofday(&t, 0);
-  return t.tv_sec * 1000000ULL + t.tv_usec;
-}
-
-double ticks_to_seconds(unsigned long long ticks)
-{
-  return ticks * 1.0e-6;
-}
-
-
-void log_time_diff(unsigned long long ticks)
-{
-  double diff = ticks_to_seconds(ticks);
-  printf("Time taken %.2f seconds\n", diff);
 }
 
 void print_spec_params_t(spec_params_t* spec_params)

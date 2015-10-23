@@ -2,6 +2,7 @@
 #include <mutex>
 
 #include "compute/EDFlib/edflib.h"
+#include "compute/helpers.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
 #include "json11/json11.hpp"
@@ -23,6 +24,7 @@ std::mutex server_send_mutex;
 void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
     std::string msg_type, Json content, float* data, size_t data_size)
 {
+  unsigned long long start = getticks();
   Json msg = Json::object
   {
     {"type", msg_type},
@@ -44,12 +46,14 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
     data_ss.write((char*) data, data_size);
   }
 
+  std::string action = content["action"].string_value();
   // TODO(joshblum): why this necessary?
   server_send_mutex.lock();
   // server.send is an asynchronous function
-  server->send(connection, data_ss, [](const boost::system::error_code & ec)
+  server->send(connection, data_ss, [action, start](const boost::system::error_code & ec)
       {
       server_send_mutex.unlock();
+      log_time_diff("send_message::" + action, start);
       if (ec)
       {
       cout << "Server: Error sending message. " <<
@@ -147,8 +151,7 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
 
   unsigned long long start = getticks();
   eeg_spectrogram(&spec_params, ch, spec_mat);
-  unsigned long long end = getticks();
-  log_time_diff(end - start);
+  log_time_diff("eeg_spectrogram", start);
 
   cp_data_t cp_data;
   get_change_points(spec_mat, &cp_data);

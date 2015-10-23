@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include "helpers.hpp"
 #include "eeg_spectrogram.hpp"
 #include "eeg_change_point.hpp"
 
@@ -16,8 +17,7 @@ void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
   unsigned long long start = getticks();
   print_spec_params_t(spec_params);
   eeg_spectrogram(spec_params, LL, spec_mat);
-  unsigned long long end = getticks();
-  log_time_diff(end - start);
+  log_time_diff("example_spectrogram:", start);
   printf("Spectrogram shape as_mat: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);
   printf("Sample data: [\n[ ");
@@ -37,8 +37,7 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
   unsigned long long start = getticks();
   print_spec_params_t(spec_params);
   eeg_spectrogram_as_arr(spec_params, LL, spec_arr);
-  unsigned long long end = getticks();
-  log_time_diff(end - start);
+  log_time_diff("example_spectrogram_as_arr:", start);
   printf("Spectrogram shape: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);
 
