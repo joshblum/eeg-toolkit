@@ -1,7 +1,6 @@
 #ifndef SPECTROGRAM_H
 #define SPECTROGRAM_H
 
-#include <fftw3.h>
 // #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
 #include "EDFlib/edflib.h"

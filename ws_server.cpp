@@ -1,7 +1,7 @@
 #include <armadillo>
 #include <mutex>
 
-#include "compute/edflib.h"
+#include "compute/EDFlib/edflib.h"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
 #include "json11/json11.hpp"

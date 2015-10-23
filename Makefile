@@ -1,7 +1,7 @@
 .PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy update
 
 CXX = g++
-CSRC := compute/edflib.c
+CSRC := compute/EDFlib/edflib.c
 CPPSRC := json11/json11.cpp compute/eeg_spectrogram.cpp\
 	compute/eeg_change_point.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)

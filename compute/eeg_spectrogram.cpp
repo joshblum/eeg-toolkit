@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <iostream>
 #include <time.h>
+#include <fftw3.h>
+#include <sys/time.h>
 
 #include "eeg_spectrogram.hpp"
 
-#include <time.h>
-#include <sys/time.h>
 
 using namespace arma;
 
@@ -215,7 +215,7 @@ void load_edf(edf_hdr_struct* hdr, char* mrn)
     hdr = cached_hdr;
     return;
   }
-  if (edfopen_file_readonly(filename, hdr, EDFLIB_READ_ALL_ANNOTATIONS))
+  if (edfopen_file_readonly(filename, hdr, EDFLIB_DO_NOT_READ_ANNOTATIONS))
   {
     switch (hdr->filetype)
     {
