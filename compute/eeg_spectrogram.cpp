@@ -173,6 +173,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
   edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
   load_edf(hdr, mrn);
   spec_params->hdl = hdr->handle;
+
   // check for errors
   if (hdr->filetype < 0)
   {
@@ -185,21 +186,22 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
     spec_params->nblocks = 0;
     spec_params->nfreqs = 0;
     spec_params->spec_len = 0;
-    return;
+  } else {
+    spec_params->fs = get_fs(hdr);
+
+    int data_len = get_data_len(hdr);
+    int pad = 0;
+    spec_params->shift = spec_params->fs * 4;
+    spec_params->nstep = spec_params->fs * 1;
+    spec_params->nfft = get_nfft(spec_params->shift, pad);
+    spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
+    spec_params->nblocks = get_nblocks(spec_params->nsamples,
+        spec_params->shift, spec_params->nstep);
+    spec_params->nfreqs = get_nfreqs(spec_params->nfft);
+    spec_params->spec_len = spec_params->nsamples / spec_params->fs;
+
   }
 
-  spec_params->fs = get_fs(hdr);
-
-  int data_len = get_data_len(hdr);
-  int pad = 0;
-  spec_params->shift = spec_params->fs * 4;
-  spec_params->nstep = spec_params->fs * 1;
-  spec_params->nfft = get_nfft(spec_params->shift, pad);
-  spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
-  spec_params->nblocks = get_nblocks(spec_params->nsamples,
-      spec_params->shift, spec_params->nstep);
-  spec_params->nfreqs = get_nfreqs(spec_params->nfft);
-  spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
 
 void load_edf(edf_hdr_struct* hdr, char* mrn)
@@ -279,12 +281,9 @@ int read_edf_data(int hdl, int ch, int n, float* buf)
 {
 
   int bytes_read = edfread_physical_samples(hdl, ch, n, buf);
-
   if (bytes_read == -1)
   {
     printf("\nerror: edf_read_physical_samples()\n");
-    edfclose_file(hdl);
-    free(buf);
     return -1;
   }
   // clear buffer in case we didn't read as much as we expected to
@@ -424,10 +423,6 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   int nsamples = spec_params->nsamples;
   float* buf1 = create_buffer(nsamples);
   float* buf2 = create_buffer(nsamples);
-  if (buf1 == NULL || buf2 == NULL)
-  {
-    return;
-  }
 
   // nfreqs x nblocks matrix
   spec_mat.fill(0);

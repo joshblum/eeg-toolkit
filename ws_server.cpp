@@ -44,7 +44,7 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
     data_ss.write((char*) data, data_size);
   }
 
-  // TODO(joshblum): is this necessary?
+  // TODO(joshblum): why this necessary?
   server_send_mutex.lock();
   // server.send is an asynchronous function
   server->send(connection, data_ss, [](const boost::system::error_code & ec)
@@ -140,11 +140,11 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   strcpy(mrn_c, mrn.c_str());
   get_eeg_spectrogram_params(&spec_params, mrn_c, duration);
   print_spec_params_t(&spec_params);
-  const char* ch_name;
   cout << endl; // print newline between each spectrogram computation
-  ch_name = CH_NAME_MAP[ch];
+  const char* ch_name = CH_NAME_MAP[ch];
   send_spectrogram_new(server, connection, spec_params, ch_name);
   fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
+
   unsigned long long start = getticks();
   eeg_spectrogram(&spec_params, ch, spec_mat);
   unsigned long long end = getticks();
