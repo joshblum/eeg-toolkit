@@ -257,20 +257,13 @@ void close_edf(char* mrn)
   }
 }
 
-void cleanup_spectrogram(char* mrn, float* spec_arr)
-{
-  // TODO(joshblum): convert to class method `close_stream` based on the
-  // backend used
-  close_edf(mrn);
-  free(spec_arr);
-}
-
 float* create_buffer(int n)
 {
   float* buf = (float*) malloc(sizeof(float) * n);
   if (buf == NULL)
   {
     printf("\nmalloc error\n");
+    exit(1);
   }
   return buf;
 }

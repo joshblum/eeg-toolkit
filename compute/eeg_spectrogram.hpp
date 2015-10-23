@@ -114,7 +114,6 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
                                 char* mrn, float duration);
 void load_edf(edf_hdr_struct* hdr, char* mrn);
 void close_edf(char* filename);
-void cleanup_spectrogram(char* mrn, fmat spec_mat);
 float* create_buffer(int n);
 void get_array_data(spec_params_t* spec_params, int edfsignal, int n, float *buf);
 int read_edf_data(int hdl, int ch, int n, float* buf);
