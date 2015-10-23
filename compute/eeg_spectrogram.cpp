@@ -4,82 +4,12 @@
 #include <iostream>
 #include <fftw3.h>
 
+#include "edf_backend.hpp"
+#include "helpers.hpp"
 #include "eeg_spectrogram.hpp"
 
 
 using namespace arma;
-
-// TODO(joshblum): this needs to be a concurrent structure
-static edf_hdr_struct* EDF_HDR_CACHE[EDFLIB_MAXFILES];
-
-// should use a hashmap + linked list implementation if the
-// list traversal becomes a bottleneck
-void print_hdr_cache()
-{
-  printf("[\n");
-  for (int i = 0; i < EDFLIB_MAXFILES; i++)
-  {
-    if (EDF_HDR_CACHE[i] == NULL)
-    {
-      printf("-,");
-    }
-    else
-    {
-      printf("%s,\n", EDF_HDR_CACHE[i]->path);
-    }
-  }
-  printf("]\n");
-}
-
-edf_hdr_struct* get_hdr_cache(char *filename)
-{
-  for (int i = 0; i < EDFLIB_MAXFILES; i++)
-  {
-    if (EDF_HDR_CACHE[i] != NULL)
-    {
-      if (!(strcmp(filename, EDF_HDR_CACHE[i]->path)))
-      {
-        edf_hdr_struct* hdr = EDF_HDR_CACHE[i];
-        // TODO(joshblum): probably remove this once
-        // windowing is fully implemented
-        for (int signal = 0; signal < hdr->edfsignals; signal++)
-        {
-          edfrewind(hdr->handle, signal);
-        }
-        return hdr;
-      }
-    }
-  }
-
-  return NULL;
-}
-
-void set_hdr_cache(edf_hdr_struct* hdr)
-{
-  for (int i = 0; i < EDFLIB_MAXFILES; i++)
-  {
-    if (EDF_HDR_CACHE[i] == NULL)
-    {
-      EDF_HDR_CACHE[i] = hdr;
-      break;
-    }
-  }
-}
-
-void pop_hdr_cache(const char* filename)
-{
-  for (int i = 0; i < EDFLIB_MAXFILES; i++)
-  {
-    if (EDF_HDR_CACHE[i] != NULL)
-    {
-      if (!(strcmp(filename, EDF_HDR_CACHE[i]->path)))
-      {
-        free(EDF_HDR_CACHE[i]);
-        EDF_HDR_CACHE[i] = NULL;
-      }
-    }
-  }
-}
 
 void print_spec_params_t(spec_params_t* spec_params)
 {
@@ -97,12 +27,6 @@ void print_spec_params_t(spec_params_t* spec_params)
   printf("\tspec_len: %d\n", spec_params->spec_len);
   printf("\tfs: %d\n", spec_params->fs);
   printf("}\n");
-}
-
-int get_data_len(edf_hdr_struct* hdr)
-{
-  // assume all signals have a uniform sample rate
-  return hdr->signalparam[0].smp_in_file;
 }
 
 int get_nfft(int shift, int pad)
@@ -134,18 +58,6 @@ int get_nblocks(int nsamples, int nfft, int shift)
 int get_nfreqs(int nfft)
 {
   return nfft / 2 + 1;
-}
-
-int get_next_pow_2(unsigned int v)
-{
-  v--;
-  v |= v >> 1;
-  v |= v >> 2;
-  v |= v >> 4;
-  v |= v >> 8;
-  v |= v >> 16;
-  v++;
-  return v;
 }
 
 int get_fs(edf_hdr_struct* hdr)
@@ -203,63 +115,6 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
     spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 
   }
-
-}
-
-void load_edf(edf_hdr_struct* hdr, char* mrn)
-{
-  char* filename = (char*) malloc(sizeof(char)*100);
-  mrn_to_filename(mrn, filename);
-  edf_hdr_struct* cached_hdr = get_hdr_cache(filename);
-  if (cached_hdr != NULL)
-  {
-    // get the file from the cache
-    hdr = cached_hdr;
-    return;
-  }
-  if (edfopen_file_readonly(filename, hdr, EDFLIB_DO_NOT_READ_ANNOTATIONS))
-  {
-    switch (hdr->filetype)
-    {
-      case EDFLIB_MALLOC_ERROR                :
-        printf("\nmalloc error\n\n");
-        break;
-      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
-        printf("\ncannot open file, no such file or directory: %s\n\n", filename);
-        break;
-      case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
-        printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
-            "(it contains format errors)\n\n");
-        break;
-      case EDFLIB_MAXFILES_REACHED            :
-        printf("\nto many files opened\n\n");
-        break;
-      case EDFLIB_FILE_READ_ERROR             :
-        printf("\na read error occurred\n\n");
-        break;
-      case EDFLIB_FILE_ALREADY_OPENED         :
-        printf("\nfile has already been opened\n\n");
-        break;
-      default                                 :
-        printf("\nunknown error\n\n");
-        break;
-    }
-    exit(1);
-  }
-  // set the file in the cache
-  set_hdr_cache(hdr);
-}
-
-void close_edf(char* mrn)
-{
-  char* filename = (char*) malloc(sizeof(char)*100);
-  mrn_to_filename(mrn, filename);
-  edf_hdr_struct* hdr = get_hdr_cache(filename);
-  if (hdr != NULL)
-  {
-    edfclose_file(hdr->handle);
-    pop_hdr_cache(filename);
-  }
 }
 
 float* create_buffer(int n)
@@ -278,23 +133,6 @@ void get_array_data(spec_params_t* spec_params, int ch, int n, float *buf)
   //TODO(joshblum): support different types of backends
   //global config? variable passed in?
   read_edf_data(spec_params->hdl, ch, n, buf);
-}
-
-int read_edf_data(int hdl, int ch, int n, float* buf)
-{
-
-  int bytes_read = edfread_physical_samples(hdl, ch, n, buf);
-  if (bytes_read == -1)
-  {
-    printf("\nerror: edf_read_physical_samples()\n");
-    return -1;
-  }
-  // clear buffer in case we didn't read as much as we expected to
-  for (int i = bytes_read; i < n; i++)
-  {
-    buf[i] = 0.0;
-  }
-  return bytes_read;
 }
 
 // Create a hamming window of windowLength samples in buffer
@@ -393,7 +231,7 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_file_spectrogram_handler(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat)
+void eeg_file_wrapper(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat)
 {
   spec_params_t spec_params;
   get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
@@ -417,6 +255,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 {
   if (spec_params->hdl == -1)
   {
+    cout << "invalid handle" << endl;
     return;
   }
   spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
@@ -472,23 +311,4 @@ void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_
       *(spec_arr + i + j * spec_params->nfreqs) = (float) spec_mat(i, j);
     }
   }
-}
-
-/*
- * Transform a medical record number (mrn) to a filename. This
- * should only be used for temporary testing before a real backend is
- * implemented.
- */
-
-void mrn_to_filename(char* mrn, char* filename) {
-  char* basedir;
-#ifdef __APPLE__
-  basedir = "/Users/joshblum/Dropbox (MIT)";
-#elif __linux__
-  basedir = "/home/ubuntu";
-#endif
-  sprintf(filename,
-      "%s/MIT-EDFs/MIT-CSAIL-%s.edf",
-      basedir,
-      mrn);
 }

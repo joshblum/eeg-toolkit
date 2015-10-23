@@ -2,7 +2,7 @@
 
 CXX = g++
 CSRC := compute/EDFlib/edflib.c
-CPPSRC := json11/json11.cpp compute/helpers.cpp compute/eeg_spectrogram.cpp\
+CPPSRC := json11/json11.cpp compute/helpers.cpp compute/edf_backend.cpp compute/eeg_spectrogram.cpp\
 	compute/eeg_change_point.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 TARGET := ws_server

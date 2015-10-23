@@ -25,3 +25,15 @@ void log_time_diff(std::string msg, unsigned long long ticks)
   cout << msg << " took " << setprecision(2) << diff_secs << " seconds" << endl;
 }
 
+int get_next_pow_2(unsigned int v)
+{
+  v--;
+  v |= v >> 1;
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v++;
+  return v;
+}
+

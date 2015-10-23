@@ -10,8 +10,6 @@
 
 using namespace arma;
 
-
-
 void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
 {
   unsigned long long start = getticks();

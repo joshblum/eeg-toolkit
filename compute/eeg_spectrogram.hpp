@@ -4,6 +4,7 @@
 // #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
 #include "EDFlib/edflib.h"
+#include "edf_backend.hpp"
 
 using namespace arma;
 
@@ -91,31 +92,13 @@ const ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
   {.ch = RL, .ch_idx = {FP2, F8, T4, T6, O2}},
 };
 
-void print_hdr_cache();
-edf_hdr_struct* get_hdr_cache(const char *filename);
-void set_hdr_cache(edf_hdr_struct* hdr);
-void pop_hdr_cache(const char* filename);
 void print_spec_params_t(spec_params_t* spec_params);
-int get_data_len(edf_hdr_struct* hdr);
-int get_nfft(int shift, int pad);
-int get_nsamples(int data_len, int fs, float duration);
-int get_nblocks(int data_len, int fs, int shift);
-int get_nfreqs(int nfft);
-int get_next_pow_2(unsigned int v);
-int get_fs(edf_hdr_struct* hdr);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
                                 char* mrn, float startTime, float endTime);
-void load_edf(edf_hdr_struct* hdr, char* mrn);
-void close_edf(char* filename);
-float* create_buffer(int n);
-void get_array_data(spec_params_t* spec_params, int edfsignal, int n, float *buf);
-int read_edf_data(int hdl, int ch, int n, float* buf);
-void hamming(int windowLength, float* buf);
-void STFT(frowvec& diff, spec_params_t* spec_params, fmat& specs);
-void eeg_file_spectrogram_handler(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat);
+// does not need spec params
+void eeg_spectrogram_wrapper(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat);
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
 void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
-void mrn_to_filename(char* mrn, char* filename);
 
 #endif // SPECTROGRAM_H
