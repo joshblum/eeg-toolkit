@@ -6,7 +6,7 @@ OS := $(shell uname)
 CXX = g++
 TARGET := main
 SHARED_LIB = $(addprefix $(ROOT), lib_eeg_spectrogram.so)
-CSRC := $(addprefix $(ROOT), edflib.c)
+CSRC := $(addprefix $(ROOT), EDFlib/edflib.c)
 CPPSRC := $(addprefix $(ROOT),  eeg_spectrogram.cpp eeg_change_point.cpp)
 
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)

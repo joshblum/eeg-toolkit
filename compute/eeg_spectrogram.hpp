@@ -4,7 +4,7 @@
 #include <fftw3.h>
 // #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
-#include "edflib.h"
+#include "EDFlib/edflib.h"
 
 #ifdef __cplusplus
 extern "C" {
