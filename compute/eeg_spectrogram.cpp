@@ -85,7 +85,8 @@ void print_spec_params_t(spec_params_t* spec_params)
 {
   printf("spec_params: {\n");
   printf("\tmrn: %s\n", spec_params->mrn);
-  printf("\tduration: %.2f\n", spec_params->duration);
+  printf("\tstartTime: %.2f\n", spec_params->startTime);
+  printf("\tendTime: %.2f\n", spec_params->endTime);
   printf("\thdl: %d\n", spec_params->hdl);
   printf("\tnfft: %d\n", spec_params->nfft);
   printf("\tnstep: %d\n", spec_params->nstep);
@@ -109,9 +110,20 @@ int get_nfft(int shift, int pad)
   return fmax(get_next_pow_2(shift) + pad, shift);
 }
 
-int get_nsamples(int data_len, int fs, float duration)
+float get_valid_startTime(float startTime)
 {
-  return fmin(data_len, fs * 60 * 60 * duration);
+  return fmax(0, startTime);
+}
+
+float get_valid_endTime(int spec_len, int fs, float endTime)
+{
+  return fmin((float) spec_len / (fs * 60 * 60), endTime);
+}
+
+int get_nsamples(int spec_len, int fs, float duration)
+{
+  // get number of samples required for our duration
+  return fmin(spec_len, fs * 60 * 60 * duration);
 }
 
 int get_nblocks(int nsamples, int nfft, int shift)
@@ -142,12 +154,13 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-    char* mrn, float duration)
+    char* mrn, float startTime, float endTime)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
   spec_params->mrn = mrn;
-  spec_params->duration = duration;
+  spec_params->startTime = startTime;
+  spec_params->endTime = endTime;
 
   edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
   load_edf(hdr, mrn);
@@ -173,7 +186,17 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
     spec_params->shift = spec_params->fs * 4;
     spec_params->nstep = spec_params->fs * 1;
     spec_params->nfft = get_nfft(spec_params->shift, pad);
-    spec_params->nsamples = get_nsamples(data_len, spec_params->fs, duration);
+    spec_params->nsamples = get_nsamples(data_len, spec_params->fs, endTime - startTime);
+    spec_params->startTime = get_valid_startTime(startTime);
+    spec_params->endTime = get_valid_endTime(data_len, spec_params->fs, endTime);
+
+    // ensure startTime is before endTime
+    if (spec_params->startTime > spec_params->endTime)
+    {
+      float tmp = spec_params->startTime;
+      spec_params->startTime = spec_params->endTime;
+      spec_params->endTime = tmp;
+    }
     spec_params->nblocks = get_nblocks(spec_params->nsamples,
         spec_params->shift, spec_params->nstep);
     spec_params->nfreqs = get_nfreqs(spec_params->nfft);
@@ -221,6 +244,7 @@ void load_edf(edf_hdr_struct* hdr, char* mrn)
         printf("\nunknown error\n\n");
         break;
     }
+    exit(1);
   }
   // set the file in the cache
   set_hdr_cache(hdr);
@@ -369,10 +393,10 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_file_spectrogram_handler(char* mrn, float duration, int ch, fmat& spec_mat)
+void eeg_file_spectrogram_handler(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat)
 {
   spec_params_t spec_params;
-  get_eeg_spectrogram_params(&spec_params, mrn, duration);
+  get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
   print_spec_params_t(&spec_params);
   eeg_spectrogram(&spec_params, ch, spec_mat);
 }

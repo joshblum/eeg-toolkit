@@ -107,7 +107,7 @@ Spectrogram.prototype.init = function() {
     this.loadSpectrogramShaders();
 
     // load dummy data
-    this.newSpectrogram(1, 1, 44100, 1);
+    this.newSpectrogram(1, 1, 200, 1, 1);
 
     this.addListeners();
 };
@@ -260,7 +260,7 @@ Spectrogram.prototype.getShader = function(id) {
     return shader;
 };
 
-Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
+Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, startTime, endTime) {
     this.nblocks = nblocks;
     this.nfreqs = nfreqs;
     this.xOffset = 0;
@@ -322,15 +322,21 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
     }
 
     // save spectrogram sizes
-    this.specSize = new SpecSize(0, length, 0, fs / 2);
+    var minT = hoursToSeconds(startTime);
+    var maxT = hoursToSeconds(endTime);
+    this.specSize = new SpecSize(minT, maxT, 0, fs / 2);
     this.specSize.numT = nblocks;
     this.specSize.numF = nfreqs;
-    this.specViewSize = new SpecSize(0, length, 0, fs / 2, -45, 45);
+    this.specViewSize = new SpecSize(minT, maxT, 0, fs / 2, -45, 45);
     var self = this;
     window.requestAnimationFrame(function() {
         self.drawScene();
     });
 };
+
+function hoursToSeconds(time){
+  return 60 * 60 * time;
+}
 
 /* loads a spectrogram into video memory and fills VBOs
 
@@ -347,8 +353,6 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, length) {
    data       a Float32Array containing nblocks x nfreqs values.
    nblocks    the width of the data, the number of blocks.
    nfreqs     the height of the data, the number of frequency bins.
-   fs         the sample rate of the audio data.
-   length     the length of the audio data in seconds.
 */
 Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift) {
     var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);

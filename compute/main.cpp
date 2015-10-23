@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 {
   if (argc <= 3)
   {
-    float duration;
+    float startTime, endTime;
     char* mrn;
     if (argc >= 2)
     {
@@ -68,20 +68,20 @@ int main(int argc, char *argv[])
       // default medial record number
       mrn = "007";
     }
-    if (argc == 3)
+    if (argc == 4)
     {
-      duration = atof(argv[2]);
+      startTime = atof(argv[2]);
+      endTime = atof(argv[3]);
     }
     else
     {
-      duration = 4.0; // default duration
+      // default times
+      startTime = 0.0;
+      endTime = 4.0;
     }
-    printf("Using mrn: %s, duration: %.2f hours\n", mrn, duration);
+    printf("Using mrn: %s, startTime: %.2f, endTime %.2f\n", mrn, startTime, endTime);
     spec_params_t spec_params;
-    get_eeg_spectrogram_params(&spec_params, mrn, duration);
-    if (spec_params.hdl == -1) {
-      exit(1);
-    }
+    get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
     close_edf(mrn);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
     float* spec_arr = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
-    get_eeg_spectrogram_params(&spec_params, mrn, duration);
+    get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
     example_spectrogram_as_arr(spec_arr, &spec_params);
     close_edf(mrn);
     free(spec_arr);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    printf("\nusage: spectrogram <mrn> <duration>\n\n");
+    printf("\nusage: spectrogram <mrn> <startTime> <endTime>\n\n");
   }
   return 1;
 }

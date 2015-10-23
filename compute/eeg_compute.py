@@ -5,7 +5,6 @@ import time
 
 from os.path import dirname as parent
 from sys import platform as _platform
-from helpers import astype
 
 APPROOT = parent(os.path.realpath(__file__))
 
@@ -13,9 +12,10 @@ APPROOT = parent(os.path.realpath(__file__))
 class EEGSpecParams(ctypes.Structure):
   _fields_ = [
       ('mrn', ctypes.POINTER(ctypes.c_char)),
-      ('duration', ctypes.c_float),
+      ('startTime', ctypes.c_float),
+      ('endTime', ctypes.c_float),
       ('hdl', ctypes.c_int),
-      ('spec_len', ctypes.c_int),
+      ('total_nsamples', ctypes.c_int),
       ('fs', ctypes.c_int),
       ('nfft', ctypes.c_int),
       ('nstep', ctypes.c_int),
@@ -56,14 +56,15 @@ _libspectrogram.get_eeg_spectrogram_params.argtypes = [
     spec_params_p,
     ctypes.POINTER(ctypes.c_char),
     ctypes.c_float,
+    ctypes.c_float,
 ]
 _libspectrogram.get_eeg_spectrogram_params.restype = ctypes.c_void_p
 
 
-def get_eeg_spectrogram_params(mrn, duration):
+def get_eeg_spectrogram_params(mrn, start_time, end_time):
   spec_params = EEGSpecParams()
   _libspectrogram.get_eeg_spectrogram_params(spec_params,
-                                             mrn, duration)
+                                             mrn, start_time, end_time)
   print_spec_params_t(spec_params)
   return spec_params
 
@@ -107,13 +108,13 @@ _libspectrogram.example_change_points_as_arr.restype = ctypes.c_void_p
 
 
 def example_change_points_as_arr(spec_mat):
-  spec_mat = astype(spec_mat)
+  spec_mat = spec_mat.astype('float32')
   n_rows, n_cols = spec_mat.shape
   _libspectrogram.example_change_points_as_arr(spec_mat, n_rows, n_cols)
 
 
-def main(mrn, duration):
-  spec_params = get_eeg_spectrogram_params(mrn, duration)
+def main(mrn, start_time, end_time):
+  spec_params = get_eeg_spectrogram_params(mrn, start_time, end_time)
   start = time.time()
   spec_mat = eeg_spectrogram_as_arr(spec_params, 0)  # channel LL
   end = time.time()
@@ -131,7 +132,9 @@ if __name__ == '__main__':
                       default='007',
                       dest='mrn',
                       help='medical record number for spectrogram data.')
-  parser.add_argument('-d', '--duration', default=10.0, type=float,
-                      dest='duration', help='duration of the data')
+  parser.add_argument('-s', '--start_time', default=0.0, type=float,
+                      dest='start_time', help='start time of the data')
+  parser.add_argument('-e', '--end_time', default=4.0, type=float,
+                      dest='end_time', help='end time of the data')
   args = parser.parse_args()
-  main(args.mrn, args.duration)
+  main(args.mrn, args.start_time, args.end_time)

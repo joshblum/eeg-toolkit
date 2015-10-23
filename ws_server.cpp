@@ -95,7 +95,8 @@ void send_spectrogram_new(SocketServer<WS>* server,
     {"nblocks", spec_params.nblocks},
     {"nfreqs", spec_params.nfreqs},
     {"fs", spec_params.fs},
-    {"length", spec_params.spec_len},
+    {"startTime", spec_params.startTime},
+    {"endTime", spec_params.endTime},
     {"canvasId", canvasId}
   };
   log_json(content);
@@ -136,13 +137,14 @@ void send_change_points(SocketServer<WS>* server,
 void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
 {
   std::string mrn = data["mrn"].string_value();
-  float duration = data["duration"].number_value();
+  float startTime = data["startTime"].number_value();
+  float endTime = data["endTime"].number_value();
   int ch = data["channel"].number_value();
 
   spec_params_t spec_params;
   char *mrn_c = new char[mrn.length() + 1];
   strcpy(mrn_c, mrn.c_str());
-  get_eeg_spectrogram_params(&spec_params, mrn_c, duration);
+  get_eeg_spectrogram_params(&spec_params, mrn_c, startTime, endTime);
   print_spec_params_t(&spec_params);
   cout << endl; // print newline between each spectrogram computation
   const char* ch_name = CH_NAME_MAP[ch];

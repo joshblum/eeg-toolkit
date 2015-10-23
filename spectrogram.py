@@ -15,7 +15,7 @@ from constants import CHANNEL_INDEX
 
 
 CHUNK_HOURS = 1.0
-
+# TODO(joshblum): change duration to start_time and end_time throughout
 EEGSpecParams = namedtuple(
     'SpecParams', ['mrn', 'duration',
                    'chunksize', 'fs', 'data',

@@ -86,17 +86,19 @@ function sendMessage(type, content, payload) {
    Arguments:
    mrn       the medical record number from which to load data.
    nfft      the FFT length used for calculating the spectrogram.
-   duration  the length (in hours) to display.
+   startTime the start time for the calculation
+   endTime   the end time for the calculation
    overlap   the amount of overlap between consecutive spectra.
-   channel   the channel (LP, LP,...) we are requesting
+   channel   the channel (LP, LP, ...) we are requesting
 */
-function requestFileSpectrogram(mrn, nfft, duration, overlap, channel) {
+function requestFileSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
     updateSpectrogramStartTimes();
     // TODO (joshblum): need a new field for request action to allow updates for panning
     sendMessage("request_file_spectrogram", {
         mrn: mrn,
         nfft: nfft,
-        duration: duration,
+        startTime: startTime,
+        endTime: endTime,
         overlap: overlap,
         channel: channel,
     });
@@ -155,7 +157,7 @@ ws.onmessage = function(event) {
             // First let"s setup the canvas
             spectrogram.newSpectrogram(content.nblocks,
                 content.nfreqs, content.fs,
-                content.length);
+                content.startTime, content.endTime);
         } else if (action === "update") {
             // Now lets update the next frame in the spectrogram
             // TODO (joshblum) Instead of allocating new arrays here
@@ -205,12 +207,14 @@ function reloadSpectrogram() {
     // This really is obsolete..
     var patientIdentifier = getElementById("patientIdentifierByData").files[0];
     var fftLen = parseFloat(getElementById("fftLen").value);
-    var duration = parseFloat(getElementById("specDuration").value);
+    var startTime = parseFloat(getElementById("specStartTime").value);
+    var endTime = parseFloat(getElementById("specEndTime").value);
     // first we try to load a file
     if (patientIdentifier) {
         var reader = new FileReader();
         reader.readAsArrayBuffer(patientIdentifier);
         reader.onloadend = function() {
+            var duration = endTime - startTime;
             requestDataSpectrogram(reader.result, fftLen, duration,
                 OVERLAP);
         };
@@ -219,8 +223,9 @@ function reloadSpectrogram() {
         if (patientIdentifier) {
             console.log("Requesting spectrogram for: " + patientIdentifier);
             for (var ch = 0; ch < IDS.length; ch++) {
-              requestFileSpectrogram(patientIdentifier, fftLen, duration,
+              requestFileSpectrogram(patientIdentifier, fftLen, startTime, endTime,
                 OVERLAP, ch);
+              break;
             }
         }
     }
