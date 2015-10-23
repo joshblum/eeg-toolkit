@@ -5,10 +5,6 @@
 #include <armadillo>
 #include "EDFlib/edflib.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 using namespace arma;
 
 typedef struct spec_params
@@ -121,8 +117,5 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
 void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
 void mrn_to_filename(char* mrn, char* filename);
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif // SPECTROGRAM_H
