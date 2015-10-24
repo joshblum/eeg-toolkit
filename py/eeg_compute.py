@@ -5,8 +5,7 @@ import time
 
 from os.path import dirname as parent
 
-APPROOT = parent(os.path.realpath(__file__))
-
+APPROOT = os.path.join(parent(parent(os.path.realpath(__file__))), 'compute')
 
 class EEGSpecParams(ctypes.Structure):
   _fields_ = [

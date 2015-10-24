@@ -3,7 +3,7 @@ import scipy.io
 
 from collections import namedtuple
 
-import compute.eeg_compute as compute
+import eeg_compute
 
 CpData = namedtuple(
     'CpData', ['r', 'ch', 't01',
@@ -136,7 +136,7 @@ def main():
   ml_res = load_file(ml_filename)
   spec_mat = ml_res.r[ml_res.ch]
   # py_res = get_change_points(spec_mat)
-  compute.example_change_points_as_arr(spec_mat)
+  eeg_compute.example_change_points_as_arr(spec_mat)
   # verify_result(ml_res, py_res, 'py_res')
 
 if __name__ == '__main__':

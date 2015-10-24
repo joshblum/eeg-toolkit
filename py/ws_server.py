@@ -1,8 +1,10 @@
+from __future__ import division
+
 import io
 import time
 import json
 
-import compute.eeg_compute as eeg_compute
+import eeg_compute as eeg_compute
 import numpy as np
 
 from constants import CHANNELS
@@ -17,6 +19,11 @@ from helpers import to_bytes
 from spectrogram import spectrogram
 
 from tornado.websocket import WebSocketHandler
+from tornado.ioloop import IOLoop
+from tornado.web import Application
+from tornado.web import StaticFileHandler
+from tornado.web import RequestHandler
+
 
 EEG = 'eeg'
 
@@ -183,7 +190,7 @@ class SpectrogramWebSocket(JSONWebSocket):
         'canvasId': canvas_id})
 
   def on_eeg_spectrogram(self, mrn, nfft=1024,
-                          duration=None, overlap=0.5, dataType=EEG):
+                         duration=None, overlap=0.5, dataType=EEG):
     """
 
     Arguments:
@@ -226,3 +233,30 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     eeg_compute.close_edf(mrn)
 
+
+class MainHandler(RequestHandler):
+
+  def get(self):
+    self.render('html/main.html')
+
+
+def make_app():
+  handlers = [
+      (r'/', MainHandler),
+      (r'/compute/spectrogram/', SpectrogramWebSocket),
+      (r'/(.*)', StaticFileHandler, {
+          'path': ''
+      }),
+  ]
+  return Application(handlers, autoreload=True)
+
+
+def main():
+  app = make_app()
+  port = 5000
+  app.listen(port)
+  print 'Listing on port:', port
+  IOLoop.current().start()
+
+if __name__ == '__main__':
+  main()
