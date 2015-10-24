@@ -454,6 +454,8 @@ Spectrogram.prototype.drawSpectrogram = function() {
 */
 Spectrogram.prototype.formatTime = function(seconds) {
     var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+    minutes = minutes % 60;
     seconds = seconds % 60;
     minutes = minutes.toString();
     if (minutes.length === 1) {
@@ -463,7 +465,7 @@ Spectrogram.prototype.formatTime = function(seconds) {
     if (seconds.length === 4) {
         seconds = "0" + seconds;
     }
-    return minutes + ":" + seconds;
+    return hours + ":" + minutes + ":" + seconds;
 };
 
 /* draw the time scale canvas
