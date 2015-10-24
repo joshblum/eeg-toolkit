@@ -53,7 +53,7 @@ void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
 
 int main(int argc, char *argv[])
 {
-  if (argc <= 3)
+  if (argc <= 4)
   {
     float startTime, endTime;
     char* mrn;

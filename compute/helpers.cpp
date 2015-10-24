@@ -37,3 +37,7 @@ int get_next_pow_2(unsigned int v)
   return v;
 }
 
+int hours_to_nsamples(int fs, float time)
+{
+  return fs * 60 * 60 * time;
+}

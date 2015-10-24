@@ -15,7 +15,7 @@ class EEGSpecParams(ctypes.Structure):
       ('startTime', ctypes.c_float),
       ('endTime', ctypes.c_float),
       ('hdl', ctypes.c_int),
-      ('total_nsamples', ctypes.c_int),
+      ('spec_len', ctypes.c_int),
       ('fs', ctypes.c_int),
       ('nfft', ctypes.c_int),
       ('nstep', ctypes.c_int),
@@ -33,7 +33,7 @@ _libspectrogram = np.ctypeslib.load_library('lib_eeg_spectrogram', APPROOT)
 
 # print_spec_params_t
 _libspectrogram.print_spec_params_t.argtypes = [
-    ctypes.POINTER(EEGSpecParams),
+    spec_params_p,
 ]
 _libspectrogram.print_spec_params_t.restype = ctypes.c_void_p
 

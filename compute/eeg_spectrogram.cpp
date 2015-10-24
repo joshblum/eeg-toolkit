@@ -47,7 +47,7 @@ float get_valid_endTime(int spec_len, int fs, float endTime)
 int get_nsamples(int spec_len, int fs, float duration)
 {
   // get number of samples required for our duration
-  return fmin(spec_len, fs * 60 * 60 * duration);
+  return fmin(spec_len, hours_to_nsamples(fs, duration));
 }
 
 int get_nblocks(int nsamples, int nfft, int shift)
@@ -128,11 +128,11 @@ float* create_buffer(int n)
   return buf;
 }
 
-void get_array_data(spec_params_t* spec_params, int ch, int n, float *buf)
+void get_array_data(spec_params_t* spec_params, int ch, int startOffset, int endOffset, float *buf)
 {
   //TODO(joshblum): support different types of backends
   //global config? variable passed in?
-  read_edf_data(spec_params->hdl, ch, n, buf);
+  read_edf_data(spec_params->hdl, ch, startOffset, endOffset, buf);
 }
 
 // Create a hamming window of windowLength samples in buffer
@@ -271,12 +271,17 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 
   int ch_idx1, ch_idx2;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
-  get_array_data(spec_params, ch_idx1, nsamples, buf1);
+
+  // should this just move to the spec_params struct?
+  int startOffset = hours_to_nsamples(spec_params->fs, spec_params->startTime);
+  int endOffset= hours_to_nsamples(spec_params->fs, spec_params->endTime);
+
+  get_array_data(spec_params, ch_idx1, startOffset, endOffset, buf1);
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    get_array_data(spec_params, ch_idx2, nsamples, buf2);
+    get_array_data(spec_params, ch_idx2, startOffset, endOffset, buf2);
 
     // TODO use rowvec::fixed with fixed size chunks
     frowvec v1 = frowvec(buf1, nsamples);

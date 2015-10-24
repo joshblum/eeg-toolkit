@@ -134,17 +134,23 @@ void close_edf(char* mrn)
   }
 }
 
-int read_edf_data(int hdl, int ch, int n, float* buf)
+int read_edf_data(int hdl, int ch, int startOffset, int endOffset, float* buf)
 {
+  if (edfseek(hdl, ch, (long long) startOffset,  EDFSEEK_SET) == -1)
+  {
+    printf("\nerror: edfseek()\n");
+    return -1;
+  }
 
-  int bytes_read = edfread_physical_samples(hdl, ch, n, buf);
+  int nsamples = endOffset - startOffset;
+  int bytes_read = edfread_physical_samples(hdl, ch, nsamples, buf);
   if (bytes_read == -1)
   {
     printf("\nerror: edf_read_physical_samples()\n");
     return -1;
   }
   // clear buffer in case we didn't read as much as we expected to
-  for (int i = bytes_read; i < n; i++)
+  for (int i = bytes_read; i < nsamples; i++)
   {
     buf[i] = 0.0;
   }
