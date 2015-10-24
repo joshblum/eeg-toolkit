@@ -1,36 +1,23 @@
-from __future__ import division
-
-from tornado.ioloop import IOLoop
-from tornado.web import Application
-from tornado.web import StaticFileHandler
-from tornado.web import RequestHandler
-
-from ws_server import SpectrogramWebSocket
+from flask import Flask
+from flask import request
+from flask import send_from_directory
 
 
-class MainHandler(RequestHandler):
+app = Flask(__name__)
 
-  def get(self):
-    self.render('html/main.html')
+@app.route('/css/<path:path>')
+def send_css(path):
+    return send_from_directory('css', path)
 
-
-def make_app():
-  handlers = [
-      (r'/', MainHandler),
-      (r'/compute/spectrogram/', SpectrogramWebSocket),
-      (r'/(.*)', StaticFileHandler, {
-          'path': ''
-      }),
-  ]
-  return Application(handlers, autoreload=True)
+@app.route('/js/<path:path>')
+def send_js(path):
+    return send_from_directory('js', path)
 
 
+@app.route('/')
 def main():
-  app = make_app()
-  port = 5000
-  app.listen(port)
-  print 'Listing on port:', port
-  IOLoop.current().start()
+  return send_from_directory('html', 'main.html')
+
 
 if __name__ == '__main__':
-  main()
+  app.run(host='0.0.0.0')
