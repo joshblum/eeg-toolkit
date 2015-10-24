@@ -4,7 +4,6 @@ import os
 import time
 
 from os.path import dirname as parent
-from sys import platform as _platform
 
 APPROOT = parent(os.path.realpath(__file__))
 
@@ -118,9 +117,9 @@ def main(mrn, start_time, end_time):
   start = time.time()
   spec_mat = eeg_spectrogram_as_arr(spec_params, 0)  # channel LL
   end = time.time()
-  print 'Total time: ',  (end - start)
-  print 'Spectrogram shape:',  str(spec_mat.shape)
-  print 'Sample data:',  spec_mat[:10, :10]
+  print 'Total time: ', (end - start)
+  print 'Spectrogram shape:', str(spec_mat.shape)
+  print 'Sample data:', spec_mat[:10, :10]
   close_edf(mrn)
 
 if __name__ == '__main__':
