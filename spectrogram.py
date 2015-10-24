@@ -22,12 +22,6 @@ EEGSpecParams = namedtuple(
                    'nstep', 'trial_avg',
                    'nfft', 'nblocks', 'tapers',
                    'nfreqs', 'nsamples', 'findx', ])
-AudioSpecParams = namedtuple(
-    'SpecParams', ['chunksize', 'fs',
-                   'shift', 'spec_len',
-                   'nfft', 'nblocks',
-                   'nfreqs', 'nsamples'])
-
 # see if we are running normally or using kernprof
 try:
   profile(lambda x: None)
@@ -236,19 +230,6 @@ def on_eeg_file_spectrogram_profile(mrn, duration):
   return spec
 
 
-def get_audio_spectrogram_params(data, fs, duration, nfft, overlap):
-  shift = _get_shift(nfft, overlap)
-  nsamples = _get_nsamples(data, fs, duration)
-  chunksize = _get_chunksize(nsamples, fs, nfft)
-  nblocks = _get_nblocks(nsamples, nfft, shift)
-  nfreqs = _get_nfreqs(nfft)
-  return AudioSpecParams(nfft=nfft, shift=shift,
-                         nsamples=nsamples,
-                         spec_len=nsamples / fs,
-                         nblocks=nblocks, nfreqs=nfreqs,
-                         fs=fs, chunksize=chunksize)
-
-
 @profile
 def multitaper_spectrogram(data, spec_params):
 
@@ -286,15 +267,15 @@ def multitaper_spectrogram(data, spec_params):
 
 
 def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
-  """Calculate a real spectrogram from audio data
+  """Calculate a real spectrogram from data
 
-  An audio data will be cut up into overlapping blocks of length
+  The data will be cut up into overlapping blocks of length
   `nfft`. The amount of overlap will be `overlap*nfft`. Then,
   calculate a real fourier transform of length `nfft` of every
   block and save the absolute spectrum.
 
   Arguments:
-  data      audio data as a numpy array.
+  data      data as a numpy array.
   nfft      the FFT length used for calculating the spectrogram.
   shift   the amount of overlap between consecutive spectra.
 

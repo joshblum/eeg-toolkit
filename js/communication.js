@@ -104,23 +104,6 @@ function requestFileSpectrogram(mrn, nfft, startTime, endTime, overlap, channel)
     });
 }
 
-/* Request the spectrogram for a file.
-
-   Arguments:
-   data      the content of a file from which to load audio data.
-   nfft      the FFT length used for calculating the spectrogram.
-   duration  the length (in hours) to display.
-   overlap   the amount of overlap between consecutive spectra.
-*/
-function requestDataSpectrogram(data, nfft, duration, overlap) {
-    updateSpectrogramStartTimes();
-    sendMessage("request_data_spectrogram", {
-        nfft: nfft,
-        duration: duration,
-        overlap: overlap,
-    }, data);
-}
-
 /* Parses a message
 
    Each message must contain the message type, the message content,
@@ -197,36 +180,24 @@ function submitSpectrogram(e) {
 
 /* Loads the spectrogram for the currently seleced file/FFT-length.
 
-   Reads the audioFile input field to get the current file and the
+   Reads the input field to get the current file and the
    select field to get the current FFT length.
 
    This only sends the request for a spectrogram. Delivering the
    spectrogram is up to the server.
 */
 function reloadSpectrogram() {
-    // This really is obsolete..
-    var patientIdentifier = getElementById("patientIdentifierByData").files[0];
+    var patientIdentifier = getElementById("patientIdentifierByMRN").value;
     var fftLen = parseFloat(getElementById("fftLen").value);
     var startTime = parseFloat(getElementById("specStartTime").value);
     var endTime = parseFloat(getElementById("specEndTime").value);
     // first we try to load a file
     if (patientIdentifier) {
-        var reader = new FileReader();
-        reader.readAsArrayBuffer(patientIdentifier);
-        reader.onloadend = function() {
-            var duration = endTime - startTime;
-            requestDataSpectrogram(reader.result, fftLen, duration,
-                OVERLAP);
-        };
-    } else { // otherwise see if there is a filename
-        patientIdentifier = getElementById("patientIdentifierByMRN").value;
-        if (patientIdentifier) {
-            console.log("Requesting spectrogram for: " + patientIdentifier);
-            for (var ch = 0; ch < IDS.length; ch++) {
-              requestFileSpectrogram(patientIdentifier, fftLen, startTime, endTime,
-                OVERLAP, ch);
-              break;
-            }
+        console.log("Requesting spectrogram for: " + patientIdentifier);
+        for (var ch = 0; ch < IDS.length; ch++) {
+          requestFileSpectrogram(patientIdentifier, fftLen, startTime, endTime,
+            OVERLAP, ch);
+          break;
         }
     }
     if (!patientIdentifier) {

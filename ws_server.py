@@ -14,14 +14,10 @@ from helpers import downsample_extent
 from helpers import from_bytes
 from helpers import to_bytes
 
-from pysoundfile import SoundFile
-
-from spectrogram import get_audio_spectrogram_params
 from spectrogram import spectrogram
 
 from tornado.websocket import WebSocketHandler
 
-AUDIO = 'audio'
 EEG = 'eeg'
 
 
@@ -142,8 +138,7 @@ class SpectrogramWebSocket(JSONWebSocket):
     """Message dispatcher.
 
     Dispatches
-    - `request_file_spectrogram` to self.on_file_spectrogram
-    - `request_data_spectrogram` to self.on_data_spectrogram
+    - `request_file_spectrogram` to self.on_eeg_spectrogram
 
     Arguments:
     msg_type  the message type as string.
@@ -152,9 +147,7 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     """
     if msg_type == 'request_file_spectrogram':
-      self.on_file_spectrogram(**content)
-    elif msg_type == 'request_data_spectrogram':
-      self.on_data_spectrogram(data, **content)
+      self.on_eeg_spectrogram(**content)
     else:
       super(self.__class__, self).receive_message(
           msg_type, content, data)
@@ -189,9 +182,9 @@ class SpectrogramWebSocket(JSONWebSocket):
         'progress': progress,
         'canvasId': canvas_id})
 
-  def on_file_spectrogram(self, mrn, nfft=1024,
+  def on_eeg_spectrogram(self, mrn, nfft=1024,
                           duration=None, overlap=0.5, dataType=EEG):
-    """Loads an audio file and calculates a spectrogram.
+    """
 
     Arguments:
     mrn       the medical record number from which to load the data.
@@ -202,7 +195,6 @@ class SpectrogramWebSocket(JSONWebSocket):
     """
     t0 = time.time()
     dataHandlers = {
-        AUDIO: self.on_audio_file_spectrogram,
         EEG: self.on_eeg_file_spectrogram,
     }
 
@@ -234,63 +226,3 @@ class SpectrogramWebSocket(JSONWebSocket):
 
     eeg_compute.close_edf(mrn)
 
-  def on_audio_file_spectrogram(self, filename, nfft, duration, overlap):
-    _file = SoundFile(filename)
-    self._audio_file_spectrogram(_file, nfft, duration, overlap)
-
-  def _audio_file_spectrogram(self, _file, nfft, duration, overlap):
-    # first get the spec_params and let the client setup the canvas
-    fs = _file.sample_rate
-    spec_params = get_audio_spectrogram_params(
-        _file, fs, duration, nfft, overlap)
-    self.send_spectrogram_new(spec_params)
-
-    # now lets compute the spectrogram and send it over
-    data = _file[:spec_params.nsamples].sum(axis=1)
-    for chunk in grouper(data, spec_params.chunksize, spec_params.nfft):
-      chunk = np.array(chunk)
-      spec = spectrogram(chunk, spec_params)
-      self.send_spectrogram_update(spec)
-
-  def on_data_spectrogram(self, data, nfft=1024, duration=None,
-                          overlap=0.5, dataType=EEG):
-    """Loads an audio file and calculates a spectrogram.
-
-    Arguments:
-    data      the content of a file from which to load data.
-    nfft      the FFT length used for calculating the spectrogram.
-    duration  the duration (in hours) to compute. If `None` the entire
-    data source is used.
-    overlap   the amount of overlap between consecutive spectra.
-
-    """
-    dataHandlers = {
-        AUDIO: self.on_audio_data_spectrogram,
-        EEG: self.on_eeg_data_spectrogram,
-    }
-    handler = dataHandlers.get(dataType)
-    if handler is None:
-      return
-    handler(data, nfft, duration, overlap)
-
-  def on_eeg_data_spectrogram(self, data, nfft, duration, overlap):
-    """
-      Convert the raw data from a file into an array of four spectrograms.
-      The data file is a matrix of voltage data with a column per sensor.
-      We computer the differences between sensors in the four
-      regions (LL, LP, RL, RP)
-      and then average the spectrograms for each of these regions.
-      We send each spectrogram to the client for visualization.
-    """
-    # TODO (joshblum): figure out something not as stupid... (can work
-    # concurrently?)
-    # this doesn't work at all browser limit for files is pretty small...
-    FILENAME = 'tmp-data'
-    with open(FILENAME, 'w') as f:
-      f.write(data)
-
-    self.on_eeg_file_spectrogram(FILENAME, nfft, duration, overlap)
-
-  def on_audio_data_spectrogram(self, data, nfft, duration, overlap):
-    _file = SoundFile(io.BytesIO(data), virtual_io=True)
-    self._audio_file_spectrogram(_file, nfft, overlap)
