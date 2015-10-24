@@ -1,11 +1,6 @@
-PySoundFile==0.5.0
-backports.ssl-match-hostname==3.4.0.2
-certifi==14.05.14
-cffi==0.8.6
 flake8==2.4.1
-numpy==1.9.1
+numpy==1.10.1
 scipy==0.15.1
-pycparser==2.10
 tornado==4.0.2
 Fabric==1.10.1
 supervisor==3.1.3
