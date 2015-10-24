@@ -50,4 +50,4 @@ main: main.o $(OBJ)
 
 clean:
 	find . -type f -name '*.[dSYM|o|d]' -delete
-	find . -type f -wholename '[$(TARGET)|$(SHARED_LIB)]' -delete
+	find . -type f \( -name "$(TARGET)" -o -wholename "$(SHARED_LIB)" \) -delete
