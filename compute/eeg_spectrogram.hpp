@@ -6,6 +6,11 @@
 #include "EDFlib/edflib.h"
 #include "edf_backend.hpp"
 
+// necessary for the shared lib for python acess
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 using namespace arma;
 
 typedef struct spec_params
@@ -100,5 +105,9 @@ void eeg_spectrogram_wrapper(char* mrn, float startTime, float endTime, int ch, 
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
 void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif // SPECTROGRAM_H
