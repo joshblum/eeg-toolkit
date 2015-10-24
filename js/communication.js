@@ -219,7 +219,7 @@ function reloadSpectrogram() {
                 OVERLAP);
         };
     } else { // otherwise see if there is a filename
-        patientIdentifier = getElementById("patientIdentifierByName").value;
+        patientIdentifier = getElementById("patientIdentifierByMRN").value;
         if (patientIdentifier) {
             console.log("Requesting spectrogram for: " + patientIdentifier);
             for (var ch = 0; ch < IDS.length; ch++) {

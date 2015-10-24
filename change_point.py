@@ -33,7 +33,7 @@ def get_change_points(spec_mat):
 
   minimum = 5000
   stride = 10
-  nt = int(round(len(s) / stride, -1)) # round to the tens place
+  nt = int(round(len(s) / stride, -1))  # round to the tens place
 
   b = 0.95
   bb = 0.995
@@ -81,7 +81,7 @@ def get_change_points(spec_mat):
 
     if cu[j] > H or cl[j] > H:
       total_count += 1
-      cp.append(j*stride)
+      cp.append(j * stride)
       ct = 0
 
       if cu[j] > H:
@@ -114,8 +114,8 @@ def verify_result(res1, res2, src=''):
       if not valid and len(v1) == len(v2):
         valid = numpy.allclose(v1, v2)
         if not valid:
-            print 'invalid', v1[:5]
-            print 'invalid', v2[:5]
+          print 'invalid', v1[:5]
+          print 'invalid', v2[:5]
       r1 = v1.shape
       r2 = v2.shape
     else:
@@ -135,9 +135,9 @@ def main():
   ml_filename = 'cp-io.mat'
   ml_res = load_file(ml_filename)
   spec_mat = ml_res.r[ml_res.ch]
-  #py_res = get_change_points(spec_mat)
-  cpp_res = compute.example_change_points_as_arr(spec_mat)
-  #verify_result(ml_res, py_res, 'py_res')
+  # py_res = get_change_points(spec_mat)
+  compute.example_change_points_as_arr(spec_mat)
+  # verify_result(ml_res, py_res, 'py_res')
 
 if __name__ == '__main__':
   main()

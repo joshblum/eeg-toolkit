@@ -7,7 +7,6 @@ from collections import namedtuple
 from scipy import signal
 from spectrum import dpss
 
-from helpers import grouper
 from helpers import get_array_data
 from constants import CHANNELS
 from constants import DIFFERENCE_PAIRS
@@ -198,7 +197,6 @@ def eeg_ch_spectrogram(ch, data, spec_params, progress_fn=None):
     Compute the spectrogram for an individual spectrogram in the eeg
   """
   T = []
-  t0 = time.time()
   # TODO (joshblum): do this once in a preprocessing step.
   pairs = DIFFERENCE_PAIRS.get(ch)
   for i, pair in enumerate(pairs):
@@ -308,11 +306,11 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
 
   nblocks = spec_params.nblocks
   nfreqs = spec_params.nfreqs
-  nsamples = spec_params.nsamples
+  # nsamples = spec_params.nsamples
 
   window = _hann(nfft)
   specs = np.zeros((nfreqs, nblocks), dtype=np.float32)
-  fft_data = np.zeros(nfft, dtype=np.float32)
+  # fft_data = np.zeros(nfft, dtype=np.float32)
   for idx in xrange(nblocks):
     specs[:, idx] = np.abs(np.fft.rfft(
         data[idx * nstep:idx * nstep + shift] * window, n=nfft)) / nfft
@@ -328,8 +326,8 @@ def spectrogram(data, spec_params, canvas_id=None, progress_fn=None):
 
 def main(mrn, duration):
   spec = on_eeg_file_spectrogram_profile(mrn, duration)
-  print 'Spectrogram shape:',  str(spec.shape)
-  print 'Sample data:',  spec[:10, :10]
+  print 'Spectrogram shape:', str(spec.shape)
+  print 'Sample data:', spec[:10, :10]
 
 
 if __name__ == '__main__':

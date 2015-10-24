@@ -2,7 +2,7 @@ import struct
 import platform
 
 import numpy as np
-#import h5py
+import h5py
 
 from eegtools.io import load_edf
 from constants import CHANNEL_INDEX
