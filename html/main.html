@@ -68,10 +68,9 @@
   <body onload="start()">
     <div id="metadata">
       <form>
-        <label for="patientIdentifierByData">File:</label>
-          <input id="patientIdentifierByData" name="patientIdentifierByData" class="hidden" type="file" accept="audio/*" onchange="reloadSpectrogram()">
-        <input id="patientIdentifierByName" name="patientIdentifierByName" type="text" value="007" onkeyup="submitSpectrogram(event)">
-        <input id="patientIdentifierNameSubmit" type="button" value="Submit" onclick="reloadSpectrogram()">
+        <label for="patientIdentifierByData">MRN</label>
+        <input id="patientIdentifierByMRN" name="patientIdentifierByMRN" type="text" value="007" onkeyup="submitSpectrogram(event)">
+        <input id="patientIdentifierMRNSubmit" type="button" value="Load Patient" onclick="reloadSpectrogram()">
         <label for="specStartTime">Start Time (hrs):</label>
         <input id="specStartTime" class="specTime" type="text" value="0.0" onkeyup="submitSpectrogram(event)">
         <label for="specEndTime">End Time:</label>

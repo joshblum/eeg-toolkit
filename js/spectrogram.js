@@ -107,7 +107,7 @@ Spectrogram.prototype.init = function() {
     this.loadSpectrogramShaders();
 
     // load dummy data
-    this.newSpectrogram(1, 1, 200, 1, 1);
+    this.newSpectrogram(1, 1, 200, 0, 1);
 
     this.addListeners();
 };
@@ -483,7 +483,7 @@ Spectrogram.prototype.drawSpecTimeScale = function() {
     ctx.fillRect(10, 2, 1, 5);
     ctx.fillRect(ctx.canvas.width - 10, 3, 1, 5);
     // draw lower time bound
-    ctx.font = "8px sans-serif";
+    ctx.font = "10px sans-serif";
     var text = this.formatTime(this.specViewSize.minT);
     var textWidth = ctx.measureText(text).width;
     ctx.fillText(text, 0, ctx.canvas.height - 2);
@@ -539,7 +539,7 @@ Spectrogram.prototype.drawSpecFrequencyScale = function() {
     ctx.fillRect(2, 10, 5, 1);
     ctx.fillRect(2, ctx.canvas.height - 10, 5, 1);
     // draw upper frequency bound
-    ctx.font = "8px sans-serif";
+    ctx.font = "10px sans-serif";
     var text = this.formatFrequency(this.specViewSize.maxF);
     var textWidth = ctx.measureText(text).width;
     ctx.fillText(text, 8, 14);
