@@ -1,22 +1,17 @@
 from __future__ import division
 
-import io
 import time
 import json
 
 import eeg_compute as eeg_compute
-import numpy as np
 
 from constants import CHANNELS
 
 from helpers import astype
-from helpers import grouper
 from helpers import downsample
 from helpers import downsample_extent
 from helpers import from_bytes
 from helpers import to_bytes
-
-from spectrogram import spectrogram
 
 from tornado.websocket import WebSocketHandler
 from tornado.ioloop import IOLoop

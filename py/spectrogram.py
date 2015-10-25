@@ -75,7 +75,7 @@ def _hann(n):
 
 @profile
 def _power_log(x):
-  return 2**(math.ceil(math.log(x, 2)))
+  return 2 ** (math.ceil(math.log(x, 2)))
 
 
 @profile

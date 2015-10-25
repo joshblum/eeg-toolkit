@@ -8,7 +8,7 @@ from eegtools.io import load_edf
 from constants import CHANNEL_INDEX
 
 DOWNSAMPLE_RATE = 10
-MAX_SIZE = 10 * 100**3  # arbitrarily 10 MB limit
+MAX_SIZE = 10 * 100 ** 3  # arbitrarily 10 MB limit
 TILEDB = 'tiledb'
 SCIDB = 'scidb'
 
