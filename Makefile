@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy update
+.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy submodules submodule-update
 
 CXX = g++
 CSRC := compute/EDFlib/edflib.c
@@ -46,11 +46,13 @@ libs:
 ws_server: $(OBJ)
 	$(CXX) $(OBJ) $(LDFLAGS) -o $@
 
-update:
+submodule-update:
 	git submodule foreach git checkout master; git pull
 
-installdeps: clean
+submodules:
 	 git submodule update --init --recursive
+
+installdeps: clean submodules
 ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
 	brew update
