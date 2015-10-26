@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %} {{ title }} {% endblock %}
+{% block body %}
+    {% include "menu-nav.html" %}
+    <div class="row">
+      <div class="col offset-s3 s6">
+        <div class="card-panel {{ background_color }} {{ text_color }} center-align">
+          <h1>{{ title }}</h1>
+          <span>
+            {{ action }}
+          </span>
+        </div>
+      </div>
+    </div>
+{% endblock %}

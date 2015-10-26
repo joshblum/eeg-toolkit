@@ -1,0 +1,70 @@
+.specContainer {
+    position: relative;
+    width: 100%;
+    height: 147px;
+}
+
+.spectrogram {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: calc(100% - 50px);
+    height: calc(100% - 30px);
+}
+
+.specFreqScale {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    height: calc(100% - 10px);
+    width: 40px;
+}
+
+.specTimeScale {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    width: calc(100% - 30px);
+    height: 20px;
+}
+
+.specView {
+    position: absolute;
+    background: #ffffff;
+    z-index: 998;
+    margin: 13px;
+    padding: 2px;
+    border-radius: 3px;
+    border: 1px #000000 solid;
+    opacity: 0.9;
+    font: 10px sans-serif;
+}
+
+.specDataView {
+    margin-left: 50px;
+}
+
+.specTitleView {
+    font-size: 18px;
+    padding: 3px;
+}
+
+.progressBar {
+    position: absolute;
+    margin-left: calc(40%);
+    margin-top: calc(4%);
+    width: 200px;
+}
+
+.specTime {
+    width: 30px;
+}
+
+[type="checkbox"]+label {
+    padding-left: 25px;
+}
+
+.metadata {
+    padding-top: 15px;
+    margin-bottom: 0px;
+}

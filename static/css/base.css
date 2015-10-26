@@ -1,0 +1,25 @@
+.side-nav a {
+    line-height: inherit;
+    padding: 5px 5px;
+    height: 35px;
+}
+
+.side-nav .home-nav {
+    height: inherit;
+}
+
+.github-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 15px;
+}
+
+.menu-nav {
+    margin-top: 15px;
+    margin-left: 15px;
+}
+
+div .input-field .menu-nav {
+  margin-top: 0px;
+  margin-left: 0px;
+}

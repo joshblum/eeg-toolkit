@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <title> {% block title %} {% endblock %} | EEG ToolKit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EEG Toolkit">
+    <meta name="author" content="Joshua Blum">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="shortcut icon" href="/static/img/favicon.ico">
+    <link type="text/css" rel="stylesheet" href="/static/css/materialize.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/base.css">
+    {% block styles %} {% endblock %}
+</head>
+
+<body>
+    <ul id="slide-out" class="side-nav">
+        <div class="section">
+          <li>
+            <a href="/" class="home-nav">
+              EEG ToolKit
+              <i class="left material-icons">equalizer</i>
+            </a>
+          </li>
+        </div>
+        <div class="divider"></div>
+        <div class="section">
+          <li>
+              <a href="/spec-viewer">
+                <i class="left material-icons">library_books</i>
+                EEG Spectrogram Viewer
+            </a>
+          </li>
+          <li>
+              <a href="/cluster-viewer">
+                <i class="left material-icons">view_carousel</i>
+                EEG Cluster Viewer
+              </a>
+          </li>
+          <li>
+              <a href="/about">
+                <i class="left material-icons">info_outline</i>
+                About
+              </a>
+          </li>
+          <li>
+              <a href="https://github.com/joshblum/eeg-toolkit" target="_blank">
+                <img class="github-icon left" src="/static/img/github.ico" alt="Github Logo">
+                GitHub
+            </a>
+          </li>
+        </div>
+        <div class="divider"></div>
+    </ul>
+    <a href="#" data-activates="slide-out" class="hide button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+    {% block body %} {% endblock %}
+    <script src="/static/js/jquery-2.1.4.min.js"></script>
+    <script src="/static/js/materialize.min.js"></script>
+    <script src="/static/js/base.js"></script>
+    {% block scripts %} {% endblock %}
+</body>
+
+</html>
