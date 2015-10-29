@@ -324,10 +324,10 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, startTime, 
     // save spectrogram sizes
     var minT = hoursToSeconds(startTime);
     var maxT = hoursToSeconds(endTime);
-    this.specSize = new SpecSize(minT, maxT, 0, fs / 2);
+    this.specSize = new SpecSize(minT, maxT, 0, nfreqs - 1);
     this.specSize.numT = nblocks;
     this.specSize.numF = nfreqs;
-    this.specViewSize = new SpecSize(minT, maxT, 0, fs / 2, -45, 45);
+    this.specViewSize = new SpecSize(minT, maxT, 0, nfreqs - 1, -45, 45);
     var self = this;
     window.requestAnimationFrame(function() {
         self.drawScene();
