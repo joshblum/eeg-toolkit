@@ -28,3 +28,4 @@ gdb
 valgrind
 cmake
 libssl-dev
+astyle

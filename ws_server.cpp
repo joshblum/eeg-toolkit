@@ -10,7 +10,6 @@
 
 using namespace arma;
 using namespace std;
-using namespace SimpleWeb;
 using namespace json11;
 
 #define NUM_THREADS 4
@@ -18,11 +17,13 @@ using namespace json11;
 #define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
+typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
+
 const char* CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
 std::mutex server_send_mutex;
 
-void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection,
-    std::string msg_type, Json content, float* data, size_t data_size)
+void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
+                  std::string msg_type, Json content, float* data, size_t data_size)
 {
   unsigned long long start = getticks();
   Json msg = Json::object
@@ -38,30 +39,30 @@ void send_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connect
   // the header, encoded as a 32 bit signed integer:
   header.resize(header_len, ' ');
 
-  stringstream data_ss;
-  data_ss.write((char*) &header_len, sizeof(uint32_t));
-  data_ss.write(header.c_str(), header_len);
+  auto send_stream = make_shared<WsServer::SendStream>();
+  send_stream->write((char*) &header_len, sizeof(uint32_t));
+  send_stream->write(header.c_str(), header_len);
   if (data != NULL)
   {
-    data_ss.write((char*) data, data_size);
+    send_stream->write((char*) data, data_size);
   }
 
   std::string action = content["action"].string_value();
   // TODO(joshblum): why this necessary?
   server_send_mutex.lock();
   // server.send is an asynchronous function
-  server->send(connection, data_ss, [action, start](const boost::system::error_code & ec)
-      {
-      server_send_mutex.unlock();
-      log_time_diff("send_message::" + action, start);
-      if (ec)
-      {
+  server->send(connection, send_stream, [action, start](const boost::system::error_code & ec)
+  {
+    server_send_mutex.unlock();
+    log_time_diff("send_message::" + action, start);
+    if (ec)
+    {
       cout << "Server: Error sending message. " <<
-      // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html
-      // Error Codes for error code meanings
-      "Error: " << ec << ", error message: " << ec.message() << endl;
-      }
-      }, BINARY_OPCODE);
+           // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html
+           // Error Codes for error code meanings
+           "Error: " << ec << ", error message: " << ec.message() << endl;
+    }
+  }, BINARY_OPCODE);
 }
 
 void log_json(Json content)
@@ -69,10 +70,10 @@ void log_json(Json content)
   cout << "Sending content " << content.dump() << endl;
 }
 
-void send_frowvec(SocketServer<WS>* server,
-    shared_ptr<SocketServer<WS>::Connection> connection,
-    std::string canvasId, std::string type,
-    frowvec vector)
+void send_frowvec(WsServer* server,
+                  shared_ptr<WsServer::Connection> connection,
+                  std::string canvasId, std::string type,
+                  frowvec vector)
 {
 
   Json content = Json::object
@@ -85,9 +86,9 @@ void send_frowvec(SocketServer<WS>* server,
   send_message(server, connection, "spectrogram", content, vector.memptr(), vector.n_elem);
 }
 
-void send_spectrogram_new(SocketServer<WS>* server,
-    shared_ptr<SocketServer<WS>::Connection> connection,
-    spec_params_t spec_params, std::string canvasId)
+void send_spectrogram_new(WsServer* server,
+                          shared_ptr<WsServer::Connection> connection,
+                          spec_params_t spec_params, std::string canvasId)
 {
   Json content = Json::object
   {
@@ -103,10 +104,10 @@ void send_spectrogram_new(SocketServer<WS>* server,
   send_message(server, connection, "spectrogram", content, NULL, -1);
 }
 
-void send_spectrogram_update(SocketServer<WS>* server,
-    shared_ptr<SocketServer<WS>::Connection> connection,
-    spec_params_t spec_params, std::string canvasId,
-    fmat& spec_mat)
+void send_spectrogram_update(WsServer* server,
+                             shared_ptr<WsServer::Connection> connection,
+                             spec_params_t spec_params, std::string canvasId,
+                             fmat& spec_mat)
 {
 
   Json content = Json::object
@@ -124,17 +125,17 @@ void send_spectrogram_update(SocketServer<WS>* server,
   free(spec_arr);
 }
 
-void send_change_points(SocketServer<WS>* server,
-    shared_ptr<SocketServer<WS>::Connection> connection,
-    std::string canvasId,
-    cp_data_t* cp_data)
+void send_change_points(WsServer* server,
+                        shared_ptr<WsServer::Connection> connection,
+                        std::string canvasId,
+                        cp_data_t* cp_data)
 {
   send_frowvec(server, connection, canvasId, "change_points", cp_data->cp);
   send_frowvec(server, connection, canvasId, "summed_signal", cp_data->m);
 }
 
 
-void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, Json data)
+void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json data)
 {
   std::string mrn = data["mrn"].string_value();
   float startTime = data["startTime"].number_value();
@@ -164,7 +165,7 @@ void on_file_spectrogram(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::
   close_edf(mrn_c);
 }
 
-void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Connection> connection, std::string type, Json content)
+void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connection, std::string type, Json content)
 {
   if (type == "request_file_spectrogram")
   {
@@ -183,27 +184,28 @@ void receive_message(SocketServer<WS>* server, shared_ptr<SocketServer<WS>::Conn
 int main(int argc, char* argv[])
 {
   int port;
-  if (argc == 2) {
+  if (argc == 2)
+  {
     port = atoi(argv[1]);
-  } else {
+  }
+  else
+  {
     port = PORT;
   }
 
   // WebSocket (WS)-server at port using NUM_THREADS threads
-  SocketServer<WS> server(port, NUM_THREADS);
+  WsServer server(port, NUM_THREADS);
 
   auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 
   // C++14, lambda parameters declared with auto
-  // For C++11 use: (shared_ptr<SocketServer<WS>::Connection> connection, shared_ptr<SocketServer<WS>::Message> message)
-  ws.onmessage = [&server](auto connection, auto message)
+  // For C++11 use: (shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
+  ws.onmessage = [&server](shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
   {
-    //To receive message from client as string (data_ss.str())
-    stringstream data_ss;
-    message->data >> data_ss.rdbuf();
-    std::string data_s, err;
-    data_s = data_ss.str();
-    Json json = Json::parse(data_s, err);
+    auto message_str = message->string();
+    std::string err;
+    Json json = Json::parse(message_str, err);
+
     // TODO add error checking for null fields
     std::string type = json["type"].string_value();
     Json content = json["content"];
@@ -211,34 +213,35 @@ int main(int argc, char* argv[])
     receive_message(&server, connection, type, content);
   };
 
-  ws.onopen = [](auto connection)
+  ws.onopen = [](shared_ptr<WsServer::Connection> connection)
   {
     cout << "WebSocket opened" << endl;
   };
 
 
   // See RFC 6455 7.4.1. for status codes
-  ws.onclose = [](auto connection, int status, const string & reason)
+  ws.onclose = [](shared_ptr<WsServer::Connection> connection, int status, const string & reason)
   {
     cout << "Server: Closed connection " << (size_t)connection.get() << " with status code " << status << endl;
   };
 
   // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
-  ws.onerror = [](auto connection, const boost::system::error_code & ec)
+  ws.onerror = [](shared_ptr<WsServer::Connection> connection, const boost::system::error_code & ec)
   {
     cout << "Server: Error in connection " << (size_t)connection.get() << ". " <<
-      "Error: " << ec << ", error message: " << ec.message() << endl;
+         "Error: " << ec << ", error message: " << ec.message() << endl;
   };
 
 
   thread server_thread([&server, port]()
-      {
-      cout << "WebSocket Server started at port: " << port << endl;
-      // Start WS-server
-      server.start();
-      });
+  {
+    cout << "WebSocket Server started at port: " << port << endl;
+    // Start WS-server
+    server.start();
+  });
 
   server_thread.join();
 
   return 0;
 }
+

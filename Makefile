@@ -1,20 +1,14 @@
 .PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy submodules submodule-update
 
-CXX = g++
+CXX = c++
 CSRC := compute/EDFlib/edflib.c
 CPPSRC := json11/json11.cpp compute/helpers.cpp compute/edf_backend.cpp compute/eeg_spectrogram.cpp\
 	compute/eeg_change_point.cpp ws_server.cpp
 OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
 TARGET := ws_server
 CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
-LDFLAGS = -lboost_system -lcrypto -lfftw3 -lm
+LDFLAGS = -lfftw3 -rdynamic -lboost_system -lboost_regex -lcrypto
 OS := $(shell uname)
-
-ifeq ($(RPM),1)
-	PKG_INSTALLER = yum
-else
-	PKG_INSTALLER = apt-get
-endif
 
 ifeq ('$(OS)', 'Darwin')
 	OSX = true
@@ -22,12 +16,13 @@ ifeq ('$(OS)', 'Darwin')
 	LDFLAGS += -L/usr/local/opt/openssl/lib
 	CFLAGS += -I/usr/local/opt/openssl/include -Wno-writable-strings
 else
+	PKG_INSTALLER = apt-get
 	LDFLAGS += -pthread -lboost_thread
 	CFLAGS += -Wno-write-strings
 endif
 
 ifeq ($(DEBUG),1)
-	 CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
+	CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
 else
 	CFLAGS += -O3 -DNDEBUG
 endif
@@ -38,31 +33,29 @@ libs:
 	make -C compute/ libs
 
 %.o : %.c
-	$(CXX) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) -o $@ -c $<
 
 %.o : %.cpp
-	$(CXX) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CFLAGS) -o $@ -c $<
 
 ws_server: $(OBJ)
-	$(CXX) $(OBJ) $(LDFLAGS) -o $@
+	$(CXX) -o $@ $(OBJ) $(LDFLAGS)
 
 submodule-update:
 	git submodule foreach git checkout master; git pull
 
 submodules:
-	 git submodule update --init --recursive
+	git submodule update --init --recursive
 
 installdeps: clean submodules
 ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
-	brew update
-	cat packages-osx.txt | xargs brew install
+	$(PKG_INSTALLER) update
+	cat packages-osx.txt | xargs $(PKG_INSTALLER) install
 	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
 	# setup gcc 4.9
-	# TODO(joshblum): setup for yum as well
-ifeq ('$(PKG_INSTALLER)', 'apt-get')
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 	sudo apt-get update
 	sudo apt-get install -y gcc-4.9
@@ -71,9 +64,7 @@ ifeq ('$(PKG_INSTALLER)', 'apt-get')
 	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
 	sudo update-alternatives --config gcc
 	sudo update-alternatives --config g++
-else
 	sudo $(PKG_INSTALLER) update
-endif
 	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
 endif
 	pip install -r requirements.txt
@@ -87,7 +78,7 @@ deploy:
 
 run: libs ws_server
 	./ws_server 8080 & \
-	python server.py
+		python server.py
 
 prod-run: clean libs ws_server
 	supervisorctl reread
