@@ -1,8 +1,12 @@
 pkg-config
+
 libffi
 libsndfile
+
 homebrew/science/armadillo
 fftw
 boost
+
 cmake
 valgrind
+astyle

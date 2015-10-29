@@ -1,31 +1,30 @@
+gdb
+valgrind
 cmake
+libssl-dev
+astyle
+pkg-config
+
 libopenblas-dev
 liblapack-dev
 libboost-dev
 libboost-all-dev
 
-python-numpy
-python-scipy
-
 libarmadillo-dev
 libfftw3-dev
 libfftw3-doc
 
-pkg-config
 libffi-dev
 libsndfile1-dev
-python-dev
 libhdf5-serial-dev
+
+python-dev
+python-numpy
+python-scipy
+supervisor
 
 libblas-dev
 gfortran
 
 libfreetype6-dev
 libpng12-dev
-supervisor
-
-gdb
-valgrind
-cmake
-libssl-dev
-astyle
