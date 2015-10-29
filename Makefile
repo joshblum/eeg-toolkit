@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy submodules submodule-update
+.PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update
 
 CXX = c++
 CSRC := compute/EDFlib/edflib.c
