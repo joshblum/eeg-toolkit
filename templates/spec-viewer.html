@@ -23,40 +23,19 @@
           <label for="specEndTime">End Time:</label>
           <input id="specEndTime" class="specTime" type="text" value="1.0">
       </div>
-      <div class="input-field col s1 hide">
-          <select id="fftLen" name="fftLen">
-              <option value="128">128</option>
-              <option value="256">256</option>
-              <option value="512">512</option>
-              <option value="1024" selected>1024</option>
-              <option value="2048">2048</option>
-              <option value="4096">4096</option>
-          </select>
-          <label for="fftLen">NFFT:</label>
-      </div>
-      <div class="input-field col s1 hide">
-          <select id="specMode" name="specMode">
-              <option value="0" selected>physical</option>
-              <option value="1">normal</option>
-              <option value="2">direction</option>
-              <option value="3">multiple</option>
-          </select>
-          <label for="specMode">Mode:</label>
-      </div>
-      <div class="input-field col s1 hide">
-          <input id="specInterpolation" checked type="checkbox">
-          <label for="specInterpolation">Interpolate</label>
-      </div>
-      <div class="input-field col s1 hide">
-          <input id="specLogarithmic" checked type="checkbox">
-          <label for="specLogarithmic">Logarithmic</label>
-      </div>
       <div class="input-field col s2">
           <a class="submit-btn btn waves-effect waves-light blue lighten-1" id="patientIdentifierMRNSubmit">
         Load
         <i class="material-icons right">send</i>
       </a>
       </div>
+      <div class="input-field col s1 offset-s2">
+        <!-- Modal Trigger -->
+        <a class="waves-effect waves-light btn modal-trigger blue lighten-1" href="#settingsModal">
+          <i class="material-icons">settings</i>
+        </a>
+      </div>
+
   </form>
 </div>
 <div id="specContainer-LL" class="specContainer">
@@ -91,6 +70,69 @@
     <canvas id="specFreqScale-RL" class="specFreqScale"></canvas>
     <canvas id="specTimeScale-RL" class="specTimeScale"></canvas>
 </div>
+
+<!-- Modal Structure -->
+<div id="settingsModal" class="modal">
+  <div class="modal-content">
+    <h4>
+      Settings
+      <span class="modal-close modal-close-icon"></span>
+    </h4>
+    <div class="row divider"></div>
+    <div class="row">
+      <div class="input-field col offset-s1">
+      </div>
+      <div class="input-field col s3 hide">
+          <select id="fftLen" name="fftLen">
+              <option value="128">128</option>
+              <option value="256">256</option>
+              <option value="512">512</option>
+              <option value="1024" selected>1024</option>
+              <option value="2048">2048</option>
+              <option value="4096">4096</option>
+          </select>
+          <label for="fftLen">NFFT:</label>
+      </div>
+      <div class="input-field col s3">
+          <select id="specMode" name="specMode">
+              <option value="0" selected>physical</option>
+              <option value="1">normal</option>
+              <option value="2">direction</option>
+              <option value="3">multiple</option>
+          </select>
+          <label for="specMode">Mode:</label>
+      </div>
+      <div class="input-field col s3">
+          <input id="specInterpolation" checked type="checkbox">
+          <label for="specInterpolation">Interpolate</label>
+      </div>
+      <div class="input-field col s3">
+          <input id="specLogarithmic" checked type="checkbox">
+          <label for="specLogarithmic">Logarithmic</label>
+      </div>
+    </div>
+    <table class="responsive-table">
+      <tbody>
+        <tr>
+          <td>
+            <span class="code"> Shift + scroll </span>
+            <span>Change Amplitude Range</span>
+          </td>
+          <td>
+            <span class="code"> control + scroll </span>
+            <span>Zoom</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal-footer">
+    <a href="#" class="modal-action modal-close waves-effect waves-light btn blue lighten-1">Ok</a>
+  </div>
+</div>
+
+
 {% endblock %}
 
 {% block scripts %}

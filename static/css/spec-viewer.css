@@ -60,10 +60,6 @@
     width: 30px;
 }
 
-[type="checkbox"]+label {
-    padding-left: 25px;
-}
-
 .metadata {
     padding-top: 15px;
     margin-bottom: 0px;

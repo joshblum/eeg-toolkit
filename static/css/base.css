@@ -23,3 +23,25 @@ div .input-field .menu-nav {
   margin-top: 0px;
   margin-left: 0px;
 }
+
+.code {
+  background: #f3f3f3;
+  border-radius: 3px;
+  color: #212121;
+  display: inline-block;
+  font-weight: bold;
+  min-width: .7em;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.modal-close-icon{
+  background-image: url("/static/img/close.png");
+  background-size: 12px;
+  cursor: pointer;
+  float: right;
+  height: 12px;
+  opacity: .2;
+  width: 12px;
+  -webkit-user-drag: none;
+}

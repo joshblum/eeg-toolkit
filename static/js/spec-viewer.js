@@ -48,4 +48,6 @@ $(document).ready(function() {
     $("#specInterpolation").change(redrawSpectrograms);
     $("#specLogarithmic").change(redrawSpectrograms);
     $("#patientIdentifierMRNSubmit").click(reloadSpectrogram);
+    // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+    $('.modal-trigger').leanModal();
 });
