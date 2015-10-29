@@ -12,11 +12,9 @@ OS := $(shell uname)
 
 ifeq ('$(OS)', 'Darwin')
 	OSX = true
-	PKG_INSTALLER = brew
 	LDFLAGS += -L/usr/local/opt/openssl/lib
 	CFLAGS += -I/usr/local/opt/openssl/include -Wno-writable-strings
 else
-	PKG_INSTALLER = apt-get
 	LDFLAGS += -pthread -lboost_thread
 	CFLAGS += -Wno-write-strings
 endif
@@ -50,37 +48,36 @@ submodules:
 installdeps: clean submodules
 ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
-	$(PKG_INSTALLER) update
-	cat packages-osx.txt | xargs $(PKG_INSTALLER) install
+	brew update
+	cat packages-osx.txt | xargs brew install
 	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
 	# setup gcc 4.9
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-	sudo apt-get update
+	-sudo apt-get update
 	sudo apt-get install -y gcc-4.9
 	sudo apt-get install -y g++-4.9
 	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 20
 	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
 	sudo update-alternatives --config gcc
 	sudo update-alternatives --config g++
-	sudo $(PKG_INSTALLER) update
-	cat packages.txt | xargs sudo $(PKG_INSTALLER) -y install
+	cat packages.txt | xargs sudo apt-get -y install
 endif
 	pip install -r requirements.txt
 	# start the supervisor daemon
 	-supervisord
 
-install: installdeps libs ws_server
+install: installdeps ws_server
 
 deploy:
 	fab prod deploy
 
-run: libs ws_server
+run: ws_server
 	./ws_server 8080 & \
 		python server.py
 
-prod-run: clean libs ws_server
+prod-run: clean ws_server
 	supervisorctl reread
 	supervisorctl update
 	supervisorctl restart eeg:eeg
