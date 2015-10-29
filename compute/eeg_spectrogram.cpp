@@ -66,7 +66,7 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-    char* mrn, float startTime, float endTime)
+                                char* mrn, float startTime, float endTime)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
@@ -90,7 +90,9 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
     spec_params->nblocks = 0;
     spec_params->nfreqs = 0;
     spec_params->spec_len = 0;
-  } else {
+  }
+  else
+  {
     spec_params->fs = get_fs(hdr);
 
     int data_len = get_data_len(hdr);
@@ -110,7 +112,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
       spec_params->endTime = tmp;
     }
     spec_params->nblocks = get_nblocks(spec_params->nsamples,
-        spec_params->shift, spec_params->nstep);
+                                       spec_params->shift, spec_params->nstep);
     spec_params->nfreqs = get_nfreqs(spec_params->nfft);
     spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 
@@ -171,7 +173,7 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   // TODO keep plans in memory until end, create plans once and cache?
   // TODO look into using arma memptr instead of copying data
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
-      FFTW_FORWARD, FFTW_ESTIMATE);
+                                  FFTW_FORWARD, FFTW_ESTIMATE);
 
   // Create a hamming window of appropriate length
   float window[nfft];
@@ -274,7 +276,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 
   // should this just move to the spec_params struct?
   int startOffset = hours_to_nsamples(spec_params->fs, spec_params->startTime);
-  int endOffset= hours_to_nsamples(spec_params->fs, spec_params->endTime);
+  int endOffset = hours_to_nsamples(spec_params->fs, spec_params->endTime);
 
   get_array_data(spec_params, ch_idx1, startOffset, endOffset, buf1);
 
@@ -317,3 +319,4 @@ void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_
     }
   }
 }
+

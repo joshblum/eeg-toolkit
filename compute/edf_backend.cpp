@@ -80,7 +80,7 @@ int get_data_len(edf_hdr_struct* hdr)
 
 void load_edf(edf_hdr_struct* hdr, char* mrn)
 {
-  char* filename = (char*) malloc(sizeof(char)*100);
+  char* filename = (char*) malloc(sizeof(char) * 100);
   mrn_to_filename(mrn, filename);
   edf_hdr_struct* cached_hdr = get_hdr_cache(filename);
   if (cached_hdr != NULL)
@@ -93,28 +93,28 @@ void load_edf(edf_hdr_struct* hdr, char* mrn)
   {
     switch (hdr->filetype)
     {
-      case EDFLIB_MALLOC_ERROR                :
-        printf("\nmalloc error\n\n");
-        break;
-      case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
-        printf("\ncannot open file, no such file or directory: %s\n\n", filename);
-        break;
-      case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
-        printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
-            "(it contains format errors)\n\n");
-        break;
-      case EDFLIB_MAXFILES_REACHED            :
-        printf("\nto many files opened\n\n");
-        break;
-      case EDFLIB_FILE_READ_ERROR             :
-        printf("\na read error occurred\n\n");
-        break;
-      case EDFLIB_FILE_ALREADY_OPENED         :
-        printf("\nfile has already been opened\n\n");
-        break;
-      default                                 :
-        printf("\nunknown error\n\n");
-        break;
+    case EDFLIB_MALLOC_ERROR                :
+      printf("\nmalloc error\n\n");
+      break;
+    case EDFLIB_NO_SUCH_FILE_OR_DIRECTORY   :
+      printf("\ncannot open file, no such file or directory: %s\n\n", filename);
+      break;
+    case EDFLIB_FILE_CONTAINS_FORMAT_ERRORS :
+      printf("\nthe file is not EDF(+) or BDF(+) compliant\n"
+             "(it contains format errors)\n\n");
+      break;
+    case EDFLIB_MAXFILES_REACHED            :
+      printf("\nto many files opened\n\n");
+      break;
+    case EDFLIB_FILE_READ_ERROR             :
+      printf("\na read error occurred\n\n");
+      break;
+    case EDFLIB_FILE_ALREADY_OPENED         :
+      printf("\nfile has already been opened\n\n");
+      break;
+    default                                 :
+      printf("\nunknown error\n\n");
+      break;
     }
     exit(1);
   }
@@ -124,7 +124,7 @@ void load_edf(edf_hdr_struct* hdr, char* mrn)
 
 void close_edf(char* mrn)
 {
-  char* filename = (char*) malloc(sizeof(char)*100);
+  char* filename = (char*) malloc(sizeof(char) * 100);
   mrn_to_filename(mrn, filename);
   edf_hdr_struct* hdr = get_hdr_cache(filename);
   if (hdr != NULL)
@@ -163,7 +163,8 @@ int read_edf_data(int hdl, int ch, int startOffset, int endOffset, float* buf)
  * implemented.
  */
 
-void mrn_to_filename(char* mrn, char* filename) {
+void mrn_to_filename(char* mrn, char* filename)
+{
   char* basedir;
 #ifdef __APPLE__
   basedir = "/Users/joshblum/Dropbox (MIT)";
@@ -171,7 +172,8 @@ void mrn_to_filename(char* mrn, char* filename) {
   basedir = "/home/ubuntu";
 #endif
   sprintf(filename,
-      "%s/MIT-EDFs/MIT-CSAIL-%s.edf",
-      basedir,
-      mrn);
+          "%s/MIT-EDFs/MIT-CSAIL-%s.edf",
+          basedir,
+          mrn);
 }
+

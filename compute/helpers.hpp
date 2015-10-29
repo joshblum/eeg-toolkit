@@ -9,3 +9,4 @@ unsigned long long getticks();
 int get_next_pow_2(unsigned int v);
 int hours_to_nsamples(int fs, float time);
 #endif // HELPERS_H
+

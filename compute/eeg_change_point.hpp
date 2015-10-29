@@ -33,3 +33,4 @@ void print_cp_data_t(cp_data_t* cp_data);
 #endif
 
 #endif // CHANGE_POINT_H
+

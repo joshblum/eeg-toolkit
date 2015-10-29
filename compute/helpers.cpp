@@ -41,3 +41,4 @@ int hours_to_nsamples(int fs, float time)
 {
   return fs * 60 * 60 * time;
 }
+

@@ -23,3 +23,4 @@ int get_data_len(edf_hdr_struct* hdr);
 #endif
 
 #endif // EDF_BACKEND_H
+

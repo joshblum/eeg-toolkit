@@ -4,7 +4,7 @@ using namespace arma;
 
 static inline int round_up(int num_to_round, int multiple)
 {
-   return ((num_to_round + multiple - 1) / multiple) * multiple;
+  return ((num_to_round + multiple - 1) / multiple) * multiple;
 }
 
 void init_cp_data_t(cp_data_t* cp_data, int nt)
@@ -38,11 +38,11 @@ void get_change_points_as_arr(float* spec_arr, int n_rows, int n_cols, cp_data_t
 
 // TODO(joshblum): make real variable names
 void get_change_points(fmat& spec_mat,
-    cp_data_t* cp_data)
+                       cp_data_t* cp_data)
 {
   frowvec s = sum(spec_mat, 0); // sum rows
   int stride = 10;
-  int nt = round_up(s.n_cols/stride, 10);
+  int nt = round_up(s.n_cols / stride, 10);
   init_cp_data_t(cp_data, nt);
 
   int max_val = 5000;
@@ -88,7 +88,7 @@ void get_change_points(fmat& spec_mat,
 
     if (cp_data->cu[j] > H || cp_data->cl[j] > H)
     {
-      cp_data->cp[total_count] = j*stride; // time of change point
+      cp_data->cp[total_count] = j * stride; // time of change point
       total_count++;
       ct = 0;
 
@@ -149,3 +149,4 @@ void print_cp_data_t(cp_data_t* cp_data)
   print_frowvec("mu", cp_data->mu, cp_data->total_count);
   print_frowvec("m", cp_data->m, cp_data->total_count);
 }
+

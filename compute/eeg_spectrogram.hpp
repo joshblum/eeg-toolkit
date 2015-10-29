@@ -111,3 +111,4 @@ void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_
 #endif
 
 #endif // SPECTROGRAM_H
+
