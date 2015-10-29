@@ -197,7 +197,6 @@ function reloadSpectrogram() {
         for (var ch = 0; ch < IDS.length; ch++) {
           requestFileSpectrogram(patientIdentifier, fftLen, startTime, endTime,
             OVERLAP, ch);
-          break;
         }
     }
     if (!patientIdentifier) {

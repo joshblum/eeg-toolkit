@@ -11,7 +11,7 @@
       <div class="input-field col s1">
         {% include "menu-nav.html" %}
       </div>
-      <div class="input-field col s1">
+      <div class="input-field offset-s3 col s1">
           <input id="patientIdentifierByMRN" name="patientIdentifierByMRN" type="text" value="007">
           <label for="patientIdentifierByData">MRN</label>
       </div>
@@ -23,7 +23,7 @@
           <label for="specEndTime">End Time:</label>
           <input id="specEndTime" class="specTime" type="text" value="1.0">
       </div>
-      <div class="input-field col s1">
+      <div class="input-field col s1 hide">
           <select id="fftLen" name="fftLen">
               <option value="128">128</option>
               <option value="256">256</option>
@@ -34,7 +34,7 @@
           </select>
           <label for="fftLen">NFFT:</label>
       </div>
-      <div class="input-field col s1">
+      <div class="input-field col s1 hide">
           <select id="specMode" name="specMode">
               <option value="0" selected>physical</option>
               <option value="1">normal</option>
@@ -43,15 +43,15 @@
           </select>
           <label for="specMode">Mode:</label>
       </div>
-      <div class="input-field col s1">
-          <input id="specInterpolation" type="checkbox">
+      <div class="input-field col s1 hide">
+          <input id="specInterpolation" checked type="checkbox">
           <label for="specInterpolation">Interpolate</label>
       </div>
-      <div class="input-field col s1">
-          <input id="specLogarithmic" type="checkbox">
+      <div class="input-field col s1 hide">
+          <input id="specLogarithmic" checked type="checkbox">
           <label for="specLogarithmic">Logarithmic</label>
       </div>
-      <div class="input-field col offset-s1 s2">
+      <div class="input-field col s2">
           <a class="submit-btn btn waves-effect waves-light blue lighten-1" id="patientIdentifierMRNSubmit">
         Load
         <i class="material-icons right">send</i>
