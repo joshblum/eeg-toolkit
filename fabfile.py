@@ -2,6 +2,7 @@ from fabric.api import env, cd, run
 
 PROJ_NAME = 'eeg-toolkit'
 
+
 def prod():
   env.user = 'ubuntu'
   env.hosts = ['128.52.175.133', '128.52.178.57']

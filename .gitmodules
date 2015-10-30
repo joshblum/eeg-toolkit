@@ -1,9 +1,9 @@
 [submodule "wslib"]
-	path = wslib
+	path = toolkit/toolkit/wslib
 	url = git@github.com:eidheim/Simple-WebSocket-Server.git
 [submodule "json11"]
-	path = json11
+	path = toolkit/toolkit/json11
 	url = git@github.com:dropbox/json11.git
-[submodule "compute/EDFlib"]
-	path = compute/EDFlib
+[submodule "EDFlib"]
+	path = toolkit/toolkit/compute/EDFlib
 	url = git@github.com:joshblum/EDFlib.git
