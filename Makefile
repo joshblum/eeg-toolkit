@@ -18,8 +18,8 @@ submodules:
 	git submodule update --init --recursive
 
 installdeps: clean submodules dev-packages
-	make -C toolkit/toolkit make installdeps
-	make -C webapp/webapp make installdeps
+	make -C toolkit/toolkit installdeps
+	make -C webapp/webapp installdeps
 
 dev-packages:
 ifeq ('$(OSX)', 'true')

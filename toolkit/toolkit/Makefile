@@ -35,7 +35,7 @@ ifeq ('$(OS)', 'Darwin')
 else
 	# Run Linux commands
 	sudo apt-get update
-	cat packages-dev.txt | xargs sudo apt-get -y install
+	cat packages.txt | xargs sudo apt-get -y install
 endif
 
 libs:
