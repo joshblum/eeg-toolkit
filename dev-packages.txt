@@ -1,6 +1,7 @@
 astyle
 cmake
 gdb
-pkg-config
-valgrind
 htop
+pkg-config
+supervisor
+valgrind

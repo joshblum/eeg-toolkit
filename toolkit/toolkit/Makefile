@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run lint pylint jslint libs
+.PHONY: clean ws_server libs installdeps
 
 CXX = c++
 CSRC := compute/EDFlib/edflib.c
@@ -27,6 +27,17 @@ endif
 
 default: ws_server
 
+installdeps:
+ifeq ('$(OS)', 'Darwin')
+	# Run MacOS commands
+	brew update
+	cat packages-osx.txt | xargs brew install
+else
+	# Run Linux commands
+	sudo apt-get update
+	cat packages-dev.txt | xargs sudo apt-get -y install
+endif
+
 libs:
 	make -C compute/ libs
 
@@ -39,12 +50,7 @@ libs:
 ws_server: $(OBJ)
 	$(CXX) -o $@ $(OBJ) $(LDFLAGS)
 
-run: ws_server
-	./ws_server 8080 & \
-		python server.py
-
 clean:
-	find . -type f -name '*.py[cod]' -delete
 	find . -type f -name '*.*~' -delete
 	find . -type f -name $(TARGET) -delete
 	find . -type f -name '*.[dSYM|o|d]' -delete

@@ -14,26 +14,19 @@ submodule-update:
 submodules:
 	git submodule update --init --recursive
 
-installdeps: clean submodules
-ifeq ('$(shell uname)', 'Darwin')
-	# Run MacOS commands
-	brew update
-	cat packages-osx.txt | xargs brew install
-else
-	# Run Linux commands
-	-sudo apt-get update
-	cat packages.txt | xargs sudo apt-get -y install
-endif
-	pip install -r requirements.txt
+installdeps: clean submodules dev-packages
+	make -C toolkit/toolkit make installdeps
+	make -C webapp/webapp make installdeps
 
 dev-packages:
 ifeq ('$(OSX)', 'true')
 	cat packages-dev-osx.txt | xargs brew install
 else
 	# Run Linux commands
-	-sudo apt-get update
+	sudo apt-get update
 	cat packages-dev.txt | xargs sudo apt-get -y install
 endif
+	pip install -r requirements.txt
 
 
 install: installdeps ws_server
@@ -42,8 +35,8 @@ deploy:
 	fab prod deploy
 
 run: ws_server
-	./ws_server 8080 & \
-		python server.py
+	./toolkit/toolkit/ws_server 8080 & \
+		python webapp/webapp/server.py
 
 prod-run: clean ws_server
 	supervisorctl reread
