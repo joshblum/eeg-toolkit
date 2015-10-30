@@ -37,20 +37,20 @@ docker-install:
 	curl -sSL https://get.docker.com/ | sh
 
 docker-build: clean submodules
-	cd webapp && docker build -t $(DOCKER_WEBAPP_NAME) .
-	cd toolkit && docker build -t $(DOCKER_TOOLKIT_NAME) .
+	-cd webapp && docker build -t $(DOCKER_WEBAPP_NAME) .
+	-cd toolkit && docker build -t $(DOCKER_TOOLKIT_NAME) .
 
 docker-run:
-	docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(DOCKER_WEBAPP_NAME)
-	docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/MIT-EDFs:/home/ubuntu/MIT-EDFs $(DOCKER_TOOLKIT_NAME)
+	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(DOCKER_WEBAPP_NAME)
+	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/MIT-EDFs:/home/ubuntu/MIT-EDFs $(DOCKER_TOOLKIT_NAME)
 
 docker-stop:
-	docker stop $(DOCKER_WEBAPP_NAME)
-	docker stop $(DOCKER_TOOLKIT_NAME)
+	-docker stop $(DOCKER_WEBAPP_NAME)
+	-docker stop $(DOCKER_TOOLKIT_NAME)
 
 docker-rm:
-	docker stop $(DOCKER_WEBAPP_NAME)
-	docker rm  $(DOCKER_TOOLKIT_NAME)
+	-docker rm $(DOCKER_WEBAPP_NAME)
+	-docker rm  $(DOCKER_TOOLKIT_NAME)
 
 
 deploy:
