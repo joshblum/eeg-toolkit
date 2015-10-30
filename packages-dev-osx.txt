@@ -1,0 +1,4 @@
+astyle
+cmake
+pkg-config
+valgrind

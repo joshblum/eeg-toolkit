@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update
+.PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update dev-packages
 
 CXX = c++
 CSRC := compute/EDFlib/edflib.c
@@ -50,23 +50,22 @@ ifeq ('$(OSX)', 'true')
 	# Run MacOS commands
 	brew update
 	cat packages-osx.txt | xargs brew install
-	export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 else
 	# Run Linux commands
-	# setup gcc 4.9
-	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 	-sudo apt-get update
-	sudo apt-get install -y gcc-4.9
-	sudo apt-get install -y g++-4.9
-	sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 20
-	sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
-	sudo update-alternatives --config gcc
-	sudo update-alternatives --config g++
 	cat packages.txt | xargs sudo apt-get -y install
 endif
 	pip install -r requirements.txt
-	# start the supervisor daemon
-	-supervisord
+
+dev-packages:
+ifeq ('$(OSX)', 'true')
+	cat packages-dev-osx.txt | xargs brew install
+else
+	# Run Linux commands
+	-sudo apt-get update
+	cat packages-dev.txt | xargs sudo apt-get -y install
+endif
+
 
 install: installdeps ws_server
 
