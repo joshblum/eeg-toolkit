@@ -6,7 +6,7 @@ eeg-toolkit
 First, check out eeg-toolkit and launch it locally:
 
 ```bash
-git clone https://github.com/joshblum/eeg-toolkit.git
+git clone git@github.com:joshblum/eeg-toolkit.git
 cd eeg-toolkit
 ```
 
