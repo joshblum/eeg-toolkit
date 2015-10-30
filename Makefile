@@ -35,6 +35,8 @@ install: installdeps ws_server
 
 docker-install:
 	curl -sSL https://get.docker.com/ | sh
+	sudo usermod -aG docker ubuntu
+
 
 docker-build: clean submodules
 	-cd webapp && docker build -t $(DOCKER_WEBAPP_NAME) .
@@ -51,7 +53,6 @@ docker-stop:
 docker-rm:
 	-docker rm $(DOCKER_WEBAPP_NAME)
 	-docker rm  $(DOCKER_TOOLKIT_NAME)
-
 
 deploy:
 	fab prod deploy
