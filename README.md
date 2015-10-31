@@ -21,11 +21,9 @@ repository is cloned you can run the following:
 ```bash
 make docker-install
 # log out and then log back in again for docker group permission changes to take affect
-make docker-build
 make docker-run
 ```
 
-TODO(joshblum): add docker images to dockerhub
 TODO(joshblum): add instructions for importing data
 
 ## Development setup
