@@ -1,7 +1,8 @@
 .PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update dev-packages docker-install docker-run docker-stop docker-push
 
-DOCKER_WEBAPP_NAME := "joshblum/eeg-toolkit-webapp"
-DOCKER_TOOLKIT_NAME := "joshblum/eeg-toolkit-toolkit"
+REPO := "joshblum"
+DOCKER_WEBAPP_NAME := "eeg-toolkit-webapp"
+DOCKER_TOOLKIT_NAME := "eeg-toolkit-toolkit"
 
 default: ws_server
 
@@ -39,12 +40,12 @@ docker-install:
 
 
 docker-build: clean submodules
-	-cd webapp && docker build -t $(DOCKER_WEBAPP_NAME):latest .
-	-cd toolkit && docker build -t $(DOCKER_TOOLKIT_NAME):latest .
+	-cd webapp && docker build -t $(REPO)/$(DOCKER_WEBAPP_NAME):latest .
+	-cd toolkit && docker build -t $(REPO)/$(DOCKER_TOOLKIT_NAME):latest .
 
 docker-run:
-	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(DOCKER_WEBAPP_NAME)
-	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/MIT-EDFs:/home/ubuntu/MIT-EDFs $(DOCKER_TOOLKIT_NAME)
+	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(REPO)/$(DOCKER_WEBAPP_NAME)
+	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/MIT-EDFs:/home/ubuntu/MIT-EDFs $(REPO)/$(DOCKER_TOOLKIT_NAME)
 
 docker-stop:
 	-docker stop $(DOCKER_WEBAPP_NAME)
@@ -55,8 +56,8 @@ docker-rm:
 	-docker rm  $(DOCKER_TOOLKIT_NAME)
 
 docker-push: docker-build
-	-docker push $(DOCKER_WEBAPP_NAME):latest
-	-docker push $(DOCKER_TOOLKIT_NAME):latest
+	-docker push $(REPO)/$(DOCKER_WEBAPP_NAME):latest
+	-docker push $(REPO)/$(DOCKER_TOOLKIT_NAME):latest
 
 deploy:
 	fab prod deploy
