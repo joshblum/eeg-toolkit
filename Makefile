@@ -1,4 +1,4 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update dev-packages docker-install docker-run docker-stop
+.PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update dev-packages docker-install docker-run docker-stop docker-push
 
 DOCKER_WEBAPP_NAME := "eeg-toolkit-webapp"
 DOCKER_TOOLKIT_NAME := "eeg-toolkit-toolkit"
@@ -39,8 +39,8 @@ docker-install:
 
 
 docker-build: clean submodules
-	-cd webapp && docker build -t $(DOCKER_WEBAPP_NAME) .
-	-cd toolkit && docker build -t $(DOCKER_TOOLKIT_NAME) .
+	-cd webapp && docker build -t joshblum/$(DOCKER_WEBAPP_NAME):latest .
+	-cd toolkit && docker build -t joshblum/$(DOCKER_TOOLKIT_NAME):latest .
 
 docker-run:
 	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(DOCKER_WEBAPP_NAME)
@@ -53,6 +53,10 @@ docker-stop:
 docker-rm:
 	-docker rm $(DOCKER_WEBAPP_NAME)
 	-docker rm  $(DOCKER_TOOLKIT_NAME)
+
+docker-push: docker-build
+	-docker push joshblum/$(DOCKER_WEBAPP_NAME):latest
+	-docker push joshblum/$(DOCKER_TOOLKIT_NAME):latest
 
 deploy:
 	fab prod deploy
