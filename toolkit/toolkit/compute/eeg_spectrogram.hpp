@@ -6,7 +6,7 @@
 #include "EDFlib/edflib.h"
 #include "edf_backend.hpp"
 
-// necessary for the shared lib for python acess
+// necessary for the shared lib for python access
 #ifdef __cplusplus
 extern "C" {
 #endif

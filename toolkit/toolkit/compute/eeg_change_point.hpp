@@ -3,7 +3,7 @@
 // #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
 
-// necessary for the shared lib for python acess
+// necessary for the shared lib for python access
 #ifdef __cplusplus
 extern "C" {
 #endif
