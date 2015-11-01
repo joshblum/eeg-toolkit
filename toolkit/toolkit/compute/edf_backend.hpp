@@ -13,7 +13,7 @@ edf_hdr_struct* get_hdr_cache(const char *filename);
 void set_hdr_cache(edf_hdr_struct* hdr);
 void pop_hdr_cache(const char* filename);
 void load_edf(edf_hdr_struct* hdr, char* mrn);
-int read_edf_data(int hdl, int ch, int startTime, int endTime, float* buf);
+int read_edf_data(int hdl, int ch, int start_offset, int end_offset, float* buf);
 void close_edf(char* filename);
 void mrn_to_filename(char* mrn, char* filename);
 int get_data_len(edf_hdr_struct* hdr);

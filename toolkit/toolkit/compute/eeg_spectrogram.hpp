@@ -16,8 +16,8 @@ using namespace arma;
 typedef struct spec_params
 {
   char* mrn; // patient medical record number
-  float startTime; // start of the spectrogram
-  float endTime; // end of spectogram
+  float start_time; // start of the spectrogram
+  float end_time; // end of spectogram
   int hdl; // file handler for hdr file
   int spec_len; // length of the spectrogram
   int fs; // sample rate
@@ -99,9 +99,9 @@ const ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
 
 void print_spec_params_t(spec_params_t* spec_params);
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* mrn, float startTime, float endTime);
+                                char* mrn, float start_time, float end_time);
 // does not need spec params
-void eeg_spectrogram_wrapper(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat);
+void eeg_spectrogram_wrapper(char* mrn, float start_time, float end_time, int ch, fmat& spec_mat);
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
 void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);

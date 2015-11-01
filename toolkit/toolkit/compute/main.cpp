@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 {
   if (argc <= 4)
   {
-    float startTime, endTime;
+    float start_time, end_time;
     char* mrn;
     if (argc >= 2)
     {
@@ -68,18 +68,18 @@ int main(int argc, char *argv[])
     }
     if (argc == 4)
     {
-      startTime = atof(argv[2]);
-      endTime = atof(argv[3]);
+      start_time = atof(argv[2]);
+      end_time = atof(argv[3]);
     }
     else
     {
       // default times
-      startTime = 0.0;
-      endTime = 4.0;
+      start_time = 0.0;
+      end_time = 4.0;
     }
-    printf("Using mrn: %s, startTime: %.2f, endTime %.2f\n", mrn, startTime, endTime);
+    printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn, start_time, end_time);
     spec_params_t spec_params;
-    get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
+    get_eeg_spectrogram_params(&spec_params, mrn, start_time, end_time);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
     close_edf(mrn);
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
     float* spec_arr = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
-    get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
+    get_eeg_spectrogram_params(&spec_params, mrn, start_time, end_time);
     example_spectrogram_as_arr(spec_arr, &spec_params);
     close_edf(mrn);
     free(spec_arr);
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
   }
   else
   {
-    printf("\nusage: spectrogram <mrn> <startTime> <endTime>\n\n");
+    printf("\nusage: spectrogram <mrn> <start_time> <end_time>\n\n");
   }
   return 1;
 }

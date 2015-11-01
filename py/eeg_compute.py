@@ -11,8 +11,8 @@ APPROOT = os.path.join(parent(parent(os.path.realpath(__file__))), 'compute')
 class EEGSpecParams(ctypes.Structure):
   _fields_ = [
       ('mrn', ctypes.POINTER(ctypes.c_char)),
-      ('startTime', ctypes.c_float),
-      ('endTime', ctypes.c_float),
+      ('start_time', ctypes.c_float),
+      ('end_time', ctypes.c_float),
       ('hdl', ctypes.c_int),
       ('spec_len', ctypes.c_int),
       ('fs', ctypes.c_int),
