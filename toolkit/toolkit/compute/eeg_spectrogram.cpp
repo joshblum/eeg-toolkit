@@ -15,8 +15,8 @@ void print_spec_params_t(spec_params_t* spec_params)
 {
   printf("spec_params: {\n");
   printf("\tmrn: %s\n", spec_params->mrn);
-  printf("\tstartTime: %.2f\n", spec_params->startTime);
-  printf("\tendTime: %.2f\n", spec_params->endTime);
+  printf("\tstart_time: %.2f\n", spec_params->start_time);
+  printf("\tend_time: %.2f\n", spec_params->end_time);
   printf("\thdl: %d\n", spec_params->hdl);
   printf("\tnfft: %d\n", spec_params->nfft);
   printf("\tnstep: %d\n", spec_params->nstep);
@@ -34,14 +34,14 @@ int get_nfft(int shift, int pad)
   return fmax(get_next_pow_2(shift) + pad, shift);
 }
 
-float get_valid_startTime(float startTime)
+float get_valid_start_time(float start_time)
 {
-  return fmax(0, startTime);
+  return fmax(0, start_time);
 }
 
-float get_valid_endTime(int spec_len, int fs, float endTime)
+float get_valid_end_time(int spec_len, int fs, float end_time)
 {
-  return fmin((float) spec_len / (fs * 60 * 60), endTime);
+  return fmin((float) spec_len / (fs * 60 * 60), end_time);
 }
 
 int get_nsamples(int spec_len, int fs, float duration)
@@ -66,13 +66,13 @@ int get_fs(edf_hdr_struct* hdr)
 }
 
 void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* mrn, float startTime, float endTime)
+                                char* mrn, float start_time, float end_time)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
   spec_params->mrn = mrn;
-  spec_params->startTime = startTime;
-  spec_params->endTime = endTime;
+  spec_params->start_time = start_time;
+  spec_params->end_time = end_time;
 
   edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
   load_edf(hdr, mrn);
@@ -100,16 +100,16 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params,
     spec_params->shift = spec_params->fs * 4;
     spec_params->nstep = spec_params->fs * 1;
     spec_params->nfft = get_nfft(spec_params->shift, pad);
-    spec_params->nsamples = get_nsamples(data_len, spec_params->fs, endTime - startTime);
-    spec_params->startTime = get_valid_startTime(startTime);
-    spec_params->endTime = get_valid_endTime(data_len, spec_params->fs, endTime);
+    spec_params->nsamples = get_nsamples(data_len, spec_params->fs, end_time - start_time);
+    spec_params->start_time = get_valid_start_time(start_time);
+    spec_params->end_time = get_valid_end_time(data_len, spec_params->fs, end_time);
 
-    // ensure startTime is before endTime
-    if (spec_params->startTime > spec_params->endTime)
+    // ensure start_time is before end_time
+    if (spec_params->start_time > spec_params->end_time)
     {
-      float tmp = spec_params->startTime;
-      spec_params->startTime = spec_params->endTime;
-      spec_params->endTime = tmp;
+      float tmp = spec_params->start_time;
+      spec_params->start_time = spec_params->end_time;
+      spec_params->end_time = tmp;
     }
     spec_params->nblocks = get_nblocks(spec_params->nsamples,
                                        spec_params->shift, spec_params->nstep);
@@ -233,10 +233,10 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_file_wrapper(char* mrn, float startTime, float endTime, int ch, fmat& spec_mat)
+void eeg_file_wrapper(char* mrn, float start_time, float end_time, int ch, fmat& spec_mat)
 {
   spec_params_t spec_params;
-  get_eeg_spectrogram_params(&spec_params, mrn, startTime, endTime);
+  get_eeg_spectrogram_params(&spec_params, mrn, start_time, end_time);
   print_spec_params_t(&spec_params);
   eeg_spectrogram(&spec_params, ch, spec_mat);
 }
@@ -275,8 +275,8 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
 
   // should this just move to the spec_params struct?
-  int startOffset = hours_to_nsamples(spec_params->fs, spec_params->startTime);
-  int endOffset = hours_to_nsamples(spec_params->fs, spec_params->endTime);
+  int startOffset = hours_to_nsamples(spec_params->fs, spec_params->start_time);
+  int endOffset = hours_to_nsamples(spec_params->fs, spec_params->end_time);
 
   get_array_data(spec_params, ch_idx1, startOffset, endOffset, buf1);
 
