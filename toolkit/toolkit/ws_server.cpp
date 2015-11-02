@@ -136,7 +136,7 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   int ch = data["channel"].number_value();
   string ch_name = CH_NAME_MAP[ch];
 
-  EDFBackend backend; // perhaps this should be a global thing..
+  StorageBackend backend; // perhaps this should be a global thing..
   spec_params_t spec_params;
   get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
   print_spec_params_t(&spec_params);
@@ -191,8 +191,6 @@ int main(int argc, char* argv[])
 
   auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 
-  // C++14, lambda parameters declared with auto
-  // For C++11 use: (shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
   ws.onmessage = [&server](shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
   {
     auto message_str = message->string();
