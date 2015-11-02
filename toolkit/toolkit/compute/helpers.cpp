@@ -1,6 +1,7 @@
 #include <sys/time.h>
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 #include "helpers.hpp"
 
@@ -19,7 +20,7 @@ double ticks_to_seconds(unsigned long long ticks)
 }
 
 
-void log_time_diff(std::string msg, unsigned long long ticks)
+void log_time_diff(string msg, unsigned long long ticks)
 {
   double diff_secs = ticks_to_seconds(getticks() - ticks);
   cout << msg << " took " << setprecision(2) << diff_secs << " seconds" << endl;
