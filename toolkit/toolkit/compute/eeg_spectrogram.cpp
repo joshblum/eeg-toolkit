@@ -73,7 +73,6 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* back
   backend->load_array(mrn);
 
   spec_params->fs = backend->get_fs(mrn);
-
   int data_len = backend->get_data_len(mrn);
   int pad = 0;
   spec_params->shift = spec_params->fs * 4;
