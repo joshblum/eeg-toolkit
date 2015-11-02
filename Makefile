@@ -10,7 +10,7 @@ ws_server:
 	make -C toolkit/toolkit/ ws_server
 
 submodule-update:
-	git submodule foreach git checkout master; git pull
+	git submodule foreach git checkout master; git pull --rebase origin master
 
 submodules:
 	git submodule update --init --recursive
@@ -21,11 +21,11 @@ installdeps: clean submodules dev-packages
 
 dev-packages:
 ifeq ('$(OSX)', 'true')
-	cat packages-dev-osx.txt | xargs brew install
+	cat dev-packages-osx.txt | xargs brew install
 else
 	# Run Linux commands
 	sudo apt-get update
-	cat packages-dev.txt | xargs sudo apt-get -y install
+	cat dev-packages.txt | xargs sudo apt-get -y install
 endif
 	pip install -r requirements.txt
 
