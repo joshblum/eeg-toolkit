@@ -1,4 +1,0 @@
-python-dev
-python-numpy
-python-scipy
-libffi-dev

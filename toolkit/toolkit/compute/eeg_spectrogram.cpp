@@ -4,20 +4,20 @@
 #include <iostream>
 #include <fftw3.h>
 
-#include "edf_backend.hpp"
+#include "../storage/backends.hpp"
 #include "helpers.hpp"
 #include "eeg_spectrogram.hpp"
 
 
 using namespace arma;
+using namespace std;
 
 void print_spec_params_t(spec_params_t* spec_params)
 {
   printf("spec_params: {\n");
-  printf("\tmrn: %s\n", spec_params->mrn);
+  printf("\tmrn: %s\n", spec_params->mrn.c_str());
   printf("\tstart_time: %.2f\n", spec_params->start_time);
   printf("\tend_time: %.2f\n", spec_params->end_time);
-  printf("\thdl: %d\n", spec_params->hdl);
   printf("\tnfft: %d\n", spec_params->nfft);
   printf("\tnstep: %d\n", spec_params->nstep);
   printf("\tshift: %d\n", spec_params->shift);
@@ -60,82 +60,42 @@ int get_nfreqs(int nfft)
   return nfft / 2 + 1;
 }
 
-int get_fs(edf_hdr_struct* hdr)
-{
-  return ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
-}
-
-void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* mrn, float start_time, float end_time)
+void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* backend,
+                                  string mrn, float start_time, float end_time)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
   spec_params->mrn = mrn;
   spec_params->start_time = start_time;
   spec_params->end_time = end_time;
+  spec_params->backend = backend;
 
-  edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
-  load_edf(hdr, mrn);
-  spec_params->hdl = hdr->handle;
+  backend->load_array(mrn);
 
-  // check for errors
-  if (hdr->filetype < 0)
+  spec_params->fs = backend->get_fs(mrn);
+
+  int data_len = backend->get_data_len(mrn);
+  int pad = 0;
+  spec_params->shift = spec_params->fs * 4;
+  spec_params->nstep = spec_params->fs * 1;
+  spec_params->nfft = get_nfft(spec_params->shift, pad);
+  spec_params->nsamples = get_nsamples(data_len, spec_params->fs, end_time - start_time);
+  spec_params->start_time = get_valid_start_time(start_time);
+  spec_params->end_time = get_valid_end_time(data_len, spec_params->fs, end_time);
+
+  // ensure start_time is before end_time
+  if (spec_params->start_time > spec_params->end_time)
   {
-    spec_params->hdl = -1;
-    spec_params->fs = 0;
-    spec_params->shift = 0;
-    spec_params->nstep = 0;
-    spec_params->nfft = 0;
-    spec_params->nsamples = 0;
-    spec_params->nblocks = 0;
-    spec_params->nfreqs = 0;
-    spec_params->spec_len = 0;
+    float tmp = spec_params->start_time;
+    spec_params->start_time = spec_params->end_time;
+    spec_params->end_time = tmp;
   }
-  else
-  {
-    spec_params->fs = get_fs(hdr);
-
-    int data_len = get_data_len(hdr);
-    int pad = 0;
-    spec_params->shift = spec_params->fs * 4;
-    spec_params->nstep = spec_params->fs * 1;
-    spec_params->nfft = get_nfft(spec_params->shift, pad);
-    spec_params->nsamples = get_nsamples(data_len, spec_params->fs, end_time - start_time);
-    spec_params->start_time = get_valid_start_time(start_time);
-    spec_params->end_time = get_valid_end_time(data_len, spec_params->fs, end_time);
-
-    // ensure start_time is before end_time
-    if (spec_params->start_time > spec_params->end_time)
-    {
-      float tmp = spec_params->start_time;
-      spec_params->start_time = spec_params->end_time;
-      spec_params->end_time = tmp;
-    }
-    spec_params->nblocks = get_nblocks(spec_params->nsamples,
-                                       spec_params->shift, spec_params->nstep);
-    spec_params->nfreqs = get_nfreqs(spec_params->nfft);
-    spec_params->spec_len = spec_params->nsamples / spec_params->fs;
-
-  }
+  spec_params->nblocks = get_nblocks(spec_params->nsamples,
+                                     spec_params->shift, spec_params->nstep);
+  spec_params->nfreqs = get_nfreqs(spec_params->nfft);
+  spec_params->spec_len = spec_params->nsamples / spec_params->fs;
 }
 
-float* create_buffer(int n)
-{
-  float* buf = (float*) malloc(sizeof(float) * n);
-  if (buf == NULL)
-  {
-    printf("\nmalloc error\n");
-    exit(1);
-  }
-  return buf;
-}
-
-void get_array_data(spec_params_t* spec_params, int ch, int startOffset, int endOffset, float *buf)
-{
-  //TODO(joshblum): support different types of backends
-  //global config? variable passed in?
-  read_edf_data(spec_params->hdl, ch, startOffset, endOffset, buf);
-}
 
 // Create a hamming window of windowLength samples in buffer
 void hamming(int windowLength, float* buf)
@@ -156,7 +116,7 @@ static inline float abs(fftw_complex* arr, int i)
  * Fill the `spec_mat` matrix with values for the spectrogram for the given diff.
  * `spec_mat` is expected to be initialized and the results are added to allow averaging
  */
-void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
+void STFT(spec_params_t* spec_params, frowvec& diff, fmat& spec_mat)
 {
   fftw_complex    *data, *fft_result;
   fftw_plan       plan_forward;
@@ -168,8 +128,8 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   int nfreqs = spec_params->nfreqs;
   int nsamples = spec_params->nsamples;
 
-  data = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
-  fft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * nfft);
+  data = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nfft);
+  fft_result = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nfft);
   // TODO keep plans in memory until end, create plans once and cache?
   // TODO look into using arma memptr instead of copying data
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
@@ -233,10 +193,11 @@ void STFT(frowvec& diff, spec_params_t* spec_params, fmat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_file_wrapper(char* mrn, float start_time, float end_time, int ch, fmat& spec_mat)
+void eeg_file_wrapper(string mrn, float start_time, float end_time, int ch, fmat& spec_mat)
 {
   spec_params_t spec_params;
-  get_eeg_spectrogram_params(&spec_params, mrn, start_time, end_time);
+  StorageBackend backend;
+  get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
   print_spec_params_t(&spec_params);
   eeg_spectrogram(&spec_params, ch, spec_mat);
 }
@@ -255,21 +216,13 @@ void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr)
 
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 {
-  if (spec_params->hdl == -1)
-  {
-    cout << "invalid handle" << endl;
-    return;
-  }
-  spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
-  // TODO reuse buffers
-  // TODO chunking?
-  // write edf method to do diff on the fly?
-  int nsamples = spec_params->nsamples;
-  float* buf1 = create_buffer(nsamples);
-  float* buf2 = create_buffer(nsamples);
 
   // nfreqs x nblocks matrix
+  spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
   spec_mat.fill(0);
+
+  // write edf method to do diff on the fly?
+  int nsamples = spec_params->nsamples;
 
   int ch_idx1, ch_idx2;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
@@ -278,39 +231,32 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   int startOffset = hours_to_nsamples(spec_params->fs, spec_params->start_time);
   int endOffset = hours_to_nsamples(spec_params->fs, spec_params->end_time);
 
-  get_array_data(spec_params, ch_idx1, startOffset, endOffset, buf1);
+  frowvec vec1 = frowvec(nsamples);
+  frowvec vec2 = frowvec(nsamples);
+  spec_params->backend->get_array_data(spec_params->mrn, ch_idx1, startOffset, endOffset, vec1);
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    get_array_data(spec_params, ch_idx2, startOffset, endOffset, buf2);
-
-    // TODO use rowvec::fixed with fixed size chunks
-    frowvec v1 = frowvec(buf1, nsamples);
-    frowvec v2 = frowvec(buf2, nsamples);
-    frowvec diff = v2 - v1;
+    spec_params->backend->get_array_data(spec_params->mrn, ch_idx2, startOffset, endOffset, vec2);
+    frowvec diff = vec2 - vec1;
 
     // fill in the spec matrix with fft values
-    STFT(diff, spec_params, spec_mat);
-    std::swap(buf1, buf2);
+    STFT(spec_params, diff, spec_mat);
+    swap(vec1, vec2);
   }
   // TODO serialize spec_mat output for each channel
   spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
   spec_mat = spec_mat.t(); // transpose the output
-
-  free(buf1);
-  free(buf2);
 }
+
 /*
  * Transform the mat to a float* for transfer
  * via websockets
+ * TODO(joshblum): do this with arma methods directly
  */
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr)
 {
-  if (spec_params->hdl == -1)
-  {
-    return;
-  }
   for (int i = 0; i < spec_params->nfreqs; i++)
   {
     for (int j = 0; j < spec_params->nblocks; j++)

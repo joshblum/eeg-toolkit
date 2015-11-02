@@ -1,28 +1,44 @@
-.PHONY: clean ws_server libs installdeps
+.PHONY: clean main ws_server installdeps
 
-CXX = c++
-CSRC := compute/EDFlib/edflib.c
-CPPSRC := json11/json11.cpp compute/helpers.cpp compute/edf_backend.cpp compute/eeg_spectrogram.cpp\
-	compute/eeg_change_point.cpp ws_server.cpp
-OBJ := $(CSRC:.c=.o) $(CPPSRC:.cpp=.o)
-TARGET := ws_server
-CFLAGS = -Wall -std=c++1y -Wno-deprecated-declarations
-LDFLAGS = -lfftw3 -rdynamic -lboost_system -lboost_regex -lcrypto
 OS := $(shell uname)
 
+CXX = c++
+
+CSRC := storage/EDFlib/edflib.c
+CPPSRC := storage/backends.cpp compute/helpers.cpp compute/eeg_spectrogram.cpp\
+	compute/eeg_change_point.cpp
+WSSRC := $(CPPSRC) json11/json11.cpp ws_server.cpp
+MAINSRC := $(CPPSRC) compute/main.cpp
+
+WSOBJ := $(CSRC:.c=.o) $(WSSRC:.cpp=.o)
+MAINOBJ := $(CSRC:.c=.o) $(MAINSRC:.cpp=.o)
+
+CFLAGS := -Wall\
+					-std=c++1y\
+					-Wno-deprecated-declarations
+LDFLAGS := -lfftw3\
+					-rdynamic\
+					-lboost_system\
+					-lboost_regex\
+					-lcrypto
+
 ifeq ('$(OS)', 'Darwin')
-	OSX = true
 	LDFLAGS += -L/usr/local/opt/openssl/lib
-	CFLAGS += -I/usr/local/opt/openssl/include -Wno-writable-strings
+	CFLAGS += -I/usr/local/opt/openssl/include\
+						-Wno-writable-strings
 else
-	LDFLAGS += -pthread -lboost_thread
+	LDFLAGS += -pthread\
+						 -lboost_thread
 	CFLAGS += -Wno-write-strings
 endif
 
 ifeq ($(DEBUG),1)
-	CFLAGS += -O0 -g -DDEBUG # -g needed for test framework assertions
+	 CFLAGS += -O0\
+						 -g\
+						 -DDEBUG # -g needed for test framework assertions
 else
-	CFLAGS += -O3 -DNDEBUG
+	CFLAGS += -O3\
+						-DNDEBUG
 endif
 
 default: ws_server
@@ -38,19 +54,20 @@ else
 	cat packages.txt | xargs sudo apt-get -y install
 endif
 
-libs:
-	make -C compute/ libs
-
 %.o : %.c
 	$(CXX) $(CFLAGS) -o $@ -c $<
 
 %.o : %.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $<
 
-ws_server: $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(LDFLAGS)
+ws_server: $(WSOBJ)
+	$(CXX) -o $@ $(WSOBJ) $(LDFLAGS)
+
+main: $(MAINOBJ)
+	$(CXX) -o $@ $(MAINOBJ) $(LDFLAGS)
 
 clean:
 	find . -type f -name '*.*~' -delete
-	find . -type f -name $(TARGET) -delete
 	find . -type f -name '*.[dSYM|o|d]' -delete
+	find . -type f -name ws_server -delete
+	find . -type f -name main -delete

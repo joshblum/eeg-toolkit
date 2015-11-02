@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include "../storage/backends.hpp"
 #include "helpers.hpp"
 #include "eeg_spectrogram.hpp"
 #include "eeg_change_point.hpp"
@@ -79,18 +80,19 @@ int main(int argc, char *argv[])
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn, start_time, end_time);
     spec_params_t spec_params;
-    get_eeg_spectrogram_params(&spec_params, mrn, start_time, end_time);
+    StorageBackend backend;
+    get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
     fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
     example_spectrogram(spec_mat, &spec_params);
-    close_edf(mrn);
+    backend.close_array(mrn);
 
     example_change_points(spec_mat);
 
     float* spec_arr = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
     // reopen file
-    get_eeg_spectrogram_params(&spec_params, mrn, start_time, end_time);
+    get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
     example_spectrogram_as_arr(spec_arr, &spec_params);
-    close_edf(mrn);
+    backend.close_array(mrn);
     free(spec_arr);
 
   }

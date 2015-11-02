@@ -3,22 +3,17 @@
 
 // #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
-#include "EDFlib/edflib.h"
-#include "edf_backend.hpp"
-
-// necessary for the shared lib for python access
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../storage/backends.hpp"
 
 using namespace arma;
+using namespace std;
 
 typedef struct spec_params
 {
-  char* mrn; // patient medical record number
+  string mrn; // patient medical record number
+  StorageBackend* backend; // array storage backend
   float start_time; // start of the spectrogram
   float end_time; // end of spectogram
-  int hdl; // file handler for hdr file
   int spec_len; // length of the spectrogram
   int fs; // sample rate
   int nfft; // number of samples for fft
@@ -98,17 +93,14 @@ const ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
 };
 
 void print_spec_params_t(spec_params_t* spec_params);
-void get_eeg_spectrogram_params(spec_params_t* spec_params,
-                                char* mrn, float start_time, float end_time);
+void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* backend,
+                                string mrn, float start_time, float end_time);
 // does not need spec params
-void eeg_spectrogram_wrapper(char* mrn, float start_time, float end_time, int ch, fmat& spec_mat);
+void eeg_spectrogram_wrapper(string mrn, float start_time,
+                              float end_time, int ch, fmat& spec_mat);
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
 void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
 void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif // SPECTROGRAM_H
 

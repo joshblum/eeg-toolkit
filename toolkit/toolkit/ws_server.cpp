@@ -1,12 +1,12 @@
 #include <armadillo>
 #include <mutex>
 
-#include "compute/EDFlib/edflib.h"
+#include "wslib/server_ws.hpp"
+#include "json11/json11.hpp"
+#include "storage/backends.hpp"
 #include "compute/helpers.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
-#include "json11/json11.hpp"
-#include "wslib/server_ws.hpp"
 
 using namespace arma;
 using namespace std;
@@ -19,11 +19,11 @@ using namespace json11;
 
 typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
 
-const char* CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
-std::mutex server_send_mutex;
+string CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
+mutex server_send_mutex;
 
 void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
-                  std::string msg_type, Json content, float* data, size_t data_size)
+                  string msg_type, Json content, float* data, size_t data_size)
 {
   unsigned long long start = getticks();
   Json msg = Json::object
@@ -31,7 +31,7 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
     {"type", msg_type},
     {"content", content}
   };
-  std::string header = msg.dump();
+  string header = msg.dump();
 
   uint32_t header_len = header.size() + (8 - ((header.size() + 4) % 8));
   // append enough spaces so that the payload starts at an 8-byte
@@ -47,7 +47,7 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
     send_stream->write((char*) data, data_size);
   }
 
-  std::string action = content["action"].string_value();
+  string action = content["action"].string_value();
   // TODO(joshblum): why this necessary?
   server_send_mutex.lock();
   // server.send is an asynchronous function
@@ -72,7 +72,7 @@ void log_json(Json content)
 
 void send_frowvec(WsServer* server,
                   shared_ptr<WsServer::Connection> connection,
-                  std::string canvasId, std::string type,
+                  string canvasId, string type,
                   frowvec vector)
 {
 
@@ -88,7 +88,7 @@ void send_frowvec(WsServer* server,
 
 void send_spectrogram_new(WsServer* server,
                           shared_ptr<WsServer::Connection> connection,
-                          spec_params_t spec_params, std::string canvasId)
+                          spec_params_t spec_params, string canvasId)
 {
   Json content = Json::object
   {
@@ -106,7 +106,7 @@ void send_spectrogram_new(WsServer* server,
 
 void send_spectrogram_update(WsServer* server,
                              shared_ptr<WsServer::Connection> connection,
-                             spec_params_t spec_params, std::string canvasId,
+                             spec_params_t spec_params, string canvasId,
                              fmat& spec_mat)
 {
 
@@ -127,7 +127,7 @@ void send_spectrogram_update(WsServer* server,
 
 void send_change_points(WsServer* server,
                         shared_ptr<WsServer::Connection> connection,
-                        std::string canvasId,
+                        string canvasId,
                         cp_data_t* cp_data)
 {
   send_frowvec(server, connection, canvasId, "change_points", cp_data->cp);
@@ -137,35 +137,36 @@ void send_change_points(WsServer* server,
 
 void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json data)
 {
-  std::string mrn = data["mrn"].string_value();
+  // TODO(joshblum): add data validation
+  string mrn = data["mrn"].string_value();
   float start_time = data["startTime"].number_value();
   float end_time = data["endTime"].number_value();
   int ch = data["channel"].number_value();
+  string ch_name = CH_NAME_MAP[ch];
 
+  EDFBackend backend; // perhaps this should be a global thing..
   spec_params_t spec_params;
-  char *mrn_c = new char[mrn.length() + 1];
-  strcpy(mrn_c, mrn.c_str());
-  get_eeg_spectrogram_params(&spec_params, mrn_c, start_time, end_time);
+  get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
   print_spec_params_t(&spec_params);
   cout << endl; // print newline between each spectrogram computation
-  const char* ch_name = CH_NAME_MAP[ch];
-  send_spectrogram_new(server, connection, spec_params, ch_name);
-  fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
 
+  send_spectrogram_new(server, connection, spec_params, ch_name);
+
+  fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
   unsigned long long start = getticks();
   eeg_spectrogram(&spec_params, ch, spec_mat);
   log_time_diff("eeg_spectrogram", start);
 
+  send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
+
   cp_data_t cp_data;
   get_change_points(spec_mat, &cp_data);
-
-  send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
   send_change_points(server, connection, ch_name, &cp_data);
 
-  close_edf(mrn_c);
+  backend.close_array(mrn);
 }
 
-void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connection, std::string type, Json content)
+void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connection, string type, Json content)
 {
   if (type == "request_file_spectrogram")
   {
@@ -203,11 +204,11 @@ int main(int argc, char* argv[])
   ws.onmessage = [&server](shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
   {
     auto message_str = message->string();
-    std::string err;
+    string err;
     Json json = Json::parse(message_str, err);
 
     // TODO add error checking for null fields
-    std::string type = json["type"].string_value();
+    string type = json["type"].string_value();
     Json content = json["content"];
 
     receive_message(&server, connection, type, content);

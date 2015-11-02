@@ -3,11 +3,6 @@
 // #define ARMA_NO_DEBUG // enable for no bounds checking
 #include <armadillo>
 
-// necessary for the shared lib for python access
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 using namespace arma;
 
 typedef struct cp_data
@@ -27,10 +22,6 @@ void get_change_points_as_arr(float* spec_arr, int n_rows, int n_cols, cp_data_t
 void example_change_points_as_arr(float* spec_arr, int n_rows, int n_cols);
 void example_change_points(fmat& spec_mat);
 void print_cp_data_t(cp_data_t* cp_data);
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 
 #endif // CHANGE_POINT_H
 

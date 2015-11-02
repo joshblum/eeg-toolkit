@@ -5,5 +5,5 @@
 	path = toolkit/toolkit/json11
 	url = git@github.com:dropbox/json11.git
 [submodule "EDFlib"]
-	path = toolkit/toolkit/compute/EDFlib
+	path = toolkit/toolkit/storage/EDFlib
 	url = git@github.com:joshblum/EDFlib.git
