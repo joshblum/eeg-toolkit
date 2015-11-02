@@ -1,5 +1,4 @@
 #include <armadillo>
-#include <mutex>
 
 #include "wslib/server_ws.hpp"
 #include "json11/json11.hpp"
@@ -20,7 +19,6 @@ using namespace json11;
 typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
 
 string CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
-mutex server_send_mutex;
 
 void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
                   string msg_type, Json content, float* data, size_t data_size)
@@ -48,12 +46,9 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
   }
 
   string action = content["action"].string_value();
-  // TODO(joshblum): why this necessary?
-  server_send_mutex.lock();
   // server.send is an asynchronous function
   server->send(connection, send_stream, [action, start](const boost::system::error_code & ec)
   {
-    server_send_mutex.unlock();
     log_time_diff("send_message::" + action, start);
     if (ec)
     {

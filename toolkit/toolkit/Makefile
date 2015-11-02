@@ -5,10 +5,15 @@ OS := $(shell uname)
 CXX = c++
 
 CSRC := storage/EDFlib/edflib.c
-CPPSRC := storage/backends.cpp compute/helpers.cpp compute/eeg_spectrogram.cpp\
-	compute/eeg_change_point.cpp
-WSSRC := $(CPPSRC) json11/json11.cpp ws_server.cpp
-MAINSRC := $(CPPSRC) compute/main.cpp
+CPPSRC := storage/backends.cpp\
+					compute/helpers.cpp\
+					compute/eeg_spectrogram.cpp\
+					compute/eeg_change_point.cpp
+WSSRC := $(CPPSRC)\
+	json11/json11.cpp\
+	ws_server.cpp
+MAINSRC := $(CPPSRC)\
+		compute/main.cpp
 
 WSOBJ := $(CSRC:.c=.o) $(WSSRC:.cpp=.o)
 MAINOBJ := $(CSRC:.c=.o) $(MAINSRC:.cpp=.o)
@@ -20,6 +25,9 @@ LDFLAGS := -lfftw3\
 					-rdynamic\
 					-lboost_system\
 					-lboost_regex\
+					-lboost_coroutine\
+					-lboost_context\
+					-lboost_thread\
 					-lcrypto
 
 ifeq ('$(OS)', 'Darwin')
@@ -27,8 +35,7 @@ ifeq ('$(OS)', 'Darwin')
 	CFLAGS += -I/usr/local/opt/openssl/include\
 						-Wno-writable-strings
 else
-	LDFLAGS += -pthread\
-						 -lboost_thread
+	LDFLAGS += -pthread
 	CFLAGS += -Wno-write-strings
 endif
 
