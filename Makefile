@@ -1,12 +1,9 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint libs prod-run install deploy submodules submodule-update dev-packages docker-install docker-run docker-stop docker-push
+.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy submodules submodule-update dev-packages docker-install docker-run docker-stop docker-push
 
 DOCKER_WEBAPP_NAME := "joshblum/eeg-toolkit-webapp"
 DOCKER_TOOLKIT_NAME := "joshblum/eeg-toolkit-toolkit"
 
 default: ws_server
-
-libs:
-	make -C toolkit/toolkit/compute/ libs
 
 ws_server:
 	make -C toolkit/toolkit/ ws_server
@@ -80,9 +77,5 @@ jslint:
 lint: clean pylint jslint
 
 clean:
-	find . -type f -name '*.py[cod]' -delete
-	find . -type f -name '*.*~' -delete
-	find . -type f -name 'main' -delete
-	find . -type f -name 'lib_eeg_spectrogram.so' -delete
-	find . -type f -name 'ws_server' -delete
-	find . -type f -name '*.[dSYM|o|d]' -delete
+	make -C toolkit/toolkit/ clean
+	make -C webapp/webapp/ clean
