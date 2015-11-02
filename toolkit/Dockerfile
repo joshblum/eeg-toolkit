@@ -6,6 +6,6 @@ RUN apt-get update && apt-get install -y -q \
 ADD ./toolkit /opt/toolkit/
 WORKDIR /opt/toolkit
 RUN make installdeps
-RUN make ws_server
+RUN make clean && make ws_server
 EXPOSE 8080
 CMD ["./ws_server"]
