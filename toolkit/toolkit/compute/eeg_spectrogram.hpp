@@ -99,8 +99,6 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* back
 void eeg_spectrogram_wrapper(string mrn, float start_time,
                               float end_time, int ch, fmat& spec_mat);
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat);
-void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr);
-void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr);
 
 #endif // SPECTROGRAM_H
 

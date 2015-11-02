@@ -31,26 +31,18 @@ void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
   printf("]\n");
 }
 
-void example_spectrogram_as_arr(float* spec_arr, spec_params_t* spec_params)
+void compute(string mrn, float start_time, float end_time)
 {
-  unsigned long long start = getticks();
-  print_spec_params_t(spec_params);
-  eeg_spectrogram_as_arr(spec_params, LL, spec_arr);
-  log_time_diff("example_spectrogram_as_arr:", start);
-  printf("Spectrogram shape: (%d, %d)\n",
-         spec_params->nblocks, spec_params->nfreqs);
+  spec_params_t spec_params;
+  StorageBackend backend;
+  get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
+  fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
+  example_spectrogram(spec_mat, &spec_params);
+  backend.close_array(mrn);
 
-  printf("Sample data as_arr: [\n[ ");
-  for (int i = 0; i < NUM_SAMPLES; i++)
-  {
-    for (int j = 0; j < NUM_SAMPLES; j++)
-    {
-      printf("%.5f, ", *(spec_arr + i + j * spec_params->nfreqs));
-    }
-    printf("],\n[ ");
-  }
-  printf("]]\n");
+  example_change_points(spec_mat);
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -79,22 +71,7 @@ int main(int argc, char *argv[])
       end_time = 4.0;
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn, start_time, end_time);
-    spec_params_t spec_params;
-    StorageBackend backend;
-    get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
-    fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
-    example_spectrogram(spec_mat, &spec_params);
-    backend.close_array(mrn);
-
-    example_change_points(spec_mat);
-
-    float* spec_arr = (float*) malloc(sizeof(float) * spec_params.nblocks * spec_params.nfreqs);
-    // reopen file
-    get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
-    example_spectrogram_as_arr(spec_arr, &spec_params);
-    backend.close_array(mrn);
-    free(spec_arr);
-
+    compute(mrn, start_time, end_time);
   }
   else
   {

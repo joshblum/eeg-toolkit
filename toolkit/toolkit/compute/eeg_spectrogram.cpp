@@ -130,7 +130,6 @@ void STFT(spec_params_t* spec_params, frowvec& diff, fmat& spec_mat)
   data = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nfft);
   fft_result = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nfft);
   // TODO keep plans in memory until end, create plans once and cache?
-  // TODO look into using arma memptr instead of copying data
   plan_forward = fftw_plan_dft_1d(nfft, data, fft_result,
                                   FFTW_FORWARD, FFTW_ESTIMATE);
 
@@ -168,7 +167,7 @@ void STFT(spec_params_t* spec_params, frowvec& diff, fmat& spec_mat)
     }
 
     // Perform the FFT on our chunk
-    fftw_execute( plan_forward );
+    fftw_execute(plan_forward);
 
     // TODO: change maybe?
     // http://www.fftw.org/fftw2_doc/fftw_2.html
@@ -190,27 +189,6 @@ void STFT(spec_params_t* spec_params, frowvec& diff, fmat& spec_mat)
 
   fftw_free(data);
   fftw_free(fft_result);
-}
-
-void eeg_file_wrapper(string mrn, float start_time, float end_time, int ch, fmat& spec_mat)
-{
-  spec_params_t spec_params;
-  StorageBackend backend;
-  get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
-  print_spec_params_t(&spec_params);
-  eeg_spectrogram(&spec_params, ch, spec_mat);
-}
-
-void eeg_spectrogram_as_arr(spec_params_t* spec_params, int ch, float* spec_arr)
-{
-  if (spec_arr == NULL)
-  {
-    spec_arr = (float*) malloc(sizeof(float) * spec_params->nblocks * spec_params->nfreqs);
-
-  }
-  fmat spec_mat;
-  eeg_spectrogram(spec_params, ch, spec_mat);
-  serialize_spec_mat(spec_params, spec_mat, spec_arr);
 }
 
 void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
@@ -244,24 +222,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
     STFT(spec_params, diff, spec_mat);
     swap(vec1, vec2);
   }
-  // TODO serialize spec_mat output for each channel
   spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
   spec_mat = spec_mat.t(); // transpose the output
-}
-
-/*
- * Transform the mat to a float* for transfer
- * via websockets
- * TODO(joshblum): do this with arma methods directly
- */
-void serialize_spec_mat(spec_params_t* spec_params, fmat& spec_mat, float* spec_arr)
-{
-  for (int i = 0; i < spec_params->nfreqs; i++)
-  {
-    for (int j = 0; j < spec_params->nblocks; j++)
-    {
-      *(spec_arr + i + j * spec_params->nfreqs) = (float) spec_mat(i, j);
-    }
-  }
 }
 

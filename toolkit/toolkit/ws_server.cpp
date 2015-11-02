@@ -113,11 +113,8 @@ void send_spectrogram_update(WsServer* server,
     {"canvasId", canvasId}
   };
   size_t data_size = sizeof(float) * spec_mat.n_elem;
-  float* spec_arr = (float*) malloc(data_size);
-  serialize_spec_mat(&spec_params, spec_mat, spec_arr);
   log_json(content);
-  send_message(server, connection, "spectrogram", content, spec_arr, data_size);
-  free(spec_arr);
+  send_message(server, connection, "spectrogram", content, spec_mat.memptr(), data_size);
 }
 
 void send_change_points(WsServer* server,
