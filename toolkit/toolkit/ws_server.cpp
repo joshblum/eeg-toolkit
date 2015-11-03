@@ -1,6 +1,7 @@
 #include <armadillo>
 
 #include "wslib/server_ws.hpp"
+#include "config.hpp"
 #include "json11/json11.hpp"
 #include "storage/backends.hpp"
 #include "compute/helpers.hpp"
@@ -11,8 +12,6 @@ using namespace arma;
 using namespace std;
 using namespace json11;
 
-#define NUM_THREADS 4
-#define PORT 8080
 #define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
@@ -183,11 +182,11 @@ int main(int argc, char* argv[])
   }
   else
   {
-    port = PORT;
+    port = WS_DEFAULT_PORT;
   }
 
-  // WebSocket (WS)-server at port using NUM_THREADS threads
-  WsServer server(port, NUM_THREADS);
+  // WebSocket (WS)-server at port using WS_NUM_THREADS threads
+  WsServer server(port, WS_NUM_THREADS);
 
   auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 

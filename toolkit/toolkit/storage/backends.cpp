@@ -40,12 +40,7 @@ void EDFBackend::pop_cache(string mrn)
  */
 string EDFBackend::mrn_to_filename(string mrn)
 {
-    string basedir;
-#ifdef __APPLE__
-    basedir = "/Users/joshblum/Dropbox (MIT)";
-#elif __linux__
-    basedir = "/home/ubuntu";
-#endif
+    string basedir = EDF_BASEDIR;
     return basedir + "/MIT-EDFs/MIT-CSAIL-" + mrn + ".edf";
 }
 

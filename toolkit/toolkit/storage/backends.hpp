@@ -5,6 +5,7 @@
 #include <armadillo>
 #include <string>
 #include "EDFlib/edflib.h"
+#include "../config.hpp"
 
 using namespace std;
 using namespace arma;
@@ -45,8 +46,7 @@ class EDFBackend: public AbstractStorageBackend<edf_hdr_struct*>
     string mrn_to_filename(string mrn);
 };
 
-// TODO(joshblum): change based on config variable
-typedef EDFBackend StorageBackend;
+typedef BACKEND StorageBackend;
 
 #endif // BACKENDS_H
 
