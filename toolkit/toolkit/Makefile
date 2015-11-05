@@ -1,6 +1,4 @@
-.PHONY: clean main ws_server convert installdeps
-
-OS := $(shell uname)
+.PHONY: clean main ws_server edf_converter installdeps
 
 CXX = c++
 
@@ -33,6 +31,7 @@ LDFLAGS := -lfftw3\
 					-lboost_context\
 					-lboost_thread\
 					-lcrypto\
+					-pthread\
 					-L/usr/lib/x86_64-linux-gnu\
 					/usr/lib/x86_64-linux-gnu/libhdf5_hl_cpp.a\
 					/usr/lib/x86_64-linux-gnu/libhdf5_cpp.a\
@@ -40,15 +39,6 @@ LDFLAGS := -lfftw3\
 					/usr/lib/x86_64-linux-gnu/libhdf5.a\
 					-lz\
 					-ldl
-
-ifeq ('$(OS)', 'Darwin')
-	LDFLAGS += -L/usr/local/opt/openssl/lib
-	CFLAGS += -I/usr/local/opt/openssl/include\
-						-Wno-writable-strings
-else
-	LDFLAGS += -pthread
-	CFLAGS += -Wno-write-strings
-endif
 
 ifeq ($(DEBUG),1)
 	 CFLAGS += -O0\
@@ -62,15 +52,8 @@ endif
 default: ws_server
 
 installdeps:
-ifeq ('$(OS)', 'Darwin')
-	# Run MacOS commands
-	brew update
-	cat packages-osx.txt | xargs brew install
-else
-	# Run Linux commands
 	sudo apt-get update
 	cat packages.txt | xargs sudo apt-get -y install
-endif
 
 %.o : %.c
 	$(CXX) $(CFLAGS) -o $@ -c $<
@@ -84,7 +67,7 @@ ws_server: $(WSOBJ)
 main: $(MAINOBJ)
 	$(CXX) -o $@ $(MAINOBJ) $(LDFLAGS)
 
-convert: $(CONVERTOBJ)
+edf_converter: $(CONVERTOBJ)
 	$(CXX) -o $@ $(CONVERTOBJ) $(LDFLAGS)
 
 clean:

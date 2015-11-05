@@ -1,6 +1,0 @@
-astyle
-cmake
-htop
-pkg-config
-supervisor
-valgrind

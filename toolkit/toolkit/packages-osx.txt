@@ -1,5 +1,0 @@
-boost
-fftw
-homebrew/science/armadillo
-openssl
-hdf5

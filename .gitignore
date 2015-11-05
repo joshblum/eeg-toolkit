@@ -63,4 +63,4 @@ pip-delete-this-directory.txt
 
 main
 ws_server
-convert
+edf_converter
