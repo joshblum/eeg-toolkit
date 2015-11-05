@@ -75,3 +75,4 @@ clean:
 	find . -type f -name '*.[dSYM|o|d]' -delete
 	find . -type f -name ws_server -delete
 	find . -type f -name main -delete
+	find . -type f -name edf_converter -delete
