@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
   if (argc <= 3)
   {
-    char* mrn;
+    string mrn;
     if (argc >= 2)
     {
       mrn = argv[1];
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
       mrn = "007";
     }
 
-    char* backend_name;
+    string backend_name;
     if (argc == 3)
     {
       backend_name = argv[2];

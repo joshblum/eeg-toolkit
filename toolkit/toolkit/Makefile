@@ -22,7 +22,8 @@ CONVERTOBJ := $(OBJ) $(CONVERTSRC:.cpp=.o)
 
 CFLAGS := -Wall\
 					-std=c++1y\
-					-Wno-deprecated-declarations
+					-Wno-deprecated-declarations\
+					-Wno-write-strings
 LDFLAGS := -lfftw3\
 					-rdynamic\
 					-lboost_system\

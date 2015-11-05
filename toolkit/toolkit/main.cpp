@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   if (argc <= 4)
   {
     float start_time, end_time;
-    char* mrn;
+    string mrn;
     if (argc >= 2)
     {
       mrn = argv[1];
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
       start_time = 0.0;
       end_time = 4.0;
     }
-    printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn, start_time, end_time);
+    printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn.c_str(), start_time, end_time);
 //    compute_example(mrn, start_time, end_time);
     storage_example(mrn);
   }
