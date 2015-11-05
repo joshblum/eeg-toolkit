@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 
   thread server_thread([&server, port]()
   {
-    cout << "WebSocket Server started at port: " << port << endl;
+    cout << "WebSocket Server started at port: " << port << " and using backend: " << TOSTRING(BACKEND) << endl;
     // Start WS-server
     server.start();
   });

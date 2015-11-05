@@ -1,15 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-
-#include "../storage/backends.hpp"
-#include "helpers.hpp"
-#include "eeg_spectrogram.hpp"
-#include "eeg_change_point.hpp"
+#include "storage/backends.hpp"
+#include "compute/helpers.hpp"
+#include "compute/eeg_spectrogram.hpp"
+#include "compute/eeg_change_point.hpp"
 
 #define NUM_SAMPLES 10
-
-using namespace arma;
 
 void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
 {
@@ -31,7 +25,7 @@ void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
   printf("]\n");
 }
 
-void compute(string mrn, float start_time, float end_time)
+void compute_example(string mrn, float start_time, float end_time)
 {
   spec_params_t spec_params;
   StorageBackend backend;
@@ -43,8 +37,23 @@ void compute(string mrn, float start_time, float end_time)
   example_change_points(spec_mat);
 }
 
+void storage_example(string mrn)
+{
+  HDF5Backend hdf5_backend;
+  hdf5_backend.edf_to_array(mrn);
+  hdf5_backend.load_array(mrn);
+  frowvec buf = frowvec(NUM_SAMPLES);
+  cout << "fs: " << hdf5_backend.get_fs(mrn) << " data_len: " << hdf5_backend.get_data_len(mrn) << endl;
+  hdf5_backend.get_array_data(mrn, C3, 0, NUM_SAMPLES, buf);
+  for (int i = 0; i < NUM_SAMPLES; i++)
+  {
+    cout << " " << buf(i);
+  }
+  cout << endl;
+}
 
-int main(int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
   if (argc <= 4)
   {
@@ -71,11 +80,12 @@ int main(int argc, char *argv[])
       end_time = 4.0;
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn, start_time, end_time);
-    compute(mrn, start_time, end_time);
+//    compute_example(mrn, start_time, end_time);
+    storage_example(mrn);
   }
   else
   {
-    printf("\nusage: spectrogram <mrn> <start_time> <end_time>\n\n");
+    cout << "\nusage: main <mrn> <start_time> <end_time>\n" << endl;
   }
   return 1;
 }

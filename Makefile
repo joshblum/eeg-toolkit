@@ -42,7 +42,7 @@ docker-build: clean submodules
 
 docker-run:
 	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(REPO)/$(DOCKER_WEBAPP_NAME)
-	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/MIT-EDFs:/home/ubuntu/MIT-EDFs $(REPO)/$(DOCKER_TOOLKIT_NAME)
+	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/eeg-data:/home/ubuntu/eeg-data $(REPO)/$(DOCKER_TOOLKIT_NAME)
 
 docker-stop:
 	-docker stop $(DOCKER_WEBAPP_NAME)

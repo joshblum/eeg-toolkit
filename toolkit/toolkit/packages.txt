@@ -2,3 +2,4 @@ libarmadillo-dev
 libboost-all-dev
 libfftw3-dev
 libssl-dev
+libhdf5-serial-dev

@@ -1,47 +1,13 @@
 #include "backends.hpp"
 
-
-/*
- * Checks the `data_cache` for a specific mrn.
- * Returns a pointer to an `edf_hdr_struct` if it is present
- * else `NULL`
- */
-edf_hdr_struct* EDFBackend::get_cache(string mrn)
-{
-    auto iter = data_cache.find(mrn);
-    if (iter == data_cache.end())
-    {
-      return NULL;
-    } else {
-      return iter->second;
-    }
-}
-
-/*
- * Set the key-value pair `mrn`:`ptr` in the cache
- */
-void EDFBackend::put_cache(string mrn, edf_hdr_struct* ptr)
-{
-  data_cache[mrn] = ptr;
-}
-
-/*
- * Delete the value from the cache and free the ptr
- */
-void EDFBackend::pop_cache(string mrn)
-{
-  data_cache.erase(mrn);
-}
-
 /*
  * Transform a medical record number (mrn) to a filename. This
  * should only be used for temporary testing before a real backend is
  * implemented.
  */
-string EDFBackend::mrn_to_filename(string mrn)
+string EDFBackend::mrn_to_array_name(string mrn)
 {
-    string basedir = EDF_BASEDIR;
-    return basedir + "/MIT-EDFs/MIT-CSAIL-" + mrn + ".edf";
+    return AbstractStorageBackend::_mrn_to_array_name(mrn, "edf");
 }
 
 int EDFBackend::get_fs(string mrn)
@@ -62,7 +28,7 @@ void EDFBackend::load_array(string mrn)
     edf_hdr_struct* cached_hdr = get_cache(mrn);
     if (cached_hdr == NULL) {
         edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
-        string filename = mrn_to_filename(mrn);
+        string filename = mrn_to_array_name(mrn);
         if (edfopen_file_readonly(filename.c_str(), hdr, EDFLIB_DO_NOT_READ_ANNOTATIONS))
         {
             switch (hdr->filetype)

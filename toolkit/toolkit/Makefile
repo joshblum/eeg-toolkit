@@ -1,22 +1,26 @@
-.PHONY: clean main ws_server installdeps
+.PHONY: clean main ws_server convert installdeps
 
 OS := $(shell uname)
 
 CXX = c++
 
 CSRC := storage/EDFlib/edflib.c
-CPPSRC := storage/backends.cpp\
+CPPSRC := storage/edf_backend.cpp\
+					storage/hdf5_backend.cpp\
 					compute/helpers.cpp\
 					compute/eeg_spectrogram.cpp\
 					compute/eeg_change_point.cpp
 WSSRC := $(CPPSRC)\
-	json11/json11.cpp\
-	ws_server.cpp
+					json11/json11.cpp\
+					ws_server.cpp
 MAINSRC := $(CPPSRC)\
-		compute/main.cpp
+						main.cpp
 
-WSOBJ := $(CSRC:.c=.o) $(WSSRC:.cpp=.o)
-MAINOBJ := $(CSRC:.c=.o) $(MAINSRC:.cpp=.o)
+CONVERTSRC := $(wildcard storage/*.cpp)
+OBJ := $(CSRC:.c=.o)
+WSOBJ := $(OBJ) $(WSSRC:.cpp=.o)
+MAINOBJ := $(OBJ) $(MAINSRC:.cpp=.o)
+CONVERTOBJ := $(OBJ) $(CONVERTSRC:.cpp=.o)
 
 CFLAGS := -Wall\
 					-std=c++1y\
@@ -28,7 +32,14 @@ LDFLAGS := -lfftw3\
 					-lboost_coroutine\
 					-lboost_context\
 					-lboost_thread\
-					-lcrypto
+					-lcrypto\
+					-L/usr/lib/x86_64-linux-gnu\
+					/usr/lib/x86_64-linux-gnu/libhdf5_hl_cpp.a\
+					/usr/lib/x86_64-linux-gnu/libhdf5_cpp.a\
+					/usr/lib/x86_64-linux-gnu/libhdf5_hl.a\
+					/usr/lib/x86_64-linux-gnu/libhdf5.a\
+					-lz\
+					-ldl
 
 ifeq ('$(OS)', 'Darwin')
 	LDFLAGS += -L/usr/local/opt/openssl/lib
@@ -72,6 +83,9 @@ ws_server: $(WSOBJ)
 
 main: $(MAINOBJ)
 	$(CXX) -o $@ $(MAINOBJ) $(LDFLAGS)
+
+convert: $(CONVERTOBJ)
+	$(CXX) -o $@ $(CONVERTOBJ) $(LDFLAGS)
 
 clean:
 	find . -type f -name '*.*~' -delete
