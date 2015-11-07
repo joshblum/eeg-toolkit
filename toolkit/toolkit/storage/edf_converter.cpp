@@ -1,9 +1,15 @@
 #include "backends.hpp"
 
 void convert_to_array(string mrn, string backend_name) {
-  if (backend_name == "HDF5Backend"){
+  if (backend_name == "HDF5Backend")
+  {
     HDF5Backend hdf5_backend;
     hdf5_backend.edf_to_array(mrn);
+  }
+  else if (backend_name == "TileDBBackend")
+  {
+    TileDBBackend tiledb_backend;
+    tiledb_backend.edf_to_array(mrn);
   }
   else
   {

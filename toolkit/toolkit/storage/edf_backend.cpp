@@ -80,7 +80,7 @@ void EDFBackend::get_array_data(string mrn, int ch, int startOffset, int endOffs
     // clear buffer in case we didn't read as much as we expected to
     for (int i = bytes_read; i < nsamples; i++)
     {
-        buf[i] = 0.0;
+        buf(i) = 0.0;
     }
 }
 

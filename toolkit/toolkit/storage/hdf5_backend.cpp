@@ -6,7 +6,6 @@
 #define ATTR_NAME "metadata" // we store fs and nsamples here, all datasets have the same attribute name
 #define FS_IDX 0
 #define DATA_LEN_IDX 1
-#define CHUNK_SIZE 4000000 // 4 * 1 000 000 = 4MB chunks
 
 string HDF5Backend::mrn_to_array_name(string mrn)
 {
@@ -48,7 +47,7 @@ void HDF5Backend::get_array_data(string mrn, int ch, int start_offset, int end_o
   offset[0] = start_offset; // start_offset rows down
   offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
 
-  count[0] = end_offset - start_offset; // nsamples
+  count[0] = get_nsamples(start_offset, end_offset);
   count[1] = 1; // only ever get one column
 
   // TODO(joshblum): use this for downsampling
@@ -110,7 +109,7 @@ void HDF5Backend::edf_to_array(string mrn)
       offset[0] = start_offset; // start_offset rows down
       offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
 
-      count[0] = end_offset - start_offset; // nsamples
+      count[0] = end_offset - start_offset;
       count[1] = 1; // only ever get one column
 
       DataSpace memspace(DATA_RANK, count, NULL);

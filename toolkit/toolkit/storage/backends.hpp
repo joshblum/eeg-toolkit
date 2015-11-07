@@ -4,9 +4,13 @@
 #include <unordered_map>
 #include <armadillo>
 #include <string>
-#include "H5Cpp.h"
+#include <assert.h>
 #include "../config.hpp"
 #include "EDFlib/edflib.h"
+#include "H5Cpp.h"
+#include "TileDB/core/include/capis/tiledb.h"
+
+#define CHUNK_SIZE 4000000 // 4 * 1 000 000 = 4MB chunks
 
 using namespace std;
 using namespace arma;
@@ -21,14 +25,14 @@ class AbstractStorageBackend
     /*
      * Checks the `data_cache` for a specific mrn.
      * Returns a pointer to an `T` if it is present
-     * else `NULL`
+     * else `T()`
      */
     T get_cache(string mrn)
     {
       auto iter = data_cache.find(mrn);
       if (iter == data_cache.end())
       {
-        return NULL;
+        return T();
       } else {
         return iter->second;
       }
@@ -57,6 +61,21 @@ class AbstractStorageBackend
     virtual string mrn_to_array_name(string mrn) = 0;
 
   public:
+    /*
+     * Return the inclusive range from `start_offset` to `end_offset`
+     */
+    int get_nsamples(int start_offset, int end_offset)
+    {
+      assert(end_offset <= start_offset);
+      if (start_offset == end_offset)
+      {
+        return 0;
+      }
+      else
+      {
+        return end_offset - start_offset + 1;
+      }
+    }
     virtual int get_fs(string mrn) = 0;
     virtual int get_data_len(string mrn) = 0;
     virtual void load_array(string mrn) = 0;
@@ -92,6 +111,25 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
     void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
+};
+
+typedef pair<TileDB_CTX*, int> tiledb_cache_pair;
+
+class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
+{
+  protected:
+    string mrn_to_array_name(string mrn);
+    string mrn_to_filename(string mrn);
+    string get_workspace();
+
+  public:
+    int get_fs(string mrn);
+    int get_data_len(string mrn);
+    void load_array(string mrn);
+    void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
+    void close_array(string mrn);
+    void edf_to_array(string filename);
+    void edf_to_bin(string mrn, string path);
 };
 
 typedef BACKEND StorageBackend;

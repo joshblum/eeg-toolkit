@@ -3,7 +3,7 @@
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
 
-#define NUM_SAMPLES 10
+#define NSAMPLES 10
 
 void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
 {
@@ -14,9 +14,9 @@ void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
   printf("Spectrogram shape as_mat: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);
   printf("Sample data: [\n[ ");
-  for (int i = 0; i < NUM_SAMPLES; i++)
+  for (int i = 0; i < NSAMPLES; i++)
   {
-    for (int j = 0; j < NUM_SAMPLES; j++)
+    for (int j = 0; j < NSAMPLES; j++)
     {
       printf("%.5f, ", spec_mat(i, j));
     }
@@ -39,13 +39,13 @@ void compute_example(string mrn, float start_time, float end_time)
 
 void storage_example(string mrn)
 {
-  HDF5Backend hdf5_backend;
-  hdf5_backend.edf_to_array(mrn);
-  hdf5_backend.load_array(mrn);
-  frowvec buf = frowvec(NUM_SAMPLES);
-  cout << "fs: " << hdf5_backend.get_fs(mrn) << " data_len: " << hdf5_backend.get_data_len(mrn) << endl;
-  hdf5_backend.get_array_data(mrn, C3, 0, NUM_SAMPLES, buf);
-  for (int i = 0; i < NUM_SAMPLES; i++)
+  StorageBackend backend;
+  backend.edf_to_array(mrn);
+  backend.load_array(mrn);
+  cout << "fs: " << backend.get_fs(mrn) << " data_len: " << backend.get_data_len(mrn) << endl;
+  frowvec buf = frowvec(NSAMPLES);
+  backend.get_array_data(mrn, C3, 0, NSAMPLES - 1, buf);
+  for (int i = 0; i < NSAMPLES; i++)
   {
     cout << " " << buf(i);
   }
@@ -79,7 +79,8 @@ int main(int argc, char* argv[])
       start_time = 0.0;
       end_time = 4.0;
     }
-    printf("Using mrn: %s, start_time: %.2f, end_time %.2f\n", mrn.c_str(), start_time, end_time);
+    printf("Using mrn: %s, start_time: %.2f, end_time %.2f and backend: %s\n",
+        mrn.c_str(), start_time, end_time, TOSTRING(BACKEND));
 //    compute_example(mrn, start_time, end_time);
     storage_example(mrn);
   }

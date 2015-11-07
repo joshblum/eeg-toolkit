@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // backend config
-#define BACKEND HDF5Backend
+#define BACKEND TileDBBackend
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -108,8 +108,8 @@ typedef struct ch_diff
 } ch_diff_t;
 
 
-static const int NUM_CH = 4;
-const ch_diff_t DIFFERENCE_PAIRS[NUM_CH] =
+static const int NUM_DIFF = 4;
+const ch_diff_t DIFFERENCE_PAIRS[NUM_DIFF] =
 {
   // (FP1 - F7)
   // (F7 - T3)

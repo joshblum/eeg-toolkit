@@ -5,9 +5,12 @@ CXX = c++
 CSRC := storage/EDFlib/edflib.c
 CPPSRC := storage/edf_backend.cpp\
 					storage/hdf5_backend.cpp\
+					storage/tiledb_backend.cpp\
 					compute/helpers.cpp\
 					compute/eeg_spectrogram.cpp\
 					compute/eeg_change_point.cpp
+TILEDBLIBPATH := storage/TileDB/core/lib/release
+TILEDBLIBNAME := libtiledb.so
 WSSRC := $(CPPSRC)\
 					json11/json11.cpp\
 					ws_server.cpp
@@ -39,7 +42,9 @@ LDFLAGS := -lfftw3\
 					/usr/lib/x86_64-linux-gnu/libhdf5_hl.a\
 					/usr/lib/x86_64-linux-gnu/libhdf5.a\
 					-lz\
-					-ldl
+					-ldl\
+					-L$(TILEDBLIBPATH)\
+					-l:$(TILEDBLIBNAME)
 
 ifeq ($(DEBUG),1)
 	 CFLAGS += -O0\
