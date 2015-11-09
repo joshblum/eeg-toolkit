@@ -7,7 +7,7 @@
 #define ROW_NAME "samples"
 #define COL_NAME "channels"
 #define RANGE_SIZE 4
-#define CELL_SIZE (sizeof(int64_t) * 2 + sizeof(float)) // struct gets padded to 24 bytes
+#define CELL_SIZE (sizeof(int32_t) * 2 + sizeof(float)) // struct gets padded to 24 bytes
 
 string TileDBBackend::mrn_to_array_name(string mrn)
 {
@@ -80,8 +80,8 @@ void TileDBBackend::close_array(string mrn)
 // Use this to write binary TileDB file
 typedef struct cell
 {
-  int64_t x;
-  int64_t y;
+  int32_t x;
+  int32_t y;
   float sample;
 } cell_t;
 
@@ -171,7 +171,7 @@ void TileDBBackend::edf_to_array(string mrn)
   string workspace = get_workspace();
   string array_name = mrn_to_array_name(mrn);
   // csv of array schema
-  string array_schema_str = array_name + ",1," + ATTR_NAME + ",2," + COL_NAME + "," + ROW_NAME + ",0," + to_string(nsamples) + ",0," + to_string(nchannels) + ",float32,int64,*,column-major,*,*,*,*";
+  string array_schema_str = array_name + ",1," + ATTR_NAME + ",2," + COL_NAME + "," + ROW_NAME + ",0," + to_string(nsamples) + ",0," + to_string(nchannels) + ",float32,int32,*,column-major,*,*,*,*";
 
   // Initialize TileDB
   TileDB_CTX* tiledb_ctx;
