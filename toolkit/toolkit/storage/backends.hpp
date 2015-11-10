@@ -11,10 +11,19 @@
 #include "TileDB/core/include/capis/tiledb.h"
 
 #define CHUNK_SIZE 4000000 // 4 * 1 000 000 = 4MB chunks
+#define CELL_SIZE (sizeof(int32_t) * 2 + sizeof(float)) // struct gets padded to 24 bytes
 
 using namespace std;
 using namespace arma;
 using namespace H5;
+
+// Use this to write binary TileDB file
+typedef struct cell
+{
+  int32_t x;
+  int32_t y;
+  float sample;
+} cell_t;
 
 template <class T>
 class AbstractStorageBackend
@@ -119,7 +128,7 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
 {
   protected:
     string mrn_to_array_name(string mrn);
-    string mrn_to_filename(string mrn);
+    string mrn_to_filename(string mrn, string format);
     string get_workspace();
 
   public:
@@ -129,7 +138,6 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
     void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
-    void edf_to_bin(string mrn, string path);
 };
 
 typedef BACKEND StorageBackend;

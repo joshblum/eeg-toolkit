@@ -12,7 +12,7 @@
 #define BASEDIR "/home/ubuntu"
 #endif
 
-#define DATADIR BASEDIR"/eeg-data/"
+#define DATADIR BASEDIR"/eeg-data/eeg-data/"
 
 // websocket server config
 #define WS_NUM_THREADS 4

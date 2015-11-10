@@ -1,13 +1,10 @@
 #include "backends.hpp"
-#include <sys/stat.h>
-#include <fstream>
 
 #define DIM_NAME "__hide"
 #define ATTR_NAME "sample"
 #define ROW_NAME "samples"
 #define COL_NAME "channels"
 #define RANGE_SIZE 4
-#define CELL_SIZE (sizeof(int32_t) * 2 + sizeof(float)) // struct gets padded to 24 bytes
 
 string TileDBBackend::mrn_to_array_name(string mrn)
 {
@@ -18,12 +15,6 @@ string TileDBBackend::get_workspace()
 {
   return DATADIR;
 }
-
-string TileDBBackend::mrn_to_filename(string mrn)
-{
-  return DATADIR + mrn + ".bin";
-}
-
 
 int TileDBBackend::get_fs(string mrn)
 {
@@ -77,85 +68,6 @@ void TileDBBackend::close_array(string mrn)
   pop_cache(mrn);
 }
 
-// Use this to write binary TileDB file
-typedef struct cell
-{
-  int32_t x;
-  int32_t y;
-  float sample;
-} cell_t;
-
-
-void TileDBBackend::edf_to_bin(string mrn, string path)
-{
-  // don't convert if the file already exists.
-  struct stat buffer;
-  if (stat (path.c_str(), &buffer) == 0) {
-    cout << "File : " << path << " already exists." << endl;
-    return;
-  }
-
-  ofstream file;
-  file.open(path, ios::trunc|ios::binary);
-
-  EDFBackend edf_backend;
-  edf_backend.load_array(mrn);
-
-  int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_data_len(mrn);
-  int start_offset = 0;
-  int end_offset = min(nsamples, CHUNK_SIZE);
-
-  // write samples in chunks in a nchannels x CHUNK_SIZE matrix
-  fmat chunk_mat = fmat(nchannels, end_offset);
-  frowvec chunk_buf; // store samples from each channel here
-  int ch;
-  cell_t cell;
-
-  for (; end_offset <= nsamples; end_offset = min(end_offset + CHUNK_SIZE, nsamples))
-  {
-    // for the last chunk
-    if (end_offset - start_offset != CHUNK_SIZE)
-    {
-      chunk_mat.resize(nchannels, end_offset);
-    }
-
-    for (int i = 0; i < nchannels; i++)
-    {
-      chunk_buf = chunk_mat.row(i);
-      ch = CHANNEL_ARRAY[i];
-      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, chunk_buf);
-      chunk_mat.row(i) = chunk_buf;
-    }
-
-    // write chunk_mat to file
-    for (uword i = 0; i < chunk_mat.n_rows; i++)
-    {
-      for (uword j = 0; j < chunk_mat.n_cols; j++)
-      {
-        // x coord, y coord, attribute
-        cell.x = i;
-        cell.y = start_offset + j;
-        cell.sample = chunk_mat(i, j);
-        file.write((char*) &cell, CELL_SIZE);
-      }
-    }
-
-    if (!((end_offset / CHUNK_SIZE) % 10)) // print for even channels every 10 chunks (40MB)
-    {
-      cout << "Wrote " << end_offset / CHUNK_SIZE << " chunks to file." << endl;
-    }
-
-    // ensure we write the last part of the samples
-    if (end_offset == nsamples)
-    {
-      break;
-    }
-    start_offset = end_offset;
-  }
-  file.close();
-}
-
 void TileDBBackend::edf_to_array(string mrn)
 {
   EDFBackend edf_backend;
@@ -165,7 +77,6 @@ void TileDBBackend::edf_to_array(string mrn)
   int nsamples = edf_backend.get_data_len(mrn);
   int fs = edf_backend.get_fs(mrn); // TODO(joshblum) store this in TileDB metadata when it's implemented
   cout << "Writing " << nsamples << " samples with fs=" << fs << "." << endl;
-  edf_backend.close_array(mrn);
 
   string group = "";
   string workspace = get_workspace();
@@ -185,22 +96,55 @@ void TileDBBackend::edf_to_array(string mrn)
     return;
   }
 
-  string path = mrn_to_filename(mrn);
-  cout << "Converting to file at: " << path << endl;
-  edf_to_bin(mrn, path);
-  string format = "bin";
-  char delimiter = ',';
-  cout << "Loading: " << path << " into TileDB." << endl;
-  if (tiledb_array_load(tiledb_ctx, workspace.c_str(), group.c_str(),
-                             array_name.c_str(), path.c_str(),
-                             format.c_str(), delimiter))
+  cout << "Opening TileDB array." << endl;
+  const char* mode = "a";
+  int array_id = tiledb_array_open(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str(), mode);
+
+  cout << "Writing cells to TileDB." << endl;
+  int ch, start_offset, end_offset;
+  cell_t cell;
+  for (int i = 0; i < nchannels; i++)
   {
-    tiledb_ctx_finalize(tiledb_ctx);
-    return;
+    ch = CHANNEL_ARRAY[i];
+    start_offset = 0;
+    end_offset = min(nsamples, CHUNK_SIZE);
+    frowvec chunk_buf = frowvec(end_offset); // store samples from each channel here
+
+    // read chunks from each signal and write them
+    for (; end_offset <= nsamples; end_offset = min(end_offset + CHUNK_SIZE, nsamples))
+    {
+      if (end_offset - start_offset != CHUNK_SIZE) {
+        chunk_buf.resize(end_offset - start_offset);
+      }
+      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, chunk_buf);
+
+      // write chunk_mat to file
+      for (uword i = 0; i < chunk_buf.n_elem; i++)
+      {
+        // x coord, y coord, attribute
+        cell.x = CH_REVERSE_IDX[ch];
+        cell.y = start_offset + i;
+        cell.sample = chunk_buf(i);
+        tiledb_cell_write_sorted(tiledb_ctx, array_id, &cell);
+      }
+
+      start_offset = end_offset;
+      // ensure we write the last part of the samples
+      if (end_offset == nsamples)
+      {
+        break;
+      }
+
+      if (!(ch % 2 || (end_offset / CHUNK_SIZE) % 10)) // print for even channels every 10 chunks (40MB)
+      {
+        cout << "Wrote " << end_offset / CHUNK_SIZE << " chunks for ch: " << ch << endl;
+      }
+    }
   }
-  cout << "Conversion complete." << endl;
 
   // Finalize TileDB
+  tiledb_array_close(tiledb_ctx, array_id);
   tiledb_ctx_finalize(tiledb_ctx);
+  cout << "Conversion complete." << endl;
 }
 

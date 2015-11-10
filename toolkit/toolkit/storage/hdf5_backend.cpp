@@ -92,19 +92,23 @@ void HDF5Backend::edf_to_array(string mrn)
   data_dims[1] = nchannels;
   DataSpace dataspace(DATA_RANK, data_dims);
   DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
-
-  frowvec buf = frowvec(nsamples);
+  int ch, start_offset, end_offset;
   hsize_t offset[DATA_RANK], count[DATA_RANK];
-  int start_offset, end_offset;
 
   for (int i = 0; i < nchannels; i++)
   {
-    int ch = CHANNEL_ARRAY[i];
+    ch = CHANNEL_ARRAY[i];
     start_offset = 0;
+    end_offset = min(nsamples, CHUNK_SIZE);
+    frowvec chunk_buf = frowvec(end_offset);
+
     // read chunks from each signal and write them
-    for (end_offset = min(nsamples, CHUNK_SIZE); end_offset <= nsamples; end_offset = min(end_offset + CHUNK_SIZE, nsamples))
+    for (; end_offset <= nsamples; end_offset = min(end_offset + CHUNK_SIZE, nsamples))
     {
-      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, buf);
+      if (end_offset - start_offset != CHUNK_SIZE) {
+        chunk_buf.resize(end_offset - start_offset);
+      }
+      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, chunk_buf);
 
       offset[0] = start_offset; // start_offset rows down
       offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
@@ -116,7 +120,7 @@ void HDF5Backend::edf_to_array(string mrn)
       dataspace = dataset.getSpace();
       dataspace.selectHyperslab(H5S_SELECT_SET, count, offset);
 
-      dataset.write(buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
+      dataset.write(chunk_buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
 
       start_offset = end_offset;
       // ensure we write the last part of the samples
