@@ -34,11 +34,13 @@ function redrawSpectrograms() {
  */
 function Spectrogram(id) {
     this.id = id;
+    this.specContainer = getElementById("specContainer", id);
     this.specView = getElementById("spectrogram", id);
     this.specTimeScale = getElementById("specTimeScale", id);
     this.specFrequencyScale = getElementById("specFreqScale", id);
     this.specDataView = getElementById("specDataView", id);
     this.progressBar = getElementById("progressBar", id);
+    this.annotation = new Annotation(this.specContainer);
 
     this.gl = null; // the WebGL instance
 
@@ -116,10 +118,10 @@ Spectrogram.prototype.addListeners = function() {
     window.addEventListener("resize", this.updateCanvasResolutions, false);
     this.updateCanvasResolutions();
     var self = this;
-    this.specView.onwheel = function(wheel) {
+    this.specContainer.onwheel = function(wheel) {
         self.onwheel(wheel);
     };
-    this.specView.onmousemove = function(mouse) {
+    this.specContainer.onmousemove = function(mouse) {
         self.onmousemove(mouse);
     };
 };
@@ -624,7 +626,7 @@ Spectrogram.prototype.onwheel = function(wheel) {
         this.specViewSize.maxT += deltaT;
     }
     wheel.preventDefault();
-    this.specView.onmousemove(wheel);
+    this.specContainer.onmousemove(wheel);
     var self = this;
     window.requestAnimationFrame(function() {
         self.drawScene();

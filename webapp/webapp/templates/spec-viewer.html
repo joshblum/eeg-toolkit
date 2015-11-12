@@ -2,7 +2,9 @@
 {% block title %} EEG Spectrogram Viewer {% endblock %}
 
 {% block styles %}
+<link type="text/css" rel="stylesheet" href="/static/css/leaflet.css" />
 <link type="text/css" rel="stylesheet" href="/static/css/spec-viewer.css">
+<link type="text/css" rel="stylesheet" href="/static/css/annotation.css">
 {% endblock %}
 
 {% block body %}
@@ -38,38 +40,19 @@
 
   </form>
 </div>
-<div id="specContainer-LL" class="specContainer">
-    <canvas id="spectrogram-LL" class="spectrogram"></canvas>
-    <div class="specView specTitleView">LL</div>
-    <div id="specDataView-LL" class="specView specDataView">NaN</div>
-    <progress id="progressBar-LL" class="progressBar" hidden="True"></progress>
-    <canvas id="specFreqScale-LL" class="specFreqScale"></canvas>
-    <canvas id="specTimeScale-LL" class="specTimeScale"></canvas>
-</div>
-<div id="specContainer-LP" class="specContainer">
-    <canvas id="spectrogram-LP" class="spectrogram"></canvas>
-    <div class="specView specTitleView">LP</div>
-    <div id="specDataView-LP" class="specView specDataView">NaN</div>
-    <progress id="progressBar-LP" class="progressBar" hidden="True"></progress>
-    <canvas id="specFreqScale-LP" class="specFreqScale"></canvas>
-    <canvas id="specTimeScale-LP" class="specTimeScale"></canvas>
-</div>
-<div id="specContainer-RP" class="specContainer">
-    <canvas id="spectrogram-RP" class="spectrogram"></canvas>
-    <div class="specView specTitleView">RP</div>
-    <div id="specDataView-RP" class="specView specDataView">NaN</div>
-    <progress id="progressBar-RP" class="progressBar" hidden="True"></progress>
-    <canvas id="specFreqScale-RP" class="specFreqScale"></canvas>
-    <canvas id="specTimeScale-RP" class="specTimeScale"></canvas>
-</div>
-<div id="specContainer-RL" class="specContainer">
-    <canvas id="spectrogram-RL" class="spectrogram"></canvas>
-    <div class="specView specTitleView">RL</div>
-    <div id="specDataView-RL" class="specView specDataView">NaN</div>
-    <progress id="progressBar-RL" class="progressBar" hidden="True"></progress>
-    <canvas id="specFreqScale-RL" class="specFreqScale"></canvas>
-    <canvas id="specTimeScale-RL" class="specTimeScale"></canvas>
-</div>
+
+{% with spectrogram_id="LL" %}
+  {% include "spectrogram.html" %}
+{% endwith %}
+{% with spectrogram_id="LP" %}
+  {% include "spectrogram.html" %}
+{% endwith %}
+{% with spectrogram_id="RP" %}
+  {% include "spectrogram.html" %}
+{% endwith %}
+{% with spectrogram_id="RL" %}
+  {% include "spectrogram.html" %}
+{% endwith %}
 
 <!-- Modal Structure -->
 <div id="settingsModal" class="modal">
@@ -317,8 +300,14 @@
       vTextureCoord = aTextureCoord;
   }
 </script>
+<script src="/static/js/leaflet.js"></script>
+<script src="/static/js/d3.min.js"></script>
+<script src="/static/js/clipper_unminified.js"></script>
+<script src="/static/js/concavehull.js"></script>
+<script src="/static/js/leaflet.freedraw.js"></script>
 <script src="/static/js/specsize.js"></script>
 <script src="/static/js/spectrogram.js"></script>
 <script src="/static/js/communication.js"></script>
 <script src="/static/js/spec-viewer.js"></script>
+<script src="/static/js/annotation.js"></script>
 {% endblock %}
