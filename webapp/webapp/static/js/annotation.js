@@ -39,7 +39,6 @@ function Annotation(el) {
 
   // add the free drawing layer
   this.map.addLayer(this.freeDraw);
-//  d3.select($el[0]).on('keyup', this.keyup);
 }
 
 Annotation.prototype.exportPolygons = function() {
@@ -75,6 +74,3 @@ Annotation.prototype.importPolygons = function(polygons) {
     self.freeDraw.options.simplifyPolygon = true;
 }
 
-//Annotation.prototype.keyup = function() {
-//    freeDraw.setMode(L.FreeDraw.MODES.CREATE | L.FreeDraw.MODES.EDIT | L.FreeDraw.MODES.DELETE)
-//}
