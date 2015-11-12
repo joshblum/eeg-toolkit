@@ -205,17 +205,16 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
 
   // should this just move to the spec_params struct?
-  int startOffset = hours_to_nsamples(spec_params->fs, spec_params->start_time);
-  int endOffset = hours_to_nsamples(spec_params->fs, spec_params->end_time);
-
+  int start_offset = hours_to_nsamples(spec_params->fs, spec_params->start_time);
+  int end_offset = hours_to_nsamples(spec_params->fs, spec_params->end_time) - 1; // exclusive range
   frowvec vec1 = frowvec(nsamples);
   frowvec vec2 = frowvec(nsamples);
-  spec_params->backend->get_array_data(spec_params->mrn, ch_idx1, startOffset, endOffset, vec1);
+  spec_params->backend->get_array_data(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    spec_params->backend->get_array_data(spec_params->mrn, ch_idx2, startOffset, endOffset, vec2);
+    spec_params->backend->get_array_data(spec_params->mrn, ch_idx2, start_offset, end_offset, vec2);
     frowvec diff = vec2 - vec1;
 
     // fill in the spec matrix with fft values

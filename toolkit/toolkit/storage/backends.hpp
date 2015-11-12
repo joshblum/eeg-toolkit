@@ -70,21 +70,6 @@ class AbstractStorageBackend
     virtual string mrn_to_array_name(string mrn) = 0;
 
   public:
-    /*
-     * Return the inclusive range from `start_offset` to `end_offset`
-     */
-    int get_nsamples(int start_offset, int end_offset)
-    {
-      assert(end_offset <= start_offset);
-      if (start_offset == end_offset)
-      {
-        return 0;
-      }
-      else
-      {
-        return end_offset - start_offset + 1;
-      }
-    }
     virtual int get_fs(string mrn) = 0;
     virtual int get_data_len(string mrn) = 0;
     virtual void load_array(string mrn) = 0;

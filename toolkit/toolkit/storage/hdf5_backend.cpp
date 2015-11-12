@@ -47,7 +47,7 @@ void HDF5Backend::get_array_data(string mrn, int ch, int start_offset, int end_o
   offset[0] = start_offset; // start_offset rows down
   offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
 
-  count[0] = get_nsamples(start_offset, end_offset);
+  count[0] = buf.n_elem;
   count[1] = 1; // only ever get one column
 
   // TODO(joshblum): use this for downsampling

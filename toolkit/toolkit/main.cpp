@@ -81,8 +81,8 @@ int main(int argc, char* argv[])
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f and backend: %s\n",
         mrn.c_str(), start_time, end_time, TOSTRING(BACKEND));
-//    compute_example(mrn, start_time, end_time);
-    storage_example(mrn);
+    compute_example(mrn, start_time, end_time);
+//    storage_example(mrn);
   }
   else
   {

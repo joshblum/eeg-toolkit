@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // backend config
-#define BACKEND TileDBBackend
+#define BACKEND HDF5Backend
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
