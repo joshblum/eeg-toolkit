@@ -15,7 +15,6 @@
 #define DATADIR BASEDIR"/eeg-data/eeg-data/"
 
 // websocket server config
-#define WS_NUM_THREADS 4
 #define WS_DEFAULT_PORT 8080
 
 // spectrogram config

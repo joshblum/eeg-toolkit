@@ -1,4 +1,6 @@
 #include <armadillo>
+#include <thread>
+#include <algorithm>
 
 #include "wslib/server_ws.hpp"
 #include "config.hpp"
@@ -12,7 +14,6 @@ using namespace arma;
 using namespace std;
 using namespace json11;
 
-#define TEXT_OPCODE 129
 #define BINARY_OPCODE 130
 
 typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
@@ -186,7 +187,8 @@ int main(int argc, char* argv[])
   }
 
   // WebSocket (WS)-server at port using WS_NUM_THREADS threads
-  WsServer server(port, WS_NUM_THREADS);
+  int num_threads = max((int) thread::hardware_concurrency() - 1, 1);
+  WsServer server(port, num_threads);
 
   auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 
@@ -223,9 +225,9 @@ int main(int argc, char* argv[])
   };
 
 
-  thread server_thread([&server, port]()
+  thread server_thread([&server, port, num_threads]()
   {
-    cout << "WebSocket Server started at port: " << port << " and using backend: " << TOSTRING(BACKEND) << endl;
+    cout << "WebSocket Server started at port: " << port << " using " << num_threads << " threads and backend: " << TOSTRING(BACKEND) << endl;
     // Start WS-server
     server.start();
   });
