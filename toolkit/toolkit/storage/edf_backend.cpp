@@ -1,4 +1,5 @@
 #include "backends.hpp"
+#include <exception>
 
 #include <armadillo>
 #include <string>
@@ -18,20 +19,38 @@ string EDFBackend::mrn_to_array_name(string mrn)
 
 int EDFBackend::get_fs(string mrn)
 {
+    if (is_cached_array(mrn))
+    {
+      throw NotImplementedError();
+    }
     edf_hdr_struct* hdr = get_cache(mrn);
     return ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
 }
 
 int EDFBackend::get_array_len(string mrn)
 {
+    if (is_cached_array(mrn))
+    {
+      throw NotImplementedError();
+    }
+
     edf_hdr_struct* hdr = get_cache(mrn);
     // assume all signals have a uniform sample rate
     return hdr->signalparam[0].smp_in_file;
 }
 
+void EDFBackend::create_array(string mrn, int nrows, int ncols)
+{
+  throw NotImplementedError();
+}
+
 void EDFBackend::open_array(string mrn)
 {
-    if (in_cache(mrn)) {
+    if (is_cached_array(mrn))
+    {
+      throw NotImplementedError();
+    }
+    if (!in_cache(mrn)) {
         edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
         string filename = mrn_to_array_name(mrn);
         if (edfopen_file_readonly(filename.c_str(), hdr, EDFLIB_DO_NOT_READ_ANNOTATIONS))
@@ -68,6 +87,10 @@ void EDFBackend::open_array(string mrn)
 void EDFBackend::read_array(string mrn, int ch, int startOffset, int endOffset, frowvec& buf)
 
 {
+    if (is_cached_array(mrn))
+    {
+      throw NotImplementedError();
+    }
     edf_hdr_struct* hdr = get_cache(mrn);
     int hdl = hdr->handle;
     if (edfseek(hdl, ch, (long long) startOffset,  EDFSEEK_SET) == -1)
@@ -89,8 +112,22 @@ void EDFBackend::read_array(string mrn, int ch, int startOffset, int endOffset, 
     }
 }
 
+void EDFBackend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
+{
+  throw NotImplementedError();
+}
+
+void EDFBackend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
+{
+  throw NotImplementedError();
+}
+
 void EDFBackend::close_array(string mrn)
 {
+    if (is_cached_array(mrn))
+    {
+      throw NotImplementedError();
+    }
     if (in_cache(mrn))
     {
         edf_hdr_struct* hdr = get_cache(mrn);

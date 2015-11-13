@@ -32,6 +32,11 @@ int TileDBBackend::get_array_len(string mrn)
   return 84992; // TODO(joshblum) store this in TileDB metadata when it's implemented
 }
 
+void TileDBBackend::create_array(string mrn, int nrows, int ncols)
+{
+
+}
+
 void TileDBBackend::open_array(string mrn)
 {
   if (in_cache(mrn))
@@ -69,6 +74,14 @@ void TileDBBackend::read_array(string mrn, int ch, int start_offset, int end_off
       RANGE_SIZE, &dim_names, dim_names_num,
       &attribute_names, attribute_names_num,
       buf.memptr(), &cell_buf_size);
+}
+
+void TileDBBackend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
+{
+}
+
+void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
+{
 }
 
 void TileDBBackend::close_array(string mrn)

@@ -52,13 +52,32 @@ void HDF5Backend::open_array(string mrn)
 void HDF5Backend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 {
   DataSet dataset = get_cache(mrn);
-  hsize_t offset[DATA_RANK], count[DATA_RANK], stride[DATA_RANK], block[DATA_RANK];
+  hsize_t offset[DATA_RANK], count[DATA_RANK];
 
   offset[0] = start_offset; // start_offset rows down
   offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
 
-  count[0] = buf.n_elem;
-  count[1] = 1; // only ever get one column
+  count[0] = end_offset - start_offset;
+  count[1] = buf.n_rows; // only ever get one column
+
+  _read_array(mrn, offset, count, buf.memptr());
+}
+
+void HDF5Backend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
+{
+  hsize_t offset[DATA_RANK], count[DATA_RANK];
+  offset[0] = start_offset; // start_offset rows down
+  offset[1] = 0; //  we want all columns
+
+  count[0] = end_offset - start_offset;
+  count[1] = buf.n_rows;
+  _read_array(mrn, offset, count, buf.memptr());
+}
+
+void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf)
+{
+  DataSet dataset = get_cache(mrn);
+  hsize_t stride[DATA_RANK], block[DATA_RANK];
 
   // TODO(joshblum): use this for downsampling
   stride[0] = 1;
@@ -71,7 +90,39 @@ void HDF5Backend::read_array(string mrn, int ch, int start_offset, int end_offse
   DataSpace dataspace = dataset.getSpace();
   dataspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
 
-  dataset.read(buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
+  dataset.read(buf, PredType::NATIVE_FLOAT, memspace, dataspace);
+}
+
+void HDF5Backend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
+{
+  DataSet dataset = get_cache(mrn);
+  hsize_t offset[DATA_RANK], count[DATA_RANK];
+
+  offset[0] = start_offset; // start_offset rows down
+  offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
+
+  count[0] = end_offset - start_offset;
+  count[1] = buf.n_rows;
+
+  DataSpace dataspace = dataset.getSpace();
+  dataspace.selectHyperslab(H5S_SELECT_SET, count, offset);
+
+  DataSpace memspace(DATA_RANK, count, NULL);
+  dataset.write(buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
+
+}
+
+void HDF5Backend::create_array(string mrn, int nrows, int ncols)
+{
+  string array_name = mrn_to_array_name(mrn);
+  H5File file(array_name, H5F_ACC_TRUNC);
+
+  // Create the dataset of the correct dimensions
+  hsize_t data_dims[DATA_RANK];
+  data_dims[0] = nrows;
+  data_dims[1] = ncols;
+  DataSpace dataspace(DATA_RANK, data_dims);
+  DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
 }
 
 void HDF5Backend::close_array(string mrn)
@@ -80,7 +131,6 @@ void HDF5Backend::close_array(string mrn)
   dataset.close();
   pop_cache(mrn);
 }
-
 
 void HDF5Backend::edf_to_array(string mrn)
 {
@@ -93,18 +143,11 @@ void HDF5Backend::edf_to_array(string mrn)
 
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
 
-  string array_name = mrn_to_array_name(mrn);
-  H5File file(array_name, H5F_ACC_TRUNC);
+  create_array(mrn, nsamples, nchannels);
+  open_array(mrn);
+  DataSet dataset = get_cache(mrn);
 
-  // Create the dataset of the correct dimensions
-  hsize_t data_dims[DATA_RANK];
-  data_dims[0] = nsamples;
-  data_dims[1] = nchannels;
-  DataSpace dataspace(DATA_RANK, data_dims);
-  DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
   int ch, start_offset, end_offset;
-  hsize_t offset[DATA_RANK], count[DATA_RANK];
-
   for (int i = 0; i < nchannels; i++)
   {
     ch = CHANNEL_ARRAY[i];
@@ -119,18 +162,8 @@ void HDF5Backend::edf_to_array(string mrn)
         chunk_buf.resize(end_offset - start_offset);
       }
       edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
-
-      offset[0] = start_offset; // start_offset rows down
-      offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
-
-      count[0] = end_offset - start_offset;
-      count[1] = 1; // only ever get one column
-
-      DataSpace memspace(DATA_RANK, count, NULL);
-      dataspace = dataset.getSpace();
-      dataspace.selectHyperslab(H5S_SELECT_SET, count, offset);
-
-      dataset.write(chunk_buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
+      fmat chunk_mat = conv_to<fmat>::from(chunk_buf);
+      write_array(mrn, ch, start_offset, end_offset, chunk_mat);
 
       start_offset = end_offset;
       // ensure we write the last part of the samples

@@ -16,6 +16,14 @@ using namespace std;
 using namespace arma;
 using namespace H5;
 
+class NotImplementedError: public exception
+{
+  virtual const char* what() const throw()
+  {
+    return "Not Implemented!";
+  }
+};
+
 // Use this to write binary TileDB file
 typedef struct cell
 {
@@ -30,6 +38,7 @@ class AbstractStorageBackend
   protected:
     // mrn to array obj pointer
     unordered_map<string, T> data_cache;
+    char* cache_tag = "-cached";
 
     bool in_cache(string mrn)
     {
@@ -75,11 +84,24 @@ class AbstractStorageBackend
 
     virtual string mrn_to_array_name(string mrn) = 0;
 
+    bool is_cached_array(string array_name)
+    {
+      return array_name.find(cache_tag) != string::npos;
+    }
+
   public:
+    string mrn_to_cached_array_name(string mrn)
+    {
+      return mrn + cache_tag;
+    }
+
     virtual int get_fs(string mrn) = 0;
     virtual int get_array_len(string mrn) = 0;
+    virtual void create_array(string mrn, int nrows, int ncols) = 0;
     virtual void open_array(string mrn) = 0;
     virtual void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf) = 0;
+    virtual void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf) = 0;
+    virtual void read_array(string mrn, int start_offset, int end_offset, fmat& buf) = 0;
     virtual void close_array(string mrn) = 0;
 };
 
@@ -91,8 +113,11 @@ class EDFBackend: public AbstractStorageBackend<edf_hdr_struct*>
   public:
     int get_fs(string mrn);
     int get_array_len(string mrn);
+    void create_array(string mrn, int nrows, int ncols);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
+    void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
+    void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
 };
@@ -103,12 +128,16 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
   protected:
     string mrn_to_array_name(string mrn);
     int get_array_metadata(string mrn, int metadata_idx);
+    void _read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf);
 
   public:
     int get_fs(string mrn);
     int get_array_len(string mrn);
+    void create_array(string mrn, int nrows, int ncols);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
+    void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
+    void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
 };
@@ -125,8 +154,11 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
   public:
     int get_fs(string mrn);
     int get_array_len(string mrn);
+    void create_array(string mrn, int nrows, int ncols);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
+    void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
+    void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
 };
