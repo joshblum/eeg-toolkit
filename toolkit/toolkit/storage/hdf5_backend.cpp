@@ -52,6 +52,10 @@ void HDF5Backend::create_array(string mrn, int nrows, int ncols)
 
 void HDF5Backend::open_array(string mrn)
 {
+  if (!array_exists(mrn)) {
+    cout << "Error array " << mrn << " does not exist!" << endl;
+    exit(1);
+  }
   if (in_cache(mrn))
   {
     return;
@@ -127,9 +131,11 @@ void HDF5Backend::write_array(string mrn, int ch, int start_offset, int end_offs
 
 void HDF5Backend::close_array(string mrn)
 {
-  DataSet dataset = get_cache(mrn);
-  dataset.close();
-  pop_cache(mrn);
+  if (in_cache(mrn)) {
+    DataSet dataset = get_cache(mrn);
+    dataset.close();
+    pop_cache(mrn);
+  }
 }
 
 void HDF5Backend::edf_to_array(string mrn)

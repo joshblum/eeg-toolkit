@@ -86,9 +86,12 @@ void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_of
 
 void TileDBBackend::close_array(string mrn)
 {
-  tiledb_cache_pair pair = get_cache(mrn);
-  tiledb_array_close(pair.first, pair.second);
-  pop_cache(mrn);
+  if (in_cache(mrn))
+  {
+    tiledb_cache_pair pair = get_cache(mrn);
+    tiledb_array_close(pair.first, pair.second);
+    pop_cache(mrn);
+  }
 }
 
 void TileDBBackend::edf_to_array(string mrn)

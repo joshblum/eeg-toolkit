@@ -23,6 +23,7 @@ int EDFBackend::get_fs(string mrn)
     {
       throw NotImplementedError();
     }
+
     edf_hdr_struct* hdr = get_cache(mrn);
     return ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
 }
@@ -50,6 +51,7 @@ void EDFBackend::open_array(string mrn)
     {
       throw NotImplementedError();
     }
+
     if (!in_cache(mrn)) {
         edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
         string filename = mrn_to_array_name(mrn);
@@ -100,6 +102,7 @@ void EDFBackend::read_array(string mrn, int ch, int startOffset, int endOffset, 
 
     int nsamples = endOffset - startOffset;
     int bytes_read = edfread_physical_samples(hdl, ch, nsamples, buf.memptr());
+
     if (bytes_read == -1)
     {
         cout << "error: edf_read_physical_samples()" << endl;
@@ -128,6 +131,7 @@ void EDFBackend::close_array(string mrn)
     {
       throw NotImplementedError();
     }
+
     if (in_cache(mrn))
     {
         edf_hdr_struct* hdr = get_cache(mrn);

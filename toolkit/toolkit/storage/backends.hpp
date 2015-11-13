@@ -58,7 +58,8 @@ class AbstractStorageBackend
       auto iter = data_cache.find(mrn);
       if (iter == data_cache.end())
       {
-        return T();
+        open_array(mrn);
+        return get_cache(mrn);
       } else {
         return iter->second;
       }
