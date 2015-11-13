@@ -1,5 +1,11 @@
 #include "backends.hpp"
 
+#include<string>
+#include<armadillo>
+
+using namespace std;
+using namespace arma;
+
 #define DATA_RANK 2
 #define ATTR_RANK 1
 #define NUM_ATTR 2
@@ -31,8 +37,12 @@ int HDF5Backend::get_data_len(string mrn)
   return get_array_metadata(mrn, DATA_LEN_IDX);
 }
 
-void HDF5Backend::load_array(string mrn)
+void HDF5Backend::open_array(string mrn)
 {
+  if (in_cache(mrn))
+  {
+    return;
+  }
   string array_name = mrn_to_array_name(mrn);
   H5File file(array_name, H5F_ACC_RDWR);
   DataSet dataset = file.openDataSet(mrn);
@@ -75,7 +85,7 @@ void HDF5Backend::close_array(string mrn)
 void HDF5Backend::edf_to_array(string mrn)
 {
   EDFBackend edf_backend;
-  edf_backend.load_array(mrn);
+  edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
   int nsamples = edf_backend.get_data_len(mrn);

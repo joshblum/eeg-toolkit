@@ -64,3 +64,4 @@ pip-delete-this-directory.txt
 main
 ws_server
 edf_converter
+precompute_spectrogram

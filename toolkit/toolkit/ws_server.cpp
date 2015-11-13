@@ -18,8 +18,6 @@ using namespace json11;
 
 typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
 
-string CH_NAME_MAP[] = {"LL", "LP", "RP", "RL"};
-
 void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
                   string msg_type, Json content, float* data, size_t data_size)
 {

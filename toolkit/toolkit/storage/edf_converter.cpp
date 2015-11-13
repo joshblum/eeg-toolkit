@@ -1,6 +1,9 @@
+#include <string>
 #include "backends.hpp"
 #include <sys/stat.h>
 #include <fstream>
+
+using namespace std;
 
 string mrn_to_filename(string mrn, string format)
 {
@@ -27,7 +30,7 @@ void edf_to_file(string mrn, string path, string type)
   }
 
   EDFBackend edf_backend;
-  edf_backend.load_array(mrn);
+  edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
   int nsamples = edf_backend.get_data_len(mrn);
@@ -76,19 +79,22 @@ void edf_to_file(string mrn, string path, string type)
   file.close();
 }
 
-void edf_to_csv(string mrn) {
+void edf_to_csv(string mrn)
+{
   string type = "csv";
   string path = mrn_to_filename(mrn, type);
   edf_to_file(mrn, path, type);
 }
 
-void edf_to_bin(string mrn) {
+void edf_to_bin(string mrn)
+{
   string type = "bin";
   string path = mrn_to_filename(mrn, type);
   edf_to_file(mrn, path, type);
 }
 
-void convert_to_array(string mrn, string backend_name) {
+void convert_to_array(string mrn, string backend_name)
+{
   if (backend_name == "HDF5Backend")
   {
     HDF5Backend hdf5_backend;
@@ -134,7 +140,7 @@ int main(int argc, char* argv[])
   }
   else
   {
-    cout << "\nusage: main <mrn> <backend_name>\n" << endl;
+    cout << "\nusage: ./edf_converter <mrn> <backend_name>\n" << endl;
   }
   return 1;
 }

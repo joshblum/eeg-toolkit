@@ -1,5 +1,11 @@
 #include "backends.hpp"
 
+#include<string>
+#include<armadillo>
+
+using namespace std;
+using namespace arma;
+
 #define DIM_NAME "__hide"
 #define ATTR_NAME "sample"
 #define ROW_NAME "samples"
@@ -26,8 +32,12 @@ int TileDBBackend::get_data_len(string mrn)
   return 84992; // TODO(joshblum) store this in TileDB metadata when it's implemented
 }
 
-void TileDBBackend::load_array(string mrn)
+void TileDBBackend::open_array(string mrn)
 {
+  if (in_cache(mrn))
+  {
+    return;
+  }
   TileDB_CTX* tiledb_ctx;
   tiledb_ctx_init(tiledb_ctx);
   string group = "";
@@ -71,7 +81,7 @@ void TileDBBackend::close_array(string mrn)
 void TileDBBackend::edf_to_array(string mrn)
 {
   EDFBackend edf_backend;
-  edf_backend.load_array(mrn);
+  edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
   int nsamples = edf_backend.get_data_len(mrn);

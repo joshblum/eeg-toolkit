@@ -1,4 +1,4 @@
-.PHONY: clean main ws_server edf_converter installdeps
+.PHONY: clean main ws_server edf_converter precompute_spectrogram installdeps
 
 CXX = c++
 
@@ -11,17 +11,20 @@ CPPSRC := storage/edf_backend.cpp\
 					compute/eeg_change_point.cpp
 TILEDBLIBPATH := storage/TileDB/core/lib/release
 TILEDBLIBNAME := libtiledb.so
+
 WSSRC := $(CPPSRC)\
 					json11/json11.cpp\
 					ws_server.cpp
 MAINSRC := $(CPPSRC)\
 						main.cpp
+CONVERTSRC :=  $(wildcard storage/*.cpp)
+PRECOMPUTESRC := $(CPPSRC) compute/precompute_spectrogram.cpp
 
-CONVERTSRC := $(wildcard storage/*.cpp)
 OBJ := $(CSRC:.c=.o)
 WSOBJ := $(OBJ) $(WSSRC:.cpp=.o)
 MAINOBJ := $(OBJ) $(MAINSRC:.cpp=.o)
 CONVERTOBJ := $(OBJ) $(CONVERTSRC:.cpp=.o)
+PREOCMPUTEOBJ := $(OBJ) $(PRECOMPUTESRC:.cpp=.o)
 
 CFLAGS := -Wall\
 					-std=c++1y\
@@ -76,9 +79,13 @@ main: $(MAINOBJ)
 edf_converter: $(CONVERTOBJ)
 	$(CXX) -o $@ $(CONVERTOBJ) $(LDFLAGS)
 
+precompute_spectrogram: $(PREOCMPUTEOBJ)
+	$(CXX) -o $@ $(PREOCMPUTEOBJ) $(LDFLAGS)
+
 clean:
 	find . -type f -name '*.*~' -delete
 	find . -type f -name '*.[dSYM|o|d]' -delete
 	find . -type f -name ws_server -delete
 	find . -type f -name main -delete
 	find . -type f -name edf_converter -delete
+	find . -type f -name precompute_spectrogram -delete

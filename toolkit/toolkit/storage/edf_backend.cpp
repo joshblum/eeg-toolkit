@@ -1,5 +1,11 @@
 #include "backends.hpp"
 
+#include <armadillo>
+#include <string>
+
+using namespace std;
+using namespace arma;
+
 /*
  * Transform a medical record number (mrn) to a filename. This
  * should only be used for temporary testing before a real backend is
@@ -23,10 +29,9 @@ int EDFBackend::get_data_len(string mrn)
     return hdr->signalparam[0].smp_in_file;
 }
 
-void EDFBackend::load_array(string mrn)
+void EDFBackend::open_array(string mrn)
 {
-    edf_hdr_struct* cached_hdr = get_cache(mrn);
-    if (cached_hdr == NULL) {
+    if (in_cache(mrn)) {
         edf_hdr_struct* hdr = (edf_hdr_struct*) malloc(sizeof(edf_hdr_struct));
         string filename = mrn_to_array_name(mrn);
         if (edfopen_file_readonly(filename.c_str(), hdr, EDFLIB_DO_NOT_READ_ANNOTATIONS))
@@ -86,12 +91,12 @@ void EDFBackend::get_array_data(string mrn, int ch, int startOffset, int endOffs
 
 void EDFBackend::close_array(string mrn)
 {
-    edf_hdr_struct* hdr = get_cache(mrn);
-    if (hdr != NULL)
+    if (in_cache(mrn))
     {
+        edf_hdr_struct* hdr = get_cache(mrn);
         edfclose_file(hdr->handle);
         free(hdr);
+        pop_cache(mrn);
     }
-    pop_cache(mrn);
 }
 

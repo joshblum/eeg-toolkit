@@ -1,7 +1,13 @@
+#include <string>
+#include <armadillo>
+
 #include "storage/backends.hpp"
 #include "compute/helpers.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
+
+using namespace std;
+using namespace arma;
 
 #define NSAMPLES 10
 
@@ -41,7 +47,7 @@ void storage_example(string mrn)
 {
   StorageBackend backend;
   backend.edf_to_array(mrn);
-  backend.load_array(mrn);
+  backend.open_array(mrn);
   cout << "fs: " << backend.get_fs(mrn) << " data_len: " << backend.get_data_len(mrn) << endl;
   frowvec buf = frowvec(NSAMPLES);
   backend.get_array_data(mrn, C3, 0, NSAMPLES - 1, buf);
@@ -51,7 +57,6 @@ void storage_example(string mrn)
   }
   cout << endl;
 }
-
 
 int main(int argc, char* argv[])
 {
@@ -86,7 +91,7 @@ int main(int argc, char* argv[])
   }
   else
   {
-    cout << "\nusage: main <mrn> <start_time> <end_time>\n" << endl;
+    cout << "\nusage: ./main <mrn> <start_time> <end_time>\n" << endl;
   }
   return 1;
 }

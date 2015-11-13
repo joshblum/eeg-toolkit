@@ -38,8 +38,12 @@ int get_next_pow_2(unsigned int v)
   return v;
 }
 
-int hours_to_nsamples(int fs, float time)
+int hours_to_samples(int fs, float time)
 {
   return fs * 60 * 60 * time;
 }
 
+float samples_to_hours(int fs, int samples)
+{
+  return samples / (fs * 60.0 * 60.0);
+}

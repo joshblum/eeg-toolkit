@@ -1,5 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
+#include<string>
+
+using namespace std;
 
 // backend config
 #define BACKEND HDF5Backend
@@ -134,5 +137,7 @@ const ch_diff_t DIFFERENCE_PAIRS[NUM_DIFF] =
   // (T6 - O2)
   {.ch = RL, .ch_idx = {FP2, F8, T4, T6, O2}},
 };
+
+static const string CH_NAME_MAP[NUM_DIFF] = {"LL", "LP", "RP", "RL"};
 
 #endif // CONFIG_H

@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <armadillo>
 #include <string>
-#include <assert.h>
 #include "../config.hpp"
 #include "EDFlib/edflib.h"
 #include "H5Cpp.h"
@@ -31,6 +30,13 @@ class AbstractStorageBackend
   protected:
     // mrn to array obj pointer
     unordered_map<string, T> data_cache;
+
+    bool in_cache(string mrn)
+    {
+      auto iter = data_cache.find(mrn);
+      return iter != data_cache.end();
+    }
+
     /*
      * Checks the `data_cache` for a specific mrn.
      * Returns a pointer to an `T` if it is present
@@ -72,7 +78,7 @@ class AbstractStorageBackend
   public:
     virtual int get_fs(string mrn) = 0;
     virtual int get_data_len(string mrn) = 0;
-    virtual void load_array(string mrn) = 0;
+    virtual void open_array(string mrn) = 0;
     virtual void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf) = 0;
     virtual void close_array(string mrn) = 0;
 };
@@ -85,7 +91,7 @@ class EDFBackend: public AbstractStorageBackend<edf_hdr_struct*>
   public:
     int get_fs(string mrn);
     int get_data_len(string mrn);
-    void load_array(string mrn);
+    void open_array(string mrn);
     void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
@@ -101,7 +107,7 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
   public:
     int get_fs(string mrn);
     int get_data_len(string mrn);
-    void load_array(string mrn);
+    void open_array(string mrn);
     void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);
@@ -119,7 +125,7 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
   public:
     int get_fs(string mrn);
     int get_data_len(string mrn);
-    void load_array(string mrn);
+    void open_array(string mrn);
     void get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void close_array(string mrn);
     void edf_to_array(string filename);

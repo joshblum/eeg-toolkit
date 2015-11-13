@@ -47,7 +47,7 @@ float get_valid_end_time(int spec_len, int fs, float end_time)
 int get_nsamples(int spec_len, int fs, float duration)
 {
   // get number of samples required for our duration
-  return fmin(spec_len, hours_to_nsamples(fs, duration));
+  return fmin(spec_len, hours_to_samples(fs, duration));
 }
 
 int get_nblocks(int nsamples, int nfft, int shift)
@@ -70,7 +70,7 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* back
   spec_params->end_time = end_time;
   spec_params->backend = backend;
 
-  backend->load_array(mrn);
+  backend->open_array(mrn);
 
   spec_params->fs = backend->get_fs(mrn);
   int data_len = backend->get_data_len(mrn);
@@ -196,7 +196,7 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 
   // nfreqs x nblocks matrix
   spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
-  spec_mat.fill(0);
+  spec_mat.fill(0); // can we eliminate this?
 
   // write edf method to do diff on the fly?
   int nsamples = spec_params->nsamples;
@@ -205,8 +205,8 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
 
   // should this just move to the spec_params struct?
-  int start_offset = hours_to_nsamples(spec_params->fs, spec_params->start_time);
-  int end_offset = hours_to_nsamples(spec_params->fs, spec_params->end_time) - 1; // exclusive range
+  int start_offset = hours_to_samples(spec_params->fs, spec_params->start_time);
+  int end_offset = hours_to_samples(spec_params->fs, spec_params->end_time) - 1; // exclusive range
   frowvec vec1 = frowvec(nsamples);
   frowvec vec2 = frowvec(nsamples);
   spec_params->backend->get_array_data(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);
