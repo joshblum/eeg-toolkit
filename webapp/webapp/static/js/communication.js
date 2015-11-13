@@ -138,6 +138,8 @@ ws.onmessage = function(event) {
         var action = content.action;
         if (action === "new") {
             // First let"s setup the canvas
+            getElementById("specStartTime").value = content.startTime.toFixed(3);
+            getElementById("specEndTime").value = content.endTime.toFixed(3);
             spectrogram.newSpectrogram(content.nblocks,
                 content.nfreqs, content.fs,
                 content.startTime, content.endTime);
