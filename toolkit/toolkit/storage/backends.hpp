@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <armadillo>
 #include <string>
+#include <sys/stat.h>
+
 #include "../config.hpp"
 #include "EDFlib/edflib.h"
 #include "H5Cpp.h"
@@ -89,10 +91,19 @@ class AbstractStorageBackend
       return array_name.find(cache_tag) != string::npos;
     }
 
+
   public:
-    string mrn_to_cached_array_name(string mrn)
+    string mrn_to_cached_mrn_name(string mrn)
     {
       return mrn + cache_tag;
+    }
+
+    bool array_exists(string mrn)
+    {
+      // don't convert if the file already exists.
+      struct stat buffer;
+      string array_name = mrn_to_array_name(mrn);
+      return stat(array_name.c_str(), &buffer) == 0;
     }
 
     virtual int get_fs(string mrn) = 0;

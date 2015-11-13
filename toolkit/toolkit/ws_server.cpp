@@ -142,8 +142,17 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   send_spectrogram_new(server, connection, spec_params, ch_name);
 
   fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
+  string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn);
+
   unsigned long long start = getticks();
-  eeg_spectrogram(&spec_params, ch, spec_mat);
+  if (backend.array_exists(cached_mrn_name))
+  {
+    backend.open_array(cached_mrn_name);
+    backend.read_array(cached_mrn_name, spec_params.spec_start_offset, spec_params.spec_end_offset, spec_mat);
+    backend.close_array(cached_mrn_name);
+  } else {
+    eeg_spectrogram(&spec_params, ch, spec_mat);
+  }
   log_time_diff("eeg_spectrogram", start);
 
   send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);

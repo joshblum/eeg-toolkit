@@ -37,6 +37,19 @@ int HDF5Backend::get_array_len(string mrn)
   return get_array_metadata(mrn, DATA_LEN_IDX);
 }
 
+void HDF5Backend::create_array(string mrn, int nrows, int ncols)
+{
+  string array_name = mrn_to_array_name(mrn);
+  H5File file(array_name, H5F_ACC_TRUNC);
+
+  // Create the dataset of the correct dimensions
+  hsize_t data_dims[DATA_RANK];
+  data_dims[0] = nrows;
+  data_dims[1] = ncols;
+  DataSpace dataspace(DATA_RANK, data_dims);
+  DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
+}
+
 void HDF5Backend::open_array(string mrn)
 {
   if (in_cache(mrn))
@@ -110,19 +123,6 @@ void HDF5Backend::write_array(string mrn, int ch, int start_offset, int end_offs
   DataSpace memspace(DATA_RANK, count, NULL);
   dataset.write(buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
 
-}
-
-void HDF5Backend::create_array(string mrn, int nrows, int ncols)
-{
-  string array_name = mrn_to_array_name(mrn);
-  H5File file(array_name, H5F_ACC_TRUNC);
-
-  // Create the dataset of the correct dimensions
-  hsize_t data_dims[DATA_RANK];
-  data_dims[0] = nrows;
-  data_dims[1] = ncols;
-  DataSpace dataspace(DATA_RANK, data_dims);
-  DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
 }
 
 void HDF5Backend::close_array(string mrn)

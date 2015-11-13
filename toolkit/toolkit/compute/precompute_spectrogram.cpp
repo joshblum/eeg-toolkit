@@ -27,7 +27,7 @@ void precompute_spectrogram(string mrn)
 
 
   float start_time, end_time;
-  int start_offset, end_offset;
+  int start_offset, end_offset, cached_start_offset, cached_end_offset;
   fmat spec_mat;
 
   // Create array for writing
@@ -42,6 +42,8 @@ void precompute_spectrogram(string mrn)
   {
     start_offset = 0;
     end_offset = min(nsamples, chunk_size);
+    cached_start_offset = 0;
+    cached_end_offset = spec_params.nblocks;
 
     for (; end_offset <= nsamples; end_offset = min(end_offset + chunk_size, nsamples))
     {
@@ -49,10 +51,12 @@ void precompute_spectrogram(string mrn)
       end_time = samples_to_hours(fs, end_offset);
       spec_params = SpecParams(&backend, mrn, start_time, end_time);
       eeg_spectrogram(&spec_params, ch, spec_mat);
-
-      // TODO(joshblum): write output to array store
+      backend.write_array(cached_mrn_name, ALL, cached_start_offset, cached_end_offset, spec_mat);
 
       start_offset = end_offset;
+      cached_start_offset = cached_end_offset;
+      cached_end_offset += spec_params.nblocks;
+
       // ensure we write the last part of the samples
       if (end_offset == nsamples)
       {
@@ -65,6 +69,7 @@ void precompute_spectrogram(string mrn)
       }
     }
   }
+  backend.close_array(cached_mrn_name);
   backend.close_array(mrn);
 }
 

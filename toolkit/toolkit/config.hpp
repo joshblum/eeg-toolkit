@@ -48,6 +48,7 @@ typedef enum
   T4 = 19,
   T5 = 20,
   T6 = 21,
+  ALL = 22,
 } ch_idx_t;
 
 static const int NCHANNELS = 16;
@@ -74,7 +75,7 @@ static const int CHANNEL_ARRAY[NCHANNELS] = {
 // Other array stores won't skip columns though, so we use
 // this table to convert a channel (e.g. T6 = 21) to an
 // index in a different array store.
-static const int CH_REVERSE_IDX[22] = {
+static const int CH_REVERSE_IDX[23] = {
   0, // C3 = 0,
   1, // C4 = 1,
   2, // O1 = 2,
@@ -97,6 +98,7 @@ static const int CH_REVERSE_IDX[22] = {
   13, // T4 = 19,
   14, // T5 = 20,
   15, // T6 = 21,
+  0, // ALL = 22,
 };
 
 static const int NUM_DIFFS = 5;
