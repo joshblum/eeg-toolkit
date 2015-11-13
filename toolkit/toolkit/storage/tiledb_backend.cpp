@@ -27,7 +27,7 @@ int TileDBBackend::get_fs(string mrn)
   return 256; // TODO(joshblum) store this in TileDB metadata when it's implemented
 }
 
-int TileDBBackend::get_data_len(string mrn)
+int TileDBBackend::get_array_len(string mrn)
 {
   return 84992; // TODO(joshblum) store this in TileDB metadata when it's implemented
 }
@@ -48,7 +48,7 @@ void TileDBBackend::open_array(string mrn)
   put_cache(mrn, tiledb_cache_pair(tiledb_ctx, array_id));
 }
 
-void TileDBBackend::get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
+void TileDBBackend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 {
   tiledb_cache_pair cache_pair = get_cache(mrn);
   TileDB_CTX* tiledb_ctx = cache_pair.first;
@@ -84,7 +84,7 @@ void TileDBBackend::edf_to_array(string mrn)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_data_len(mrn);
+  int nsamples = edf_backend.get_array_len(mrn);
   int fs = edf_backend.get_fs(mrn); // TODO(joshblum) store this in TileDB metadata when it's implemented
   cout << "Writing " << nsamples << " samples with fs=" << fs << "." << endl;
 
@@ -126,7 +126,7 @@ void TileDBBackend::edf_to_array(string mrn)
       if (end_offset - start_offset != CHUNK_SIZE) {
         chunk_buf.resize(end_offset - start_offset);
       }
-      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, chunk_buf);
+      edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
 
       // write chunk_mat to file
       for (uword i = 0; i < chunk_buf.n_elem; i++)

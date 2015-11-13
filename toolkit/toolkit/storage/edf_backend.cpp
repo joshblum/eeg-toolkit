@@ -22,7 +22,7 @@ int EDFBackend::get_fs(string mrn)
     return ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
 }
 
-int EDFBackend::get_data_len(string mrn)
+int EDFBackend::get_array_len(string mrn)
 {
     edf_hdr_struct* hdr = get_cache(mrn);
     // assume all signals have a uniform sample rate
@@ -65,7 +65,7 @@ void EDFBackend::open_array(string mrn)
     }
 }
 
-void EDFBackend::get_array_data(string mrn, int ch, int startOffset, int endOffset, frowvec& buf)
+void EDFBackend::read_array(string mrn, int ch, int startOffset, int endOffset, frowvec& buf)
 
 {
     edf_hdr_struct* hdr = get_cache(mrn);

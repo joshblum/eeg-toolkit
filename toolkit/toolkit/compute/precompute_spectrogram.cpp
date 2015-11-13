@@ -20,7 +20,7 @@ void precompute_spectrogram(string mrn)
   backend.open_array(mrn);
 
   int fs = backend.get_fs(mrn);
-  int nsamples = backend.get_data_len(mrn);
+  int nsamples = backend.get_array_len(mrn);
 
   int chunk_size = 100000;
   int nchunks = ceil(nsamples / (float) chunk_size);

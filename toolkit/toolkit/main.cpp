@@ -48,9 +48,9 @@ void storage_example(string mrn)
   StorageBackend backend;
   backend.edf_to_array(mrn);
   backend.open_array(mrn);
-  cout << "fs: " << backend.get_fs(mrn) << " data_len: " << backend.get_data_len(mrn) << endl;
+  cout << "fs: " << backend.get_fs(mrn) << " data_len: " << backend.get_array_len(mrn) << endl;
   frowvec buf = frowvec(NSAMPLES);
-  backend.get_array_data(mrn, C3, 0, NSAMPLES - 1, buf);
+  backend.read_array(mrn, C3, 0, NSAMPLES - 1, buf);
   for (int i = 0; i < NSAMPLES; i++)
   {
     cout << " " << buf(i);

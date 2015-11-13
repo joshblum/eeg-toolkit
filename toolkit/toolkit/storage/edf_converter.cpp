@@ -33,7 +33,7 @@ void edf_to_file(string mrn, string path, string type)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_data_len(mrn);
+  int nsamples = edf_backend.get_array_len(mrn);
 
   int ch, start_offset, end_offset;
   cell_t cell;
@@ -50,7 +50,7 @@ void edf_to_file(string mrn, string path, string type)
       if (end_offset - start_offset != CHUNK_SIZE) {
         chunk_buf.resize(end_offset - start_offset);
       }
-      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, chunk_buf);
+      edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
 
       // write chunk_mat to file
       for (uword i = 0; i < chunk_buf.n_elem; i++)

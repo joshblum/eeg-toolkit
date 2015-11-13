@@ -32,7 +32,7 @@ int HDF5Backend::get_fs(string mrn)
   return get_array_metadata(mrn, FS_IDX);
 }
 
-int HDF5Backend::get_data_len(string mrn)
+int HDF5Backend::get_array_len(string mrn)
 {
   return get_array_metadata(mrn, DATA_LEN_IDX);
 }
@@ -49,7 +49,7 @@ void HDF5Backend::open_array(string mrn)
   put_cache(mrn, dataset);
 }
 
-void HDF5Backend::get_array_data(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
+void HDF5Backend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 {
   DataSet dataset = get_cache(mrn);
   hsize_t offset[DATA_RANK], count[DATA_RANK], stride[DATA_RANK], block[DATA_RANK];
@@ -88,7 +88,7 @@ void HDF5Backend::edf_to_array(string mrn)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_data_len(mrn);
+  int nsamples = edf_backend.get_array_len(mrn);
   int fs = edf_backend.get_fs(mrn);
 
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
@@ -118,7 +118,7 @@ void HDF5Backend::edf_to_array(string mrn)
       if (end_offset - start_offset != CHUNK_SIZE) {
         chunk_buf.resize(end_offset - start_offset);
       }
-      edf_backend.get_array_data(mrn, ch, start_offset, end_offset, chunk_buf);
+      edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
 
       offset[0] = start_offset; // start_offset rows down
       offset[1] = CH_REVERSE_IDX[ch]; // get the correct column

@@ -73,12 +73,11 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* back
   backend->open_array(mrn);
 
   spec_params->fs = backend->get_fs(mrn);
-  int data_len = backend->get_data_len(mrn);
+  int data_len = backend->get_array_len(mrn);
   int pad = 0;
   spec_params->shift = spec_params->fs * 4;
   spec_params->nstep = spec_params->fs * 1;
   spec_params->nfft = get_nfft(spec_params->shift, pad);
-  spec_params->nsamples = get_nsamples(data_len, spec_params->fs, end_time - start_time);
   spec_params->start_time = get_valid_start_time(start_time);
   spec_params->end_time = get_valid_end_time(data_len, spec_params->fs, end_time);
 
@@ -89,6 +88,8 @@ void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* back
     spec_params->start_time = spec_params->end_time;
     spec_params->end_time = tmp;
   }
+
+  spec_params->nsamples = get_nsamples(data_len, spec_params->fs, end_time - start_time);
   spec_params->nblocks = get_nblocks(spec_params->nsamples,
                                      spec_params->shift, spec_params->nstep);
   spec_params->nfreqs = get_nfreqs(spec_params->nfft);
@@ -209,12 +210,12 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
   int end_offset = hours_to_samples(spec_params->fs, spec_params->end_time) - 1; // exclusive range
   frowvec vec1 = frowvec(nsamples);
   frowvec vec2 = frowvec(nsamples);
-  spec_params->backend->get_array_data(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);
+  spec_params->backend->read_array(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
-    spec_params->backend->get_array_data(spec_params->mrn, ch_idx2, start_offset, end_offset, vec2);
+    spec_params->backend->read_array(spec_params->mrn, ch_idx2, start_offset, end_offset, vec2);
     frowvec diff = vec2 - vec1;
 
     // fill in the spec matrix with fft values
