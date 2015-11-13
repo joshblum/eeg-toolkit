@@ -81,7 +81,7 @@ void send_frowvec(WsServer* server,
 
 void send_spectrogram_new(WsServer* server,
                           shared_ptr<WsServer::Connection> connection,
-                          spec_params_t spec_params, string canvasId)
+                          SpecParams spec_params, string canvasId)
 {
   Json content = Json::object
   {
@@ -99,7 +99,7 @@ void send_spectrogram_new(WsServer* server,
 
 void send_spectrogram_update(WsServer* server,
                              shared_ptr<WsServer::Connection> connection,
-                             spec_params_t spec_params, string canvasId,
+                             SpecParams spec_params, string canvasId,
                              fmat& spec_mat)
 {
 
@@ -135,9 +135,8 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..
-  spec_params_t spec_params;
-  get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
-  print_spec_params_t(&spec_params);
+  SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
+  spec_params.print();
   cout << endl; // print newline between each spectrogram computation
 
   send_spectrogram_new(server, connection, spec_params, ch_name);
@@ -149,9 +148,9 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
 
   send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
 
-  cp_data_t cp_data;
-  get_change_points(spec_mat, &cp_data);
-  send_change_points(server, connection, ch_name, &cp_data);
+  // cp_data_t cp_data;
+  // get_change_points(spec_mat, &cp_data);
+  // send_change_points(server, connection, ch_name, &cp_data);
 
   backend.close_array(mrn);
 }

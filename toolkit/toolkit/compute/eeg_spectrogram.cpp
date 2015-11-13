@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
 #include <fftw3.h>
 
 #include "../storage/backends.hpp"
@@ -12,88 +13,99 @@
 using namespace arma;
 using namespace std;
 
-void print_spec_params_t(spec_params_t* spec_params)
+void SpecParams::print()
 {
-  printf("spec_params: {\n");
-  printf("\tmrn: %s\n", spec_params->mrn.c_str());
-  printf("\tstart_time: %.2f\n", spec_params->start_time);
-  printf("\tend_time: %.2f\n", spec_params->end_time);
-  printf("\tnfft: %d\n", spec_params->nfft);
-  printf("\tnstep: %d\n", spec_params->nstep);
-  printf("\tshift: %d\n", spec_params->shift);
-  printf("\tnsamples: %d\n", spec_params->nsamples);
-  printf("\tnblocks: %d\n", spec_params->nblocks);
-  printf("\tnfreqs: %d\n", spec_params->nfreqs);
-  printf("\tspec_len: %d\n", spec_params->spec_len);
-  printf("\tfs: %d\n", spec_params->fs);
-  printf("}\n");
+  cout << "spec_params: {" << endl;
+  cout << "\tmrn: " << mrn << endl;
+  cout << "\tstart_time: " << setprecision(2) << start_time << endl;
+  cout << "\tend_time: " << setprecision(2) << end_time << endl;
+  cout << "\tstart_offset: " << start_offset << endl;
+  cout << "\tend_offset: " << end_offset << endl;
+  cout << "\tspec_start_offset: " << spec_start_offset << endl;
+  cout << "\tspec_end_offset: " << spec_end_offset << endl;
+  cout << "\tnfft: " << nfft << endl;
+  cout << "\tnstep: " << nstep << endl;
+  cout << "\tshift: " << shift << endl;
+  cout << "\tnsamples: " << nsamples << endl;
+  cout << "\tnblocks: " << nblocks << endl;
+  cout << "\tnfreqs: " << nfreqs << endl;
+  cout << "\tfs: " << fs << endl;
+  cout << "}" << endl;
 }
 
-int get_nfft(int shift, int pad)
+int SpecParams::get_nfft(int pad)
 {
   return fmax(get_next_pow_2(shift) + pad, shift);
 }
 
-float get_valid_start_time(float start_time)
+float SpecParams::get_valid_start_time()
 {
   return fmax(0, start_time);
 }
 
-float get_valid_end_time(int spec_len, int fs, float end_time)
+float SpecParams::get_valid_end_time(int data_len)
 {
-  return fmin((float) spec_len / (fs * 60 * 60), end_time);
+  return fmin(data_len / (fs * 60.0 * 60.0), end_time);
 }
 
-int get_nsamples(int spec_len, int fs, float duration)
+int SpecParams::get_nsamples(int data_len, float duration)
 {
   // get number of samples required for our duration
-  return fmin(spec_len, hours_to_samples(fs, duration));
+  return fmin(data_len, hours_to_samples(fs, duration));
 }
 
-int get_nblocks(int nsamples, int nfft, int shift)
+int SpecParams::get_nblocks(int nsamples)
 {
+  if (nsamples == 0)
+  {
+    return 0;
+  }
   return (nsamples - nfft) / shift + 1;
 }
 
-int get_nfreqs(int nfft)
+int SpecParams::get_nfreqs()
 {
   return nfft / 2 + 1;
 }
 
-void get_eeg_spectrogram_params(spec_params_t* spec_params, StorageBackend* backend,
-                                  string mrn, float start_time, float end_time)
+SpecParams::SpecParams(StorageBackend* backend,
+                       string mrn, float _start_time, float _end_time)
 {
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding
-  spec_params->mrn = mrn;
-  spec_params->start_time = start_time;
-  spec_params->end_time = end_time;
-  spec_params->backend = backend;
-
+  this->mrn = mrn;
+  this->backend = backend;
+  start_time = _start_time;
+  end_time = _end_time;
   backend->open_array(mrn);
 
-  spec_params->fs = backend->get_fs(mrn);
+  fs = backend->get_fs(mrn);
+
+
   int data_len = backend->get_array_len(mrn);
   int pad = 0;
-  spec_params->shift = spec_params->fs * 4;
-  spec_params->nstep = spec_params->fs * 1;
-  spec_params->nfft = get_nfft(spec_params->shift, pad);
-  spec_params->start_time = get_valid_start_time(start_time);
-  spec_params->end_time = get_valid_end_time(data_len, spec_params->fs, end_time);
+  shift = fs * 4;
+  nstep = fs * 1;
+  nfft = get_nfft(pad);
+  start_time = get_valid_start_time();
+  end_time = get_valid_end_time(data_len);
 
   // ensure start_time is before end_time
-  if (spec_params->start_time > spec_params->end_time)
+  if (start_time > end_time)
   {
-    float tmp = spec_params->start_time;
-    spec_params->start_time = spec_params->end_time;
-    spec_params->end_time = tmp;
+    float tmp = start_time;
+    start_time = end_time;
+    end_time = tmp;
   }
+  float duration = end_time - start_time;
+  nsamples = get_nsamples(data_len, duration);
+  nblocks = get_nblocks(nsamples);
+  nfreqs = get_nfreqs();
 
-  spec_params->nsamples = get_nsamples(data_len, spec_params->fs, end_time - start_time);
-  spec_params->nblocks = get_nblocks(spec_params->nsamples,
-                                     spec_params->shift, spec_params->nstep);
-  spec_params->nfreqs = get_nfreqs(spec_params->nfft);
-  spec_params->spec_len = spec_params->nsamples / spec_params->fs;
+  start_offset = hours_to_samples(fs, start_time);
+  end_offset = hours_to_samples(fs, end_time) - 1; // exclusive range
+  spec_start_offset = get_nblocks(start_offset);
+  spec_end_offset = get_nblocks(end_offset - start_offset + 1);
 }
 
 
@@ -116,7 +128,7 @@ static inline float abs(fftw_complex* arr, int i)
  * Fill the `spec_mat` matrix with values for the spectrogram for the given diff.
  * `spec_mat` is expected to be initialized and the results are added to allow averaging
  */
-void STFT(spec_params_t* spec_params, frowvec& diff, fmat& spec_mat)
+void STFT(SpecParams* spec_params, frowvec& diff, fmat& spec_mat)
 {
   fftw_complex    *data, *fft_result;
   fftw_plan       plan_forward;
@@ -192,7 +204,7 @@ void STFT(spec_params_t* spec_params, frowvec& diff, fmat& spec_mat)
   fftw_free(fft_result);
 }
 
-void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
+void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
 {
 
   // nfreqs x nblocks matrix
@@ -204,10 +216,10 @@ void eeg_spectrogram(spec_params_t* spec_params, int ch, fmat& spec_mat)
 
   int ch_idx1, ch_idx2;
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
+  int start_offset = spec_params->start_offset;
+  int end_offset = spec_params->end_offset;
 
   // should this just move to the spec_params struct?
-  int start_offset = hours_to_samples(spec_params->fs, spec_params->start_time);
-  int end_offset = hours_to_samples(spec_params->fs, spec_params->end_time) - 1; // exclusive range
   frowvec vec1 = frowvec(nsamples);
   frowvec vec2 = frowvec(nsamples);
   spec_params->backend->read_array(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);

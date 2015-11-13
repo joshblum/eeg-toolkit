@@ -15,7 +15,6 @@ using namespace arma;
  */
 void precompute_spectrogram(string mrn)
 {
-  spec_params_t spec_params;
   StorageBackend backend;
   backend.open_array(mrn);
 
@@ -26,9 +25,19 @@ void precompute_spectrogram(string mrn)
   int nchunks = ceil(nsamples / (float) chunk_size);
   cout << "Computing " << nchunks << " chunks and " << nsamples << " samples." << endl;
 
+
   float start_time, end_time;
   int start_offset, end_offset;
   fmat spec_mat;
+
+  // Create array for writing
+  start_time = 0;
+  end_time = samples_to_hours(fs, nsamples);
+
+  string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn);
+  SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
+  backend.create_array(cached_mrn_name, spec_params.nblocks, spec_params.nfreqs);
+  backend.open_array(cached_mrn_name);
   for (int ch = 0; ch < NUM_DIFF; ch++)
   {
     start_offset = 0;
@@ -38,7 +47,7 @@ void precompute_spectrogram(string mrn)
     {
       start_time = samples_to_hours(fs, start_offset);
       end_time = samples_to_hours(fs, end_offset);
-      get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
+      spec_params = SpecParams(&backend, mrn, start_time, end_time);
       eeg_spectrogram(&spec_params, ch, spec_mat);
 
       // TODO(joshblum): write output to array store
@@ -49,12 +58,12 @@ void precompute_spectrogram(string mrn)
       {
         break;
       }
+
       if (!((end_offset / chunk_size) % 50))
       {
         cout << "Wrote " << end_offset / chunk_size << " chunks for ch: " << CH_NAME_MAP[ch] << endl;
       }
     }
-
   }
   backend.close_array(mrn);
 }

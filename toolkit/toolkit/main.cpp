@@ -11,10 +11,10 @@ using namespace arma;
 
 #define NSAMPLES 10
 
-void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
+void example_spectrogram(fmat& spec_mat, SpecParams* spec_params)
 {
   unsigned long long start = getticks();
-  print_spec_params_t(spec_params);
+  spec_params->print();
   eeg_spectrogram(spec_params, LL, spec_mat);
   log_time_diff("example_spectrogram:", start);
   printf("Spectrogram shape as_mat: (%d, %d)\n",
@@ -33,14 +33,13 @@ void example_spectrogram(fmat& spec_mat, spec_params_t* spec_params)
 
 void compute_example(string mrn, float start_time, float end_time)
 {
-  spec_params_t spec_params;
   StorageBackend backend;
-  get_eeg_spectrogram_params(&spec_params, &backend, mrn, start_time, end_time);
+  SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
   fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
   example_spectrogram(spec_mat, &spec_params);
   backend.close_array(mrn);
 
-  example_change_points(spec_mat);
+  // example_change_points(spec_mat);
 }
 
 void storage_example(string mrn)
@@ -85,9 +84,9 @@ int main(int argc, char* argv[])
       end_time = 4.0;
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f and backend: %s\n",
-        mrn.c_str(), start_time, end_time, TOSTRING(BACKEND));
-//    compute_example(mrn, start_time, end_time);
-    storage_example(mrn);
+       mrn.c_str(), start_time, end_time, TOSTRING(BACKEND));
+    compute_example(mrn, start_time, end_time);
+    // storage_example(mrn);
   }
   else
   {
