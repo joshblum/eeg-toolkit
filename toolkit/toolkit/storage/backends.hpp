@@ -60,7 +60,7 @@ class ArrayMetadata
     }
 };
 
-// Use this to write binary TileDB file
+// Use this to write binary file
 typedef struct cell
 {
   int32_t x;

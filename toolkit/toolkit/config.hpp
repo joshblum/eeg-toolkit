@@ -9,9 +9,7 @@ using namespace std;
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-#ifdef __APPLE__
-#define BASEDIR "/Users/joshblum/Dropbox (MIT)"
-#elif __linux__
+#ifdef __linux__
 #define BASEDIR "/home/ubuntu"
 #endif
 
