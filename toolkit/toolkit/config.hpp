@@ -5,7 +5,7 @@
 using namespace std;
 
 // backend config
-#define BACKEND HDF5Backend
+#define BACKEND BinaryBackend
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 

@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "../storage/backends.hpp"
-#include "helpers.hpp"
+#include "../helpers.hpp"
 #include "eeg_spectrogram.hpp"
 
 using namespace std;
@@ -34,12 +34,15 @@ void precompute_spectrogram(string mrn)
   start_time = 0;
   end_time = samples_to_hours(fs, nsamples);
 
-  string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn);
   SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
-  backend.create_array(cached_mrn_name, spec_params.nblocks, spec_params.nfreqs);
-  backend.open_array(cached_mrn_name);
+  spec_params.print();
+  ArrayMetadata metadata = ArrayMetadata(fs, nsamples, spec_params.nblocks, spec_params.nfreqs);
   for (int ch = 0; ch < NUM_DIFF; ch++)
   {
+    string ch_name = CH_NAME_MAP[ch];
+    string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn, ch_name);
+    backend.create_array(cached_mrn_name, &metadata);
+    backend.open_array(cached_mrn_name);
     start_offset = 0;
     end_offset = min(nsamples, chunk_size);
     cached_start_offset = 0;
@@ -68,8 +71,8 @@ void precompute_spectrogram(string mrn)
         cout << "Wrote " << end_offset / chunk_size << " chunks for ch: " << CH_NAME_MAP[ch] << endl;
       }
     }
+    backend.close_array(cached_mrn_name);
   }
-  backend.close_array(cached_mrn_name);
   backend.close_array(mrn);
 }
 

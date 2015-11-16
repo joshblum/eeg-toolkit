@@ -32,7 +32,7 @@ int TileDBBackend::get_array_len(string mrn)
   return 84992; // TODO(joshblum) store this in TileDB metadata when it's implemented
 }
 
-void TileDBBackend::create_array(string mrn, int nrows, int ncols)
+void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
 {
 
 }

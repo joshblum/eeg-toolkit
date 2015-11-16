@@ -37,23 +37,34 @@ int HDF5Backend::get_array_len(string mrn)
   return get_array_metadata(mrn, DATA_LEN_IDX);
 }
 
-void HDF5Backend::create_array(string mrn, int nrows, int ncols)
+void HDF5Backend::create_array(string mrn, ArrayMetadata* metadata)
 {
   string array_name = mrn_to_array_name(mrn);
   H5File file(array_name, H5F_ACC_TRUNC);
 
   // Create the dataset of the correct dimensions
   hsize_t data_dims[DATA_RANK];
-  data_dims[0] = nrows;
-  data_dims[1] = ncols;
+  data_dims[0] = metadata->nrows;
+  data_dims[1] = metadata->ncols;
   DataSpace dataspace(DATA_RANK, data_dims);
   DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
+
+  // Write fs and data_len as attributes
+  int attr_data[NUM_ATTR];
+  attr_data[FS_IDX] = metadata->fs;
+  attr_data[DATA_LEN_IDX] = metadata->nsamples;
+  hsize_t attr_dims[ATTR_RANK] = {NUM_ATTR};
+  DataSpace attrspace = DataSpace(ATTR_RANK, attr_dims);
+
+  Attribute attribute = dataset.createAttribute(ATTR_NAME, PredType::STD_I32BE, attrspace);
+
+  attribute.write(PredType::NATIVE_INT, attr_data);
 }
 
 void HDF5Backend::open_array(string mrn)
 {
   if (!array_exists(mrn)) {
-    cout << "Error array " << mrn << " does not exist!" << endl;
+    cout << "Error array " << mrn_to_array_name(mrn) << " does not exist!" << endl;
     exit(1);
   }
   if (in_cache(mrn))
@@ -148,10 +159,9 @@ void HDF5Backend::edf_to_array(string mrn)
   int fs = edf_backend.get_fs(mrn);
 
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
-
-  create_array(mrn, nsamples, nchannels);
+  ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nsamples, nchannels);
+  create_array(mrn, &metadata);
   open_array(mrn);
-  DataSet dataset = get_cache(mrn);
 
   int ch, start_offset, end_offset;
   for (int i = 0; i < nchannels; i++)
@@ -185,16 +195,6 @@ void HDF5Backend::edf_to_array(string mrn)
     }
   }
 
-  // Write fs and data_len as attributes
-  int attr_data[NUM_ATTR];
-  attr_data[FS_IDX] = fs;
-  attr_data[DATA_LEN_IDX] = nsamples;
-  hsize_t attr_dims[ATTR_RANK] = {NUM_ATTR};
-  DataSpace attrspace = DataSpace(ATTR_RANK, attr_dims);
-
-  Attribute attribute = dataset.createAttribute(ATTR_NAME, PredType::STD_I32BE, attrspace);
-
-  attribute.write(PredType::NATIVE_INT, attr_data);
   cout << "Write complete" << endl;
 }
 

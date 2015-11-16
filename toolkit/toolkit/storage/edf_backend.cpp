@@ -7,11 +7,6 @@
 using namespace std;
 using namespace arma;
 
-/*
- * Transform a medical record number (mrn) to a filename. This
- * should only be used for temporary testing before a real backend is
- * implemented.
- */
 string EDFBackend::mrn_to_array_name(string mrn)
 {
     return AbstractStorageBackend::_mrn_to_array_name(mrn, "edf");
@@ -40,7 +35,7 @@ int EDFBackend::get_array_len(string mrn)
     return hdr->signalparam[0].smp_in_file;
 }
 
-void EDFBackend::create_array(string mrn, int nrows, int ncols)
+void EDFBackend::create_array(string mrn, ArrayMetadata* metadata)
 {
   throw NotImplementedError();
 }
@@ -86,7 +81,7 @@ void EDFBackend::open_array(string mrn)
     }
 }
 
-void EDFBackend::read_array(string mrn, int ch, int startOffset, int endOffset, frowvec& buf)
+void EDFBackend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 
 {
     if (is_cached_array(mrn))
@@ -95,12 +90,12 @@ void EDFBackend::read_array(string mrn, int ch, int startOffset, int endOffset, 
     }
     edf_hdr_struct* hdr = get_cache(mrn);
     int hdl = hdr->handle;
-    if (edfseek(hdl, ch, (long long) startOffset,  EDFSEEK_SET) == -1)
+    if (edfseek(hdl, ch, (long long) start_offset,  EDFSEEK_SET) == -1)
     {
         cout << "error: edfseek()" << endl;
     }
 
-    int nsamples = endOffset - startOffset;
+    int nsamples = end_offset - start_offset;
     int bytes_read = edfread_physical_samples(hdl, ch, nsamples, buf.memptr());
 
     if (bytes_read == -1)
@@ -141,3 +136,7 @@ void EDFBackend::close_array(string mrn)
     }
 }
 
+void EDFBackend::edf_to_array(string mrn)
+{
+
+}

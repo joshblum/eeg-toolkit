@@ -105,6 +105,11 @@ void convert_to_array(string mrn, string backend_name)
     TileDBBackend tiledb_backend;
     tiledb_backend.edf_to_array(mrn);
   }
+  else if (backend_name == "BinaryBackend")
+  {
+    BinaryBackend binary_backend;
+    binary_backend.edf_to_array(mrn);
+  }
   else
   {
     cout << "Unknown backend: " << backend_name << endl;

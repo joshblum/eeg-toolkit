@@ -1,8 +1,8 @@
 #include <string>
 #include <armadillo>
 
+#include "helpers.hpp"
 #include "storage/backends.hpp"
-#include "compute/helpers.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
 
@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f and backend: %s\n",
        mrn.c_str(), start_time, end_time, TOSTRING(BACKEND));
-    compute_example(mrn, start_time, end_time);
-    // storage_example(mrn);
+//    compute_example(mrn, start_time, end_time);
+    storage_example(mrn);
   }
   else
   {

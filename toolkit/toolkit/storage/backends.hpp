@@ -6,6 +6,7 @@
 #include <string>
 #include <sys/stat.h>
 
+#include "../json11/json11.hpp"
 #include "../config.hpp"
 #include "EDFlib/edflib.h"
 #include "H5Cpp.h"
@@ -17,6 +18,7 @@
 using namespace std;
 using namespace arma;
 using namespace H5;
+using namespace json11;
 
 class NotImplementedError: public exception
 {
@@ -24,6 +26,38 @@ class NotImplementedError: public exception
   {
     return "Not Implemented!";
   }
+};
+
+class ArrayMetadata
+{
+  public:
+    int fs;
+    int nsamples;
+    int nrows;
+    int ncols;
+
+    ArrayMetadata(int fs, int nsamples, int nrows, int ncols)
+    {
+      this->fs = fs;
+      this->nsamples = nsamples;
+      this->nrows = nrows;
+      this->ncols = ncols;
+    }
+
+    Json to_json()
+    {
+      return Json::object
+      {
+        {"fs", fs},
+        {"nsamples", nsamples},
+        {"ncols", ncols},
+        {"nrows", nrows}
+      };
+    }
+
+    string to_string() {
+      return to_json().dump();
+    }
 };
 
 // Use this to write binary TileDB file
@@ -94,9 +128,9 @@ class AbstractStorageBackend
 
 
   public:
-    string mrn_to_cached_mrn_name(string mrn)
+    string mrn_to_cached_mrn_name(string mrn, string ch_name)
     {
-      return mrn + cache_tag;
+      return mrn + "-" + ch_name + cache_tag;
     }
 
     bool array_exists(string mrn)
@@ -109,7 +143,7 @@ class AbstractStorageBackend
 
     virtual int get_fs(string mrn) = 0;
     virtual int get_array_len(string mrn) = 0;
-    virtual void create_array(string mrn, int nrows, int ncols) = 0;
+    virtual void create_array(string mrn, ArrayMetadata* metadata) = 0;
     virtual void open_array(string mrn) = 0;
     virtual void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf) = 0;
     virtual void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf) = 0;
@@ -125,7 +159,25 @@ class EDFBackend: public AbstractStorageBackend<edf_hdr_struct*>
   public:
     int get_fs(string mrn);
     int get_array_len(string mrn);
-    void create_array(string mrn, int nrows, int ncols);
+    void create_array(string mrn, ArrayMetadata* metadata);
+    void open_array(string mrn);
+    void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
+    void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
+    void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
+    void close_array(string mrn);
+    void edf_to_array(string filename);
+};
+
+class BinaryBackend: public AbstractStorageBackend<Json>
+{
+  protected:
+    string mrn_to_array_name(string mrn);
+    Json get_header(string mrn);
+
+  public:
+    int get_fs(string mrn);
+    int get_array_len(string mrn);
+    void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
@@ -145,7 +197,7 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
   public:
     int get_fs(string mrn);
     int get_array_len(string mrn);
-    void create_array(string mrn, int nrows, int ncols);
+    void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
@@ -166,7 +218,7 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
   public:
     int get_fs(string mrn);
     int get_array_len(string mrn);
-    void create_array(string mrn, int nrows, int ncols);
+    void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);

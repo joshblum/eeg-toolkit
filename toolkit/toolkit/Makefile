@@ -3,22 +3,24 @@
 CXX = c++
 
 CSRC := storage/EDFlib/edflib.c
-CPPSRC := storage/edf_backend.cpp\
+CPPSRC := storage/binary_backend.cpp\
+					storage/edf_backend.cpp\
 					storage/hdf5_backend.cpp\
 					storage/tiledb_backend.cpp\
-					compute/helpers.cpp\
 					compute/eeg_spectrogram.cpp\
-					compute/eeg_change_point.cpp
+					compute/eeg_change_point.cpp\
+					json11/json11.cpp
 TILEDBLIBPATH := storage/TileDB/core/lib/release
 TILEDBLIBNAME := libtiledb.so
 
 WSSRC := $(CPPSRC)\
-					json11/json11.cpp\
 					ws_server.cpp
 MAINSRC := $(CPPSRC)\
 						main.cpp
-CONVERTSRC :=  $(wildcard storage/*.cpp)
-PRECOMPUTESRC := $(CPPSRC) compute/precompute_spectrogram.cpp
+CONVERTSRC :=  $(wildcard storage/*.cpp)\
+					json11/json11.cpp
+PRECOMPUTESRC := $(CPPSRC)\
+						compute/precompute_spectrogram.cpp
 
 OBJ := $(CSRC:.c=.o)
 WSOBJ := $(OBJ) $(WSSRC:.cpp=.o)

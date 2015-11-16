@@ -4,9 +4,9 @@
 
 #include "wslib/server_ws.hpp"
 #include "config.hpp"
+#include "helpers.hpp"
 #include "json11/json11.hpp"
 #include "storage/backends.hpp"
-#include "compute/helpers.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
 
@@ -29,7 +29,8 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
   };
   string header = msg.dump();
 
-  uint32_t header_len = header.size() + (8 - ((header.size() + 4) % 8));
+  uint32_t header_len = get_byte_aligned_length(header);
+
   // append enough spaces so that the payload starts at an 8-byte
   // aligned position. The first four bytes will be the length of
   // the header, encoded as a 32 bit signed integer:
@@ -142,11 +143,12 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   send_spectrogram_new(server, connection, spec_params, ch_name);
 
   fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
-  string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn);
+  string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn, ch_name);
 
   unsigned long long start = getticks();
   if (backend.array_exists(cached_mrn_name))
   {
+    cout << "Using cached visualization!" << endl;
     backend.open_array(cached_mrn_name);
     backend.read_array(cached_mrn_name, spec_params.spec_start_offset, spec_params.spec_end_offset, spec_mat);
     backend.close_array(cached_mrn_name);
