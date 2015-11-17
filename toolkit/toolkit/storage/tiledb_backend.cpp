@@ -48,7 +48,7 @@ void TileDBBackend::open_array(string mrn)
   string group = "";
   string workspace = get_workspace();
   string array_name = mrn_to_array_name(mrn);
-  const char* mode = "r";
+  const char* mode = "r"; // TODO(joshblum): if read/write available this would be better
   int array_id = tiledb_array_open(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str(), mode);
   put_cache(mrn, tiledb_cache_pair(tiledb_ctx, array_id));
 }
