@@ -1,32 +1,39 @@
-.PHONY: clean main ws_server edf_converter precompute_spectrogram installdeps
+.PHONY: clean main ws_server edf_converter viz_converter precompute_spectrogram installdeps
 
 CXX = c++
 
 CSRC := storage/EDFlib/edflib.c
-CPPSRC := storage/binary_backend.cpp\
+STORAGESRC := storage/binary_backend.cpp\
 					storage/edf_backend.cpp\
 					storage/hdf5_backend.cpp\
 					storage/tiledb_backend.cpp\
-					compute/eeg_spectrogram.cpp\
-					compute/eeg_change_point.cpp\
-					json11/json11.cpp
+					json11/json11.cpp # required by binary_backend for metadata
+COMPUTESRC := compute/eeg_spectrogram.cpp\
+					compute/eeg_change_point.cpp
 TILEDBLIBPATH := storage/TileDB/core/lib/release
 TILEDBLIBNAME := libtiledb.so
 
-WSSRC := $(CPPSRC)\
-					ws_server.cpp
-MAINSRC := $(CPPSRC)\
-						main.cpp
-CONVERTSRC :=  $(wildcard storage/*.cpp)\
-					json11/json11.cpp
-PRECOMPUTESRC := $(CPPSRC)\
-						compute/precompute_spectrogram.cpp
+WSSRC := $(COMPUTESRC)\
+				$(STORAGESRC)\
+				ws_server.cpp
+MAINSRC := $(COMPUTESRC)\
+					$(STORAGESRC)\
+					main.cpp
+EDFCONVERTSRC := $(STORAGESRC)\
+								storage/edf_converter.cpp
+VIZCONVERTSRC := $(STORAGESRC)\
+								compute/eeg_spectrogram.cpp\
+								storage/viz_converter.cpp
+PRECOMPUTESRC := $(COMPUTESRC)\
+								$(STORAGESRC)\
+								compute/precompute_spectrogram.cpp
 
-OBJ := $(CSRC:.c=.o)
-WSOBJ := $(OBJ) $(WSSRC:.cpp=.o)
-MAINOBJ := $(OBJ) $(MAINSRC:.cpp=.o)
-CONVERTOBJ := $(OBJ) $(CONVERTSRC:.cpp=.o)
-PREOCMPUTEOBJ := $(OBJ) $(PRECOMPUTESRC:.cpp=.o)
+COBJ := $(CSRC:.c=.o)
+WSOBJ := $(COBJ) $(WSSRC:.cpp=.o)
+MAINOBJ := $(COBJ) $(MAINSRC:.cpp=.o)
+EDFCONVERTOBJ := $(COBJ) $(EDFCONVERTSRC:.cpp=.o)
+VIZCONVERTOBJ := $(COBJ) $(VIZCONVERTSRC:.cpp=.o)
+PREOCMPUTEOBJ := $(COBJ) $(PRECOMPUTESRC:.cpp=.o)
 
 CFLAGS := -Wall\
 					-std=c++1y\
@@ -78,8 +85,11 @@ ws_server: $(WSOBJ)
 main: $(MAINOBJ)
 	$(CXX) -o $@ $(MAINOBJ) $(LDFLAGS)
 
-edf_converter: $(CONVERTOBJ)
-	$(CXX) -o $@ $(CONVERTOBJ) $(LDFLAGS)
+edf_converter: $(EDFCONVERTOBJ)
+	$(CXX) -o $@ $(EDFCONVERTOBJ) $(LDFLAGS)
+
+viz_converter: $(VIZCONVERTOBJ)
+	$(CXX) -o $@ $(VIZCONVERTOBJ) $(LDFLAGS)
 
 precompute_spectrogram: $(PREOCMPUTEOBJ)
 	$(CXX) -o $@ $(PREOCMPUTEOBJ) $(LDFLAGS)
@@ -90,4 +100,5 @@ clean:
 	find . -type f -name ws_server -delete
 	find . -type f -name main -delete
 	find . -type f -name edf_converter -delete
+	find . -type f -name viz_converter -delete
 	find . -type f -name precompute_spectrogram -delete

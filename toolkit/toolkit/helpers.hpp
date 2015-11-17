@@ -2,6 +2,7 @@
 #define HELPERS_H
 
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -41,6 +42,12 @@ static inline float samples_to_hours(int fs, int samples)
 static inline uint32_t get_byte_aligned_length(string header)
 {
   return header.size() + (8 - ((header.size() + 4) % 8));
+}
+
+static inline bool file_exists(string path)
+{
+  struct stat buffer;
+  return stat(path.c_str(), &buffer) == 0;
 }
 
 #endif // HELPERS_H

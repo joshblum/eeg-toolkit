@@ -12,27 +12,18 @@ string EDFBackend::mrn_to_array_name(string mrn)
     return AbstractStorageBackend::_mrn_to_array_name(mrn, "edf");
 }
 
-int EDFBackend::get_fs(string mrn)
+ArrayMetadata EDFBackend::get_array_metadata(string mrn)
 {
     if (is_cached_array(mrn))
     {
       throw NotImplementedError();
     }
-
     edf_hdr_struct* hdr = get_cache(mrn);
-    return ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
-}
-
-int EDFBackend::get_array_len(string mrn)
-{
-    if (is_cached_array(mrn))
-    {
-      throw NotImplementedError();
-    }
-
-    edf_hdr_struct* hdr = get_cache(mrn);
-    // assume all signals have a uniform sample rate
-    return hdr->signalparam[0].smp_in_file;
+    int fs = ((double)hdr->signalparam[0].smp_in_datarecord / (double)hdr->datarecord_duration) * EDFLIB_TIME_DIMENSION;
+    int nsamples = hdr->signalparam[0].smp_in_file;
+    int nrows = nsamples;
+    int ncols = NCHANNELS;
+  return ArrayMetadata(fs, nsamples, nrows, ncols);
 }
 
 void EDFBackend::create_array(string mrn, ArrayMetadata* metadata)
@@ -138,5 +129,5 @@ void EDFBackend::close_array(string mrn)
 
 void EDFBackend::edf_to_array(string mrn)
 {
-
+  throw NotImplementedError();
 }

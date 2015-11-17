@@ -47,7 +47,7 @@ void storage_example(string mrn)
   StorageBackend backend;
   backend.edf_to_array(mrn);
   backend.open_array(mrn);
-  cout << "fs: " << backend.get_fs(mrn) << " data_len: " << backend.get_array_len(mrn) << endl;
+  cout << "fs: " << backend.get_fs(mrn) << " nsamples: " << backend.get_nsamples(mrn) << endl;
   frowvec buf = frowvec(NSAMPLES);
   backend.read_array(mrn, C3, 0, NSAMPLES - 1, buf);
   for (int i = 0; i < NSAMPLES; i++)
@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
     }
     printf("Using mrn: %s, start_time: %.2f, end_time %.2f and backend: %s\n",
        mrn.c_str(), start_time, end_time, TOSTRING(BACKEND));
-//    compute_example(mrn, start_time, end_time);
-    storage_example(mrn);
+    compute_example(mrn, start_time, end_time);
+//    storage_example(mrn);
   }
   else
   {

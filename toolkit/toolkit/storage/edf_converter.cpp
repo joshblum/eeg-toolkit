@@ -1,7 +1,7 @@
 #include <string>
-#include "backends.hpp"
-#include <sys/stat.h>
 #include <fstream>
+#include "backends.hpp"
+#include "../helpers.hpp"
 
 using namespace std;
 
@@ -13,8 +13,7 @@ string mrn_to_filename(string mrn, string format)
 void edf_to_file(string mrn, string path, string type)
 {
   // don't convert if the file already exists.
-  struct stat buffer;
-  if (stat (path.c_str(), &buffer) == 0) {
+  if (file_exists(path)) {
     cout << "File : " << path << " already exists." << endl;
     return;
   }
@@ -33,7 +32,7 @@ void edf_to_file(string mrn, string path, string type)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_array_len(mrn);
+  int nsamples = edf_backend.get_nsamples(mrn);
 
   int ch, start_offset, end_offset;
   cell_t cell;

@@ -43,15 +43,15 @@ float SpecParams::get_valid_start_time()
   return fmax(0, start_time);
 }
 
-float SpecParams::get_valid_end_time(int data_len)
+float SpecParams::get_valid_end_time(int nsamples)
 {
-  return fmin(data_len / (fs * 60.0 * 60.0), end_time);
+  return fmin(nsamples / (fs * 60.0 * 60.0), end_time);
 }
 
-int SpecParams::get_nsamples(int data_len, float duration)
+int SpecParams::get_nsamples(int nsamples, float duration)
 {
   // get number of samples required for our duration
-  return fmin(data_len, hours_to_samples(fs, duration));
+  return fmin(nsamples, hours_to_samples(fs, duration));
 }
 
 int SpecParams::get_nblocks(int nsamples)
@@ -82,13 +82,13 @@ SpecParams::SpecParams(StorageBackend* backend,
   fs = backend->get_fs(mrn);
 
 
-  int data_len = backend->get_array_len(mrn);
+  nsamples = backend->get_nsamples(mrn);
   int pad = 0;
   shift = fs * 4;
   nstep = fs * 1;
   nfft = get_nfft(pad);
   start_time = get_valid_start_time();
-  end_time = get_valid_end_time(data_len);
+  end_time = get_valid_end_time(nsamples);
 
   // ensure start_time is before end_time
   if (start_time > end_time)
@@ -98,7 +98,7 @@ SpecParams::SpecParams(StorageBackend* backend,
     end_time = tmp;
   }
   float duration = end_time - start_time;
-  nsamples = get_nsamples(data_len, duration);
+  nsamples = get_nsamples(nsamples, duration);
   nblocks = get_nblocks(nsamples);
   nfreqs = get_nfreqs();
 
@@ -236,5 +236,72 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
   }
   spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
   spec_mat = spec_mat.t(); // transpose the output
+}
+
+/*
+ * Compute and store the spectrogram data for
+ * the given `mrn` for all available time
+ */
+void precompute_spectrogram(string mrn)
+{
+  StorageBackend backend;
+  backend.open_array(mrn);
+
+  int fs = backend.get_fs(mrn);
+  int nsamples = backend.get_nsamples(mrn);
+
+  int chunk_size = 100000;
+  int nchunks = ceil(nsamples / (float) chunk_size);
+  cout << "Computing " << nchunks << " chunks and " << nsamples << " samples." << endl;
+
+
+  float start_time, end_time;
+  int start_offset, end_offset, cached_start_offset, cached_end_offset;
+  fmat spec_mat;
+
+  // Create array for writing
+  start_time = 0;
+  end_time = samples_to_hours(fs, nsamples);
+
+  SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
+  spec_params.print();
+  ArrayMetadata metadata = ArrayMetadata(fs, spec_params.nblocks, spec_params.nblocks, spec_params.nfreqs);
+  for (int ch = 0; ch < NUM_DIFF; ch++)
+  {
+    string ch_name = CH_NAME_MAP[ch];
+    string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn, ch_name);
+    backend.create_array(cached_mrn_name, &metadata);
+    backend.open_array(cached_mrn_name);
+    start_offset = 0;
+    end_offset = min(nsamples, chunk_size);
+    cached_start_offset = 0;
+    cached_end_offset = spec_params.nblocks;
+
+    for (; end_offset <= nsamples; end_offset = min(end_offset + chunk_size, nsamples))
+    {
+      start_time = samples_to_hours(fs, start_offset);
+      end_time = samples_to_hours(fs, end_offset);
+      spec_params = SpecParams(&backend, mrn, start_time, end_time);
+      eeg_spectrogram(&spec_params, ch, spec_mat);
+      backend.write_array(cached_mrn_name, ALL, cached_start_offset, cached_end_offset, spec_mat);
+
+      start_offset = end_offset;
+      cached_start_offset = cached_end_offset;
+      cached_end_offset += spec_params.nblocks;
+
+      // ensure we write the last part of the samples
+      if (end_offset == nsamples)
+      {
+        break;
+      }
+
+      if (!((end_offset / chunk_size) % 50))
+      {
+        cout << "Wrote " << end_offset / chunk_size << " chunks for ch: " << CH_NAME_MAP[ch] << endl;
+      }
+    }
+    backend.close_array(cached_mrn_name);
+  }
+  backend.close_array(mrn);
 }
 

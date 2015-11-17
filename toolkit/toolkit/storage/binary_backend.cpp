@@ -17,7 +17,7 @@ string BinaryBackend::mrn_to_array_name(string mrn)
     return AbstractStorageBackend::_mrn_to_array_name(mrn, "bin");
 }
 
-Json BinaryBackend::get_header(string mrn)
+ArrayMetadata BinaryBackend::get_array_metadata(string mrn)
 {
   string array_name = mrn_to_array_name(mrn);
 
@@ -33,24 +33,17 @@ Json BinaryBackend::get_header(string mrn)
   file.close();
 
   string err;
-  Json header_json = Json::parse(header, err);
-  return Json::object
+  Json json = Json::parse(header, err);
+  int fs = json["fs"].number_value();
+  int nsamples = json["nsamples"].number_value();
+  int nrows = json["nrows"].number_value();
+  int ncols = json["ncols"].number_value();
+  ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nrows, ncols);
+  metadata.optional_metadata = Json::object
   {
     {"header_offset", (int) (header_len + sizeof(uint32_t))},
-    {"header", header_json},
   };
-}
-
-int BinaryBackend::get_fs(string mrn)
-{
-  Json header = get_cache(mrn);
-  return header["header"]["fs"].number_value();
-}
-
-int BinaryBackend::get_array_len(string mrn)
-{
-  Json header = get_cache(mrn);
-  return header["header"]["nrows"].number_value();
+  return metadata;
 }
 
 void BinaryBackend::create_array(string mrn, ArrayMetadata* metadata)
@@ -82,15 +75,15 @@ void BinaryBackend::open_array(string mrn)
   {
     return;
   }
-  Json header = get_header(mrn);
-  put_cache(mrn, header);
+  ArrayMetadata metadata = get_array_metadata(mrn);
+  put_cache(mrn, metadata);
 }
 
 void BinaryBackend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 {
-  Json header = get_cache(mrn);
-  uint32_t header_offset = header["header_offset"].number_value();
-  int nrows = header["header"]["nrows"].number_value();
+  ArrayMetadata metadata = get_cache(mrn);
+  uint32_t header_offset = metadata.optional_metadata["header_offset"].number_value();
+  int nrows = metadata.nrows;
 
   ch = CH_REVERSE_IDX[ch];
   size_t row_size = nrows * sizeof(float);
@@ -109,10 +102,10 @@ void BinaryBackend::read_array(string mrn, int ch, int start_offset, int end_off
 
 void BinaryBackend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
 {
-  Json header = get_cache(mrn);
-  uint32_t header_offset = header["header_offset"].number_value();
-  int nrows = header["header"]["nrows"].number_value();
-  int ncols = header["header"]["ncols"].number_value();
+  ArrayMetadata metadata = get_cache(mrn);
+  uint32_t header_offset = metadata.optional_metadata["header_offset"].number_value();
+  int nrows = metadata.nrows;
+  int ncols = metadata.ncols;
 
   string array_name = mrn_to_array_name(mrn);
   ifstream file;
@@ -137,10 +130,9 @@ void BinaryBackend::read_array(string mrn, int start_offset, int end_offset, fma
 
 void BinaryBackend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
 {
-
-  Json header = get_cache(mrn);
-  uint32_t header_offset = header["header_offset"].number_value();
-  int nrows = header["header"]["nrows"].number_value();
+  ArrayMetadata metadata = get_cache(mrn);
+  uint32_t header_offset = metadata.optional_metadata["header_offset"].number_value();
+  int nrows = metadata.nrows;
 
   string array_name = mrn_to_array_name(mrn);
   fstream file(array_name, ios::in | ios:: out | ios::binary); // open with ios::in and ios::out flags to write sections of file
@@ -178,7 +170,7 @@ void BinaryBackend::edf_to_array(string mrn)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_array_len(mrn);
+  int nsamples = edf_backend.get_nsamples(mrn);
   int fs = edf_backend.get_fs(mrn);
 
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;

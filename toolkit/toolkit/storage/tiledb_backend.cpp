@@ -22,14 +22,14 @@ string TileDBBackend::get_workspace()
   return DATADIR;
 }
 
-int TileDBBackend::get_fs(string mrn)
+ArrayMetadata TileDBBackend::get_array_metadata(string mrn)
 {
-  return 256; // TODO(joshblum) store this in TileDB metadata when it's implemented
-}
-
-int TileDBBackend::get_array_len(string mrn)
-{
-  return 84992; // TODO(joshblum) store this in TileDB metadata when it's implemented
+  // TODO(joshblum) store this in TileDB metadata when it's implemented
+  int fs = 256;
+  int nsamples = 84992;
+  int nrows = nsamples;
+  int ncols = NCHANNELS;
+  return ArrayMetadata(fs, nsamples, nrows, ncols);
 }
 
 void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
@@ -100,7 +100,7 @@ void TileDBBackend::edf_to_array(string mrn)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_array_len(mrn);
+  int nsamples = edf_backend.get_nsamples(mrn);
   int fs = edf_backend.get_fs(mrn); // TODO(joshblum) store this in TileDB metadata when it's implemented
   cout << "Writing " << nsamples << " samples with fs=" << fs << "." << endl;
 

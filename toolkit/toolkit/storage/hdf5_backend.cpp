@@ -8,33 +8,29 @@ using namespace arma;
 
 #define DATA_RANK 2
 #define ATTR_RANK 1
-#define NUM_ATTR 2
+#define NUM_ATTR 4
 #define ATTR_NAME "metadata" // we store fs and nsamples here, all datasets have the same attribute name
 #define FS_IDX 0
-#define DATA_LEN_IDX 1
+#define NSAMPLES_IDX 1
+#define NROWS_IDX 2
+#define NCOLS_IDX 3
 
 string HDF5Backend::mrn_to_array_name(string mrn)
 {
   return AbstractStorageBackend::_mrn_to_array_name(mrn, "h5");
 }
 
-int HDF5Backend::get_array_metadata(string mrn, int metadata_idx)
+ArrayMetadata HDF5Backend::get_array_metadata(string mrn)
 {
   DataSet dataset = get_cache(mrn);
   Attribute attr = dataset.openAttribute(ATTR_NAME);
   int attr_data[NUM_ATTR];
   attr.read(PredType::NATIVE_INT, attr_data);
-  return attr_data[metadata_idx];
-}
-
-int HDF5Backend::get_fs(string mrn)
-{
-  return get_array_metadata(mrn, FS_IDX);
-}
-
-int HDF5Backend::get_array_len(string mrn)
-{
-  return get_array_metadata(mrn, DATA_LEN_IDX);
+  int fs = attr_data[FS_IDX];
+  int nsamples = attr_data[NSAMPLES_IDX];
+  int nrows = attr_data[NROWS_IDX];
+  int ncols = attr_data[NCOLS_IDX];
+  return ArrayMetadata(fs, nsamples, nrows, ncols);
 }
 
 void HDF5Backend::create_array(string mrn, ArrayMetadata* metadata)
@@ -49,10 +45,11 @@ void HDF5Backend::create_array(string mrn, ArrayMetadata* metadata)
   DataSpace dataspace(DATA_RANK, data_dims);
   DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
 
-  // Write fs and data_len as attributes
   int attr_data[NUM_ATTR];
   attr_data[FS_IDX] = metadata->fs;
-  attr_data[DATA_LEN_IDX] = metadata->nsamples;
+  attr_data[NSAMPLES_IDX] = metadata->nsamples;
+  attr_data[NROWS_IDX] = metadata->nrows;
+  attr_data[NCOLS_IDX] = metadata->ncols;
   hsize_t attr_dims[ATTR_RANK] = {NUM_ATTR};
   DataSpace attrspace = DataSpace(ATTR_RANK, attr_dims);
 
@@ -155,11 +152,13 @@ void HDF5Backend::edf_to_array(string mrn)
   edf_backend.open_array(mrn);
 
   int nchannels = NCHANNELS;
-  int nsamples = edf_backend.get_array_len(mrn);
+  int nsamples = edf_backend.get_nsamples(mrn);
+  int nrows = nsamples;
+  int ncols = nchannels;
   int fs = edf_backend.get_fs(mrn);
 
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
-  ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nsamples, nchannels);
+  ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nrows, ncols);
   create_array(mrn, &metadata);
   open_array(mrn);
 

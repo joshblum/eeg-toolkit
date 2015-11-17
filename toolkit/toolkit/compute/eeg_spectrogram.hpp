@@ -57,6 +57,7 @@ class SpecParams
 void eeg_spectrogram_wrapper(string mrn, float start_time,
                               float end_time, int ch, fmat& spec_mat);
 void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat);
+void precompute_spectrogram(string mrn);
 
 #endif // SPECTROGRAM_H
 

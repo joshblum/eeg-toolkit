@@ -8,6 +8,7 @@
 
 #include "../json11/json11.hpp"
 #include "../config.hpp"
+#include "../helpers.hpp"
 #include "EDFlib/edflib.h"
 #include "H5Cpp.h"
 #include "TileDB/core/include/capis/tiledb.h"
@@ -35,6 +36,15 @@ class ArrayMetadata
     int nsamples;
     int nrows;
     int ncols;
+    Json optional_metadata;
+
+    ArrayMetadata()
+    {
+      fs = 0;
+      nsamples = 0;
+      nrows = 0;
+      ncols = 0;
+    }
 
     ArrayMetadata(int fs, int nsamples, int nrows, int ncols)
     {
@@ -135,14 +145,27 @@ class AbstractStorageBackend
 
     bool array_exists(string mrn)
     {
-      // don't convert if the file already exists.
-      struct stat buffer;
       string array_name = mrn_to_array_name(mrn);
-      return stat(array_name.c_str(), &buffer) == 0;
+      return file_exists(array_name);
+    }
+    int get_fs(string mrn)
+    {
+      return get_array_metadata(mrn).fs;
+    }
+    int get_nsamples(string mrn)
+    {
+      return get_array_metadata(mrn).nsamples;
+    }
+    int get_nrows(string mrn)
+    {
+      return get_array_metadata(mrn).nrows;
+    }
+    int get_ncols(string mrn)
+    {
+      return get_array_metadata(mrn).ncols;
     }
 
-    virtual int get_fs(string mrn) = 0;
-    virtual int get_array_len(string mrn) = 0;
+    virtual ArrayMetadata get_array_metadata(string mrn) = 0;
     virtual void create_array(string mrn, ArrayMetadata* metadata) = 0;
     virtual void open_array(string mrn) = 0;
     virtual void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf) = 0;
@@ -157,33 +180,30 @@ class EDFBackend: public AbstractStorageBackend<edf_hdr_struct*>
     string mrn_to_array_name(string mrn);
 
   public:
-    int get_fs(string mrn);
-    int get_array_len(string mrn);
+    ArrayMetadata get_array_metadata(string mrn);
     void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string filename);
+    void edf_to_array(string mrn);
 };
 
-class BinaryBackend: public AbstractStorageBackend<Json>
+class BinaryBackend: public AbstractStorageBackend<ArrayMetadata>
 {
   protected:
     string mrn_to_array_name(string mrn);
-    Json get_header(string mrn);
 
   public:
-    int get_fs(string mrn);
-    int get_array_len(string mrn);
+    ArrayMetadata get_array_metadata(string mrn);
     void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string filename);
+    void edf_to_array(string mrn);
 };
 
  // TODO(joshblum): why can't we pass by ref?
@@ -195,15 +215,14 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
     void _read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf);
 
   public:
-    int get_fs(string mrn);
-    int get_array_len(string mrn);
+    ArrayMetadata get_array_metadata(string mrn);
     void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string filename);
+    void edf_to_array(string mrn);
 };
 
 typedef pair<TileDB_CTX*, int> tiledb_cache_pair;
@@ -216,15 +235,14 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
     string get_workspace();
 
   public:
-    int get_fs(string mrn);
-    int get_array_len(string mrn);
+    ArrayMetadata get_array_metadata(string mrn);
     void create_array(string mrn, ArrayMetadata* metadata);
     void open_array(string mrn);
     void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string filename);
+    void edf_to_array(string mrn);
 };
 
 typedef BACKEND StorageBackend;
