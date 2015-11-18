@@ -14,7 +14,7 @@ using namespace json11;
 
 string BinaryBackend::mrn_to_array_name(string mrn)
 {
-    return AbstractStorageBackend::_mrn_to_array_name(mrn, "bin");
+  return _mrn_to_array_name(mrn, ".bin");
 }
 
 ArrayMetadata BinaryBackend::get_array_metadata(string mrn)
@@ -90,7 +90,7 @@ void BinaryBackend::read_array(string mrn, int ch, int start_offset, int end_off
   size_t column_offset = ch * row_size;
   size_t row_offset = start_offset * sizeof(float);
   size_t seek_size = header_offset + column_offset + row_offset;
-  size_t read_size = (1 + end_offset - start_offset) * sizeof(float);
+  size_t read_size = buf.n_cols * sizeof(float);
 
   string array_name = mrn_to_array_name(mrn);
   ifstream file;
@@ -110,17 +110,17 @@ void BinaryBackend::read_array(string mrn, int start_offset, int end_offset, fma
   string array_name = mrn_to_array_name(mrn);
   ifstream file;
   file.open(array_name, ios::binary);
-  file.seekg(header_offset);
 
-  size_t read_size = (1 + end_offset - start_offset) * sizeof(float);
+  size_t read_size = buf.n_cols * sizeof(float);
   size_t row_size = nrows * sizeof(float);
   size_t row_offset = start_offset * sizeof(float);
   size_t column_offset = 0;
   size_t seek_size = header_offset + row_offset;
+  frowvec row;
   for (int i = 0; i < ncols; i++)
   {
     file.seekg(seek_size + column_offset);
-    frowvec row = buf.row(i);
+    row = buf.row(i);
     file.read((char*) row.memptr(), read_size);
     buf.row(i) = row; // needed?
     column_offset += row_size;
@@ -142,7 +142,7 @@ void BinaryBackend::write_array(string mrn, int ch, int start_offset, int end_of
   } else {
     col = CH_REVERSE_IDX[ch];
   }
-  size_t write_size = (1 + end_offset - start_offset) * sizeof(float);
+  size_t write_size = buf.n_cols * sizeof(float);
   size_t row_size = nrows * sizeof(float);
   size_t row_offset = start_offset * sizeof(float);
   size_t column_offset = col * row_size;
@@ -193,8 +193,7 @@ void BinaryBackend::edf_to_array(string mrn)
         chunk_buf.resize(end_offset - start_offset);
       }
       edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
-      fmat chunk_mat = conv_to<fmat>::from(chunk_buf);
-      write_array(mrn, ch, start_offset, end_offset, chunk_mat);
+      write_array(mrn, ch, start_offset, end_offset, chunk_buf);
 
       start_offset = end_offset;
       // ensure we write the last part of the samples

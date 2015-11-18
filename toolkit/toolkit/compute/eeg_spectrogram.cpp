@@ -250,7 +250,7 @@ void precompute_spectrogram(string mrn)
   int fs = backend.get_fs(mrn);
   int nsamples = backend.get_nsamples(mrn);
 
-  int chunk_size = 100000;
+  int chunk_size = 10000000;
   int nchunks = ceil(nsamples / (float) chunk_size);
   cout << "Computing " << nchunks << " chunks and " << nsamples << " samples." << endl;
 
@@ -270,10 +270,19 @@ void precompute_spectrogram(string mrn)
   {
     string ch_name = CH_NAME_MAP[ch];
     string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn, ch_name);
+
+    cout << "Creating: " << cached_mrn_name << endl;
     backend.create_array(cached_mrn_name, &metadata);
     backend.open_array(cached_mrn_name);
+
     start_offset = 0;
     end_offset = min(nsamples, chunk_size);
+
+    start_time = samples_to_hours(fs, start_offset);
+    end_time = samples_to_hours(fs, end_offset);
+
+    spec_params = SpecParams(&backend, mrn, start_time, end_time);
+
     cached_start_offset = 0;
     cached_end_offset = spec_params.nblocks;
 
@@ -287,7 +296,7 @@ void precompute_spectrogram(string mrn)
 
       start_offset = end_offset;
       cached_start_offset = cached_end_offset;
-      cached_end_offset += spec_params.nblocks;
+      cached_end_offset = min(cached_end_offset + spec_params.nblocks, metadata.nsamples);
 
       // ensure we write the last part of the samples
       if (end_offset == nsamples)

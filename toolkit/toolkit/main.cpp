@@ -13,10 +13,22 @@ using namespace arma;
 
 void example_spectrogram(fmat& spec_mat, SpecParams* spec_params)
 {
-  unsigned long long start = getticks();
   spec_params->print();
-  eeg_spectrogram(spec_params, LL, spec_mat);
+  StorageBackend* backend = spec_params->backend;
+  string cached_mrn_name = backend->mrn_to_cached_mrn_name(spec_params->mrn, CH_NAME_MAP[LL]);
+
+  unsigned long long start = getticks();
+  if (backend->array_exists(cached_mrn_name))
+  {
+    cout << "Using cached visualization!" << endl;
+    backend->open_array(cached_mrn_name);
+    backend->read_array(cached_mrn_name, spec_params->spec_start_offset, spec_params->spec_end_offset, spec_mat);
+    backend->close_array(cached_mrn_name);
+  } else {
+    eeg_spectrogram(spec_params, LL, spec_mat);
+  }
   log_time_diff("example_spectrogram:", start);
+
   printf("Spectrogram shape as_mat: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);
   printf("Sample data: [\n[ ");
@@ -38,7 +50,6 @@ void compute_example(string mrn, float start_time, float end_time)
   fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
   example_spectrogram(spec_mat, &spec_params);
   backend.close_array(mrn);
-
   // example_change_points(spec_mat);
 }
 

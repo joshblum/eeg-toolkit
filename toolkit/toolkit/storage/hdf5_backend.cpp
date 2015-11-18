@@ -17,7 +17,7 @@ using namespace arma;
 
 string HDF5Backend::mrn_to_array_name(string mrn)
 {
-  return AbstractStorageBackend::_mrn_to_array_name(mrn, "h5");
+  return _mrn_to_array_name(mrn, ".h5");
 }
 
 ArrayMetadata HDF5Backend::get_array_metadata(string mrn)
@@ -151,11 +151,10 @@ void HDF5Backend::edf_to_array(string mrn)
   EDFBackend edf_backend;
   edf_backend.open_array(mrn);
 
-  int nchannels = NCHANNELS;
+  int fs = edf_backend.get_fs(mrn);
   int nsamples = edf_backend.get_nsamples(mrn);
   int nrows = nsamples;
-  int ncols = nchannels;
-  int fs = edf_backend.get_fs(mrn);
+  int ncols = NCHANNELS;
 
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
   ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nrows, ncols);
@@ -163,7 +162,7 @@ void HDF5Backend::edf_to_array(string mrn)
   open_array(mrn);
 
   int ch, start_offset, end_offset;
-  for (int i = 0; i < nchannels; i++)
+  for (int i = 0; i < ncols; i++)
   {
     ch = CHANNEL_ARRAY[i];
     start_offset = 0;
@@ -177,8 +176,7 @@ void HDF5Backend::edf_to_array(string mrn)
         chunk_buf.resize(end_offset - start_offset);
       }
       edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
-      fmat chunk_mat = conv_to<fmat>::from(chunk_buf);
-      write_array(mrn, ch, start_offset, end_offset, chunk_mat);
+      write_array(mrn, ch, start_offset, end_offset, chunk_buf);
 
       start_offset = end_offset;
       // ensure we write the last part of the samples

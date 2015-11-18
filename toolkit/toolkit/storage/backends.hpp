@@ -84,7 +84,7 @@ class AbstractStorageBackend
   protected:
     // mrn to array obj pointer
     unordered_map<string, T> data_cache;
-    char* cache_tag = "-cached";
+    const char* cache_tag = "-cached";
 
     bool in_cache(string mrn)
     {
@@ -125,8 +125,8 @@ class AbstractStorageBackend
       data_cache.erase(mrn);
     }
 
-    string _mrn_to_array_name(string mrn, string ext) {
-      return DATADIR + mrn + "." + ext;
+    string _mrn_to_array_name(string mrn, string file_ext) {
+      return DATADIR + mrn + file_ext;
     }
 
     virtual string mrn_to_array_name(string mrn) = 0;
@@ -148,18 +148,22 @@ class AbstractStorageBackend
       string array_name = mrn_to_array_name(mrn);
       return file_exists(array_name);
     }
+
     int get_fs(string mrn)
     {
       return get_array_metadata(mrn).fs;
     }
+
     int get_nsamples(string mrn)
     {
       return get_array_metadata(mrn).nsamples;
     }
+
     int get_nrows(string mrn)
     {
       return get_array_metadata(mrn).nrows;
     }
+
     int get_ncols(string mrn)
     {
       return get_array_metadata(mrn).ncols;
@@ -211,7 +215,6 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
 {
   protected:
     string mrn_to_array_name(string mrn);
-    int get_array_metadata(string mrn, int metadata_idx);
     void _read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf);
 
   public:
@@ -231,8 +234,11 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
 {
   protected:
     string mrn_to_array_name(string mrn);
-    string mrn_to_filename(string mrn, string format);
+    string get_array_name(string mrn);
+    string get_group();
     string get_workspace();
+    void _open_array(string mrn, const char* mode);
+    void _read_array(string mrn, double* range, fmat& buf);
 
   public:
     ArrayMetadata get_array_metadata(string mrn);

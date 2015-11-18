@@ -40,9 +40,9 @@ void viz_to_csv(string mrn)
     backend.read_array(cached_mrn_name, 0, backend.get_nrows(cached_mrn_name) - 1, mat);
     file.open(path, ios::trunc);
     mat = mat.t();
-    for (uint i = 0; i < mat.n_rows; i++)
+    for (uword i = 0; i < mat.n_rows; i++)
     {
-      for (uint j = 0; j < mat.n_cols; j++)
+      for (uword j = 0; j < mat.n_cols; j++)
       {
         file << i << "," << j << "," << mat(i,j) << endl;
       }

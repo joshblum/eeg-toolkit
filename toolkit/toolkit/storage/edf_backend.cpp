@@ -9,7 +9,7 @@ using namespace arma;
 
 string EDFBackend::mrn_to_array_name(string mrn)
 {
-    return AbstractStorageBackend::_mrn_to_array_name(mrn, "edf");
+  return _mrn_to_array_name(mrn, ".edf");
 }
 
 ArrayMetadata EDFBackend::get_array_metadata(string mrn)

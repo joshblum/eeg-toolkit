@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  if (argc <= 4)
+  if (argc <= 2)
   {
     string mrn;
     if (argc == 2)
