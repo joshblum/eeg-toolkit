@@ -6,6 +6,9 @@ var IDS = ["LL", "LP", "RP", "RL"];
 // When a request for update comes in the sender must specify an id to update
 var SPECTROGRAMS = {};
 
+// global visgoth object
+var visgoth = new Visgoth();
+
 /*
  * Helper function to wrap `document.getElementById`
  */
@@ -57,16 +60,22 @@ function Spectrogram(id) {
     this.specModeUniform = null;
     this.specLogarithmicUniform = null;
 
+    // for performance stats
+    this.bufferLoadTimeStat = new VisgothStat(VisgothLabels.bufferLoadTime, this.id);
+    this.networkLatencyStat = new VisgothStat(VisgothLabels.networkLatency, this.id);
+    this.networkBufferSizeStat = new VisgothStat(VisgothLabels.networkBufferSize, this.id);
+    this.fpsStat = new VisgothStat(VisgothLabels.fps, this.id);
+    visgoth.registerStat(this.bufferLoadTimeStat);
+    visgoth.registerStat(this.networkLatencyStat);
+    visgoth.registerStat(this.networkBufferSizeStat);
+    visgoth.registerStat(this.fpsStat);
+
     // vertex buffer objects
     this.vertexPositionBuffers = null;
     this.textureCoordBuffer = null;
 
     // textures objects
     this.spectrogramTextures = null;
-
-    // Debugging info
-    this.startRequestTime = null;
-    this.startLoadTime = null;
 
     // Spectrogram meta data
     this.xOffset = 0;
@@ -159,22 +168,18 @@ Spectrogram.prototype.logGLInfo = function() {
 /* Update the start time when asking for a new spectrogram */
 Spectrogram.prototype.updateStartRequestTime = function() {
     console.log("updating startRequestTime");
-    this.startRequestTime = Date.now();
+    this.networkLatencyStat.markStart();
 };
 
 Spectrogram.prototype.updateStartLoadTime = function() {
     console.log("updating startLoadTime");
-    this.startLoadTime = Date.now();
+    this.bufferLoadTimeStat.markStart();
 };
 
 /* Log the elapsed time to generate a spectrogram */
 Spectrogram.prototype.logElaspedTime = function() {
-    var endTime = Date.now();
-    var totalTime = endTime - this.startRequestTime;
-    var loadTime = endTime - this.startLoadTime;
-    console.log("Spectrogram " + this.id + ":\n" +
-        "Total request time: " + totalTime + " ms.\n" +
-        "Load time: " + loadTime + " ms.");
+    this.networkLatencyStat.measurePerformance();
+    this.bufferLoadTimeStat.measurePerformance();
 };
 
 /*
@@ -357,6 +362,7 @@ function hoursToSeconds(time){
    nfreqs     the height of the data, the number of frequency bins.
 */
 Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift) {
+    this.networkBufferSizeStat.addValue(data.byteLength);
     var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
 
     // calculate the number of textures needed
@@ -393,9 +399,13 @@ Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift)
 
 /* updates the spectrogram and the scales */
 Spectrogram.prototype.drawScene = function() {
+    this.fpsStat.markStart();
+
     this.drawSpectrogram();
     this.drawSpecTimeScale();
     this.drawSpecFrequencyScale();
+
+    this.fpsStat.measurePerformance();
 };
 
 

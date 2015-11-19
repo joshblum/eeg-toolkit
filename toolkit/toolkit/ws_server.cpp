@@ -6,9 +6,10 @@
 #include "config.hpp"
 #include "helpers.hpp"
 #include "json11/json11.hpp"
-#include "storage/backends.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
+#include "storage/backends.hpp"
+#include "visgoth/visgoth.hpp"
 
 using namespace arma;
 using namespace std;
@@ -126,13 +127,16 @@ void send_change_points(WsServer* server,
 }
 
 
-void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json data)
+void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json json)
 {
+  Json content = json["content"];
+  // TODO(joshblum): add flag for downsampling, call visgoth to get downsample factor
+
   // TODO(joshblum): add data validation
-  string mrn = data["mrn"].string_value();
-  float start_time = data["startTime"].number_value();
-  float end_time = data["endTime"].number_value();
-  int ch = data["channel"].number_value();
+  string mrn = content["mrn"].string_value();
+  float start_time = content["startTime"].number_value();
+  float end_time = content["endTime"].number_value();
+  int ch = content["channel"].number_value();
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..
@@ -166,19 +170,27 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   backend.close_array(mrn);
 }
 
-void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connection, string type, Json content)
+void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
 {
+  auto message_str = message->string();
+  string err;
+  Json json = Json::parse(message_str, err);
+
+  // TODO add error checking for null fields
+  string type = json["type"].string_value();
+
   if (type == "request_file_spectrogram")
   {
-    on_file_spectrogram(server, connection, content);
+    cout << "Json data: " << json.dump() << endl;
+    on_file_spectrogram(server, connection, json);
   }
   else if (type == "information")
   {
-    cout << content.string_value() << endl;
+    cout << json.string_value() << endl;
   }
   else
   {
-    cout << "Unknown type: " << type << " and content: " << content.string_value() << endl;
+    cout << "Unknown type: " << type << " and content: " << json.string_value() << endl;
   }
 }
 
@@ -194,30 +206,22 @@ int main(int argc, char* argv[])
     port = WS_DEFAULT_PORT;
   }
 
-  // WebSocket (WS)-server at port using WS_NUM_THREADS threads
+  // WebSocket (WS)-server at port
   int num_threads = max((int) thread::hardware_concurrency() - 1, 1);
   WsServer server(port, num_threads);
 
+  // Spectrogram Endpoint
   auto& ws = server.endpoint["^/compute/spectrogram/?$"];
 
   ws.onmessage = [&server](shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
   {
-    auto message_str = message->string();
-    string err;
-    Json json = Json::parse(message_str, err);
-
-    // TODO add error checking for null fields
-    string type = json["type"].string_value();
-    Json content = json["content"];
-
-    receive_message(&server, connection, type, content);
+    receive_message(&server, connection, message);
   };
 
   ws.onopen = [](shared_ptr<WsServer::Connection> connection)
   {
     cout << "WebSocket opened" << endl;
   };
-
 
   // See RFC 6455 7.4.1. for status codes
   ws.onclose = [](shared_ptr<WsServer::Connection> connection, int status, const string & reason)
@@ -232,11 +236,10 @@ int main(int argc, char* argv[])
          "Error: " << ec << ", error message: " << ec.message() << endl;
   };
 
-
+  // Start the server
   thread server_thread([&server, port, num_threads]()
   {
     cout << "WebSocket Server started at port: " << port << " using " << num_threads << " threads and backend: " << TOSTRING(BACKEND) << endl;
-    // Start WS-server
     server.start();
   });
 

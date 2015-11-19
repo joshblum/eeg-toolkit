@@ -41,44 +41,12 @@ function getURLParameters() {
    Arguments:
    type      the message type as string.
    content   the message content as json-serializable data.
-   payload   binary data as ArrayBuffer.
 */
-function sendMessage(type, content, payload) {
-    if (payload === undefined) {
-        ws.send(JSON.stringify({
-            type: type,
-            content: content
-        }));
-    } else {
-        var headerString = JSON.stringify({
-            type: type,
-            content: content
-        });
-        // append enough spaces so that the payload starts at an 8-byte
-        // aligned position. The first four bytes will be the length of
-        // the header, encoded as a 32 bit signed integer:
-        var alignmentBytes = 8 - ((headerString.length + 4) % 8);
-        for (var i = 0; i < alignmentBytes; i++) {
-            headerString += " ";
-        }
-
-        var message = new ArrayBuffer(4 + headerString.length + payload.byteLength);
-
-        // write the length of the header as a binary 32 bit signed integer:
-        var prefixData = new Int32Array(message, 0, 4);
-        prefixData[0] = headerString.length;
-
-        // write the header data
-        var headerData = new Uint8Array(message, 4, headerString.length);
-        for (i = 0; i < headerString.length; i++) {
-            headerData[i] = headerString.charCodeAt(i);
-        }
-
-        // write the payload data
-        var payloadData = new Uint8Array(message, 4 + headerString.length, payload.byteLength);
-        payloadData.set(new Uint8Array(payload));
-        ws.send(message);
-    }
+function sendMessage(type, content) {
+  ws.send(JSON.stringify({
+      type: type,
+      content: content
+  }));
 }
 
 /* Request the spectrogram for a file.
@@ -94,7 +62,7 @@ function sendMessage(type, content, payload) {
 function requestFileSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
     updateSpectrogramStartTimes();
     // TODO (joshblum): need a new field for request action to allow updates for panning
-    sendMessage("request_file_spectrogram", {
+    visgoth.sendProfiledMessage("request_file_spectrogram", {
         mrn: mrn,
         nfft: nfft,
         startTime: startTime,

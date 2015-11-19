@@ -10,11 +10,13 @@ STORAGESRC := storage/binary_backend.cpp\
 					json11/json11.cpp # required by binary_backend for metadata
 COMPUTESRC := compute/eeg_spectrogram.cpp\
 					compute/eeg_change_point.cpp
+VISGOTHSRC := visgoth/visgoth.cpp
 TILEDBLIBPATH := storage/TileDB/core/lib/release
 TILEDBLIBNAME := libtiledb.so
 
 WSSRC := $(COMPUTESRC)\
 				$(STORAGESRC)\
+				$(VISGOTHSRC)\
 				ws_server.cpp
 MAINSRC := $(COMPUTESRC)\
 					$(STORAGESRC)\
