@@ -57,7 +57,7 @@ function sendMessage(type, content) {
    startTime the start time for the calculation
    endTime   the end time for the calculation
    overlap   the amount of overlap between consecutive spectra.
-   channel   the channel (LP, LP, ...) we are requesting
+   channel   the channel (LL, LP, ...) we are requesting
 */
 function requestFileSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
     updateSpectrogramStartTimes();

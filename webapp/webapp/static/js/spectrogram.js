@@ -134,6 +134,9 @@ Spectrogram.prototype.addListeners = function() {
 
 /* set resolution of all canvases to native resolution */
 Spectrogram.prototype.updateCanvasResolutions = function() {
+    if (this.specView === undefined) {
+      return;
+    }
     this.specView.width = this.specView.clientWidth;
     this.specView.height = this.specView.clientHeight;
     this.gl.viewport(0, 0, this.specView.width, this.specView.height);
