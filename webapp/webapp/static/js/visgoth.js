@@ -17,6 +17,7 @@ var VisgothLabels = {
   "fps": "fps",
   "bufferLoadTime": "bufferLoadTime",
   "networkBufferSize": "networkBufferSize",
+  "extent": "extent",
 };
 
 // ************** //
@@ -102,6 +103,11 @@ var FpsProfiler = new VisgothProfiler(VisgothLabels.fps, function(stats) {
   return 1000 / this.avgStatArray(stats);
 });
 
+var MockExtentProfiler = new VisgothProfiler(VisgothLabels.extent, function(stats) {
+  var extent_state = stats[this.label][0].state;
+  return extent_state[extent_state.length - 1];
+});
+
 
 // ********* //
 //  Visgoth  //
@@ -111,6 +117,7 @@ function Visgoth() {
     BandwidthProfiler,
     NetworkLatencyProfiler,
     FpsProfiler,
+    MockExtentProfiler,
   ];
 
   this.stats = {};
@@ -149,7 +156,9 @@ Visgoth.prototype.getMetadata = function() {
 };
 
 Visgoth.prototype.sendProfiledMessage = function(type, content) {
-  content.metadata = this.getMetadata();
-  content.profile = this.getProfileData();
-  sendMessage(type, content);
+  var visgoth_content = {
+    "metadata": this.getMetadata(),
+    "profile": this.getProfileData(),
+  };
+  sendMessage(type, content, visgoth_content);
 };

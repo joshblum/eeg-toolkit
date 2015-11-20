@@ -115,6 +115,7 @@ void send_change_points(WsServer* server,
 void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json json)
 {
   Json content = json["content"];
+  Json visgoth_content = json["visgoth_content"];
 
   // TODO(joshblum): add data validation
   string mrn = content["mrn"].string_value();
@@ -124,8 +125,9 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..
+  Visgoth visgoth;
   // TODO(joshblum): add flag for downsampling, call visgoth to get downsample factor
-  uint extent = 2; // downsampling factor
+  uint extent = visgoth.get_extent(visgoth_content["profile"]); // downsampling factor
   SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
   spec_params.print();
   cout << endl; // print newline between each spectrogram computation

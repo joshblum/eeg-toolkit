@@ -9,18 +9,8 @@ using namespace json11;
 
 class Visgoth
 {
-  private:
-    Json stats;
-
   public:
-
-    // Constructor
-    Visgoth(Json stats)
-    {
-      this->stats = stats;
-    }
-
-    //TODO(xxx): define interfaces for visgoth object
+    uint get_extent(Json profile_data);
 };
 
 #endif // VISGOTH_H

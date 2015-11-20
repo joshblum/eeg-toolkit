@@ -65,10 +65,12 @@ function Spectrogram(id) {
     this.networkLatencyStat = new VisgothStat(VisgothLabels.networkLatency, this.id);
     this.networkBufferSizeStat = new VisgothStat(VisgothLabels.networkBufferSize, this.id);
     this.fpsStat = new VisgothStat(VisgothLabels.fps, this.id);
+    this.mockExtentStat = new VisgothStat(VisgothLabels.extent, this.id);
     visgoth.registerStat(this.bufferLoadTimeStat);
     visgoth.registerStat(this.networkLatencyStat);
     visgoth.registerStat(this.networkBufferSizeStat);
     visgoth.registerStat(this.fpsStat);
+    visgoth.registerStat(this.mockExtentStat);
 
     // vertex buffer objects
     this.vertexPositionBuffers = null;

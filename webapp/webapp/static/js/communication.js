@@ -42,10 +42,11 @@ function getURLParameters() {
    type      the message type as string.
    content   the message content as json-serializable data.
 */
-function sendMessage(type, content) {
+function sendMessage(type, content, visgoth_content) {
   ws.send(JSON.stringify({
-      type: type,
-      content: content
+      "type": type,
+      "content": content,
+      "visgoth_content": visgoth_content,
   }));
 }
 
