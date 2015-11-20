@@ -77,10 +77,10 @@ SpecParams::SpecParams(StorageBackend* backend,
   this->backend = backend;
   start_time = _start_time;
   end_time = _end_time;
+
   backend->open_array(mrn);
 
   fs = backend->get_fs(mrn);
-
 
   nsamples = backend->get_nsamples(mrn);
   int pad = 0;

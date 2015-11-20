@@ -81,37 +81,22 @@ void send_frowvec(WsServer* server,
   send_message(server, connection, "spectrogram", content, vector.memptr(), vector.n_elem);
 }
 
-void send_spectrogram_new(WsServer* server,
-                          shared_ptr<WsServer::Connection> connection,
-                          SpecParams spec_params, string canvasId)
+void send_spectrogram(WsServer* server,
+                             shared_ptr<WsServer::Connection> connection,
+                             SpecParams spec_params, string canvasId,
+                             fmat& spec_mat)
 {
   Json content = Json::object
   {
-    {"action", "new"},
-    {"nblocks", spec_params.nblocks},
-    {"nfreqs", spec_params.nfreqs},
+    {"action", "spectrogram"},
+    {"nblocks", (int) spec_mat.n_cols},
+    {"nfreqs", (int) spec_mat.n_rows},
     {"fs", spec_params.fs},
     {"startTime", spec_params.start_time},
     {"endTime", spec_params.end_time},
     {"canvasId", canvasId}
   };
-  log_json(content);
-  send_message(server, connection, "spectrogram", content, NULL, -1);
-}
 
-void send_spectrogram_update(WsServer* server,
-                             shared_ptr<WsServer::Connection> connection,
-                             SpecParams spec_params, string canvasId,
-                             fmat& spec_mat)
-{
-
-  Json content = Json::object
-  {
-    {"action", "update"},
-    {"nblocks", spec_params.nblocks},
-    {"nfreqs", spec_params.nfreqs},
-    {"canvasId", canvasId}
-  };
   size_t data_size = sizeof(float) * spec_mat.n_elem;
   log_json(content);
   send_message(server, connection, "spectrogram", content, spec_mat.memptr(), data_size);
@@ -130,7 +115,6 @@ void send_change_points(WsServer* server,
 void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json json)
 {
   Json content = json["content"];
-  // TODO(joshblum): add flag for downsampling, call visgoth to get downsample factor
 
   // TODO(joshblum): add data validation
   string mrn = content["mrn"].string_value();
@@ -140,11 +124,11 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..
+  // TODO(joshblum): add flag for downsampling, call visgoth to get downsample factor
+  uint extent = 2; // downsampling factor
   SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);
   spec_params.print();
   cout << endl; // print newline between each spectrogram computation
-
-  send_spectrogram_new(server, connection, spec_params, ch_name);
 
   fmat spec_mat = fmat(spec_params.nfreqs, spec_params.nblocks);
   string cached_mrn_name = backend.mrn_to_cached_mrn_name(mrn, ch_name);
@@ -160,8 +144,8 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
     eeg_spectrogram(&spec_params, ch, spec_mat);
   }
   log_time_diff("eeg_spectrogram", start);
-
-  send_spectrogram_update(server, connection, spec_params, ch_name, spec_mat);
+  downsample(spec_mat, extent);
+  send_spectrogram(server, connection, spec_params, ch_name, spec_mat);
 
   // cp_data_t cp_data;
   // get_change_points(spec_mat, &cp_data);

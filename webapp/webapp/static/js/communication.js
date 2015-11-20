@@ -102,27 +102,14 @@ ws.onmessage = function(event) {
     var canvasId = content.canvasId || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
-        // spectrogram messages can either be a `new` message or an `update` action.
-        var action = content.action;
-        if (action === "new") {
-            // First let"s setup the canvas
-            getElementById("specStartTime").value = content.startTime.toFixed(3);
-            getElementById("specEndTime").value = content.endTime.toFixed(3);
-            spectrogram.newSpectrogram(content.nblocks,
-                content.nfreqs, content.fs,
-                content.startTime, content.endTime);
-        } else if (action === "update") {
-            // Now lets update the next frame in the spectrogram
-            // TODO (joshblum) Instead of allocating new arrays here
-            // it might be worth it to have some of the things preallocated and cached.
-            // 1. Figure out if it is a bottleneck. When things are chunked it should be easier to reuse
-            spectrogram.updateStartLoadTime();
-            spectrogram.updateSpectrogram(new Float32Array(event.data, headerLen + 4),
-                content.nblocks, content.nfreqs);
-            spectrogram.logElaspedTime();
-        } else {
-            console.log(action);
-        }
+        getElementById("specStartTime").value = content.startTime.toFixed(3);
+        getElementById("specEndTime").value = content.endTime.toFixed(3);
+
+        spectrogram.updateStartLoadTime();
+        spectrogram.render(new Float32Array(event.data, headerLen + 4),
+            content.nblocks, content.nfreqs, content.fs,
+            content.startTime, content.endTime);
+        spectrogram.logElaspedTime();
     } else if (type === "loading_progress") {
         spectrogram.updateProgressBar(content.progress);
     } else {

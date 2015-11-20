@@ -78,9 +78,6 @@ function Spectrogram(id) {
     this.spectrogramTextures = null;
 
     // Spectrogram meta data
-    this.xOffset = 0;
-    this.nblocks = 0;
-    this.nfreqs = 0;
     this.specSize = 0; // total size of the spectrogram
     this.specViewSize = 0; // visible size of the spectrogram
     this.init();
@@ -118,7 +115,7 @@ Spectrogram.prototype.init = function() {
     this.loadSpectrogramShaders();
 
     // load dummy data
-    this.newSpectrogram(1, 1, 200, 0, 1);
+    this.render(new Float32Array(), 0, 0, 200, 0, 1);
 
     this.addListeners();
 };
@@ -267,13 +264,28 @@ Spectrogram.prototype.getShader = function(id) {
     return shader;
 };
 
-Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, startTime, endTime) {
-    this.nblocks = nblocks;
-    this.nfreqs = nfreqs;
-    this.xOffset = 0;
-    var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
+
+/* loads a spectrogram into video memory and fills VBOs
+
+   If there is more data than fits into a single texture, several
+   textures are allocated and the data is written into consecutive
+   textures. According vertex positions are saved into an equal number
+   of VBOs.
+
+   - saves textures into a global array `spectrogramTextures`.
+   - saves vertexes into a global array `vertexPositionBuffers`.
+   - saves texture coordinates into global `textureCoordBuffer`.
+
+   Attributes:
+   data       a Float32Array containing nblocks x nfreqs values.
+   nblocks    the width of the data, the number of blocks.
+   nfreqs     the height of the data, the number of frequency bins.
+*/
+Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, endTime) {
+    this.networkBufferSizeStat.addValue(data.byteLength);
 
     // calculate the number of textures needed
+    var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
     var numTextures = nblocks / maxTexSize;
 
     // bail if too big for video memory
@@ -304,10 +316,10 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, startTime, 
 
     // for every texture, calculate vertex indices and texture content
     for (i = 0; i < numTextures; i++) {
-        var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
         // texture position in 0..1:
         var minX = i / numTextures;
         var maxX = ((i + 1) < numTextures) ? (i + 1) / numTextures : 1;
+
         // calculate vertex positions, scaled to -1..1
         this.vertexPositionBuffers[i] = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexPositionBuffers[i]);
@@ -318,12 +330,21 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, startTime, 
             minX * 2 - 1, -1.0
         ]);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
+
+        var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
+        var chunk = data.subarray(i * maxTexSize * nfreqs, (i * maxTexSize + blocks) * nfreqs);
+        var tmp = new Float32Array(chunk.length);
+        for (var x = 0; x < blocks; x++) {
+            for (var y = 0; y < nfreqs; y++) {
+                tmp[x + blocks * y] = chunk[y + nfreqs * x];
+            }
+        }
         this.spectrogramTextures[i] = this.gl.createTexture();
         this.gl.activeTexture(this.gl.TEXTURE0 + i);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.spectrogramTextures[i]);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.LUMINANCE, blocks, nfreqs, 0, this.gl.LUMINANCE, this.gl.FLOAT, null);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.LUMINANCE, blocks, nfreqs, 0, this.gl.LUMINANCE, this.gl.FLOAT, tmp);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
     }
@@ -344,58 +365,6 @@ Spectrogram.prototype.newSpectrogram = function(nblocks, nfreqs, fs, startTime, 
 function hoursToSeconds(time){
   return 60 * 60 * time;
 }
-
-/* loads a spectrogram into video memory and fills VBOs
-
-   If there is more data than fits into a single texture, several
-   textures are allocated and the data is written into consecutive
-   textures. According vertex positions are saved into an equal number
-   of VBOs.
-
-   - saves textures into a global array `spectrogramTextures`.
-   - saves vertexes into a global array `vertexPositionBuffers`.
-   - saves texture coordinates into global `textureCoordBuffer`.
-
-   Attributes:
-   data       a Float32Array containing nblocks x nfreqs values.
-   nblocks    the width of the data, the number of blocks.
-   nfreqs     the height of the data, the number of frequency bins.
-*/
-Spectrogram.prototype.updateSpectrogram = function(data, nblocks, nfreqs, shift) {
-    this.networkBufferSizeStat.addValue(data.byteLength);
-    var maxTexSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-
-    // calculate the number of textures needed
-    var numTextures = nblocks / maxTexSize;
-
-    for (var i = 0; i < numTextures; i++) {
-        // fill textures with spectrogram data
-        var blocks = ((i + 1) < numTextures) ? maxTexSize : (numTextures % 1) * maxTexSize;
-        if (this.xOffset + blocks > this.nblocks) {
-            blocks = this.nblocks - this.xOffset;
-        }
-        var chunk = data.subarray(i * maxTexSize * nfreqs, (i * maxTexSize + blocks) * nfreqs);
-        var tmp = new Float32Array(chunk.length);
-        for (var x = 0; x < blocks; x++) {
-            for (var y = 0; y < nfreqs; y++) {
-                tmp[x + blocks * y] = chunk[y + nfreqs * x];
-            }
-        }
-        this.gl.activeTexture(this.gl.TEXTURE0 + i);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.spectrogramTextures[i]);
-        this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0,
-            this.xOffset, 0, blocks, nfreqs,
-            this.gl.LUMINANCE, this.gl.FLOAT, tmp);
-        // If we have filled the texture, reset the xOffset.
-        // We subtract 1 so the spectrogram appears continuous when we splice chunks
-        this.xOffset = ((i + 1) < numTextures) ? 0 : this.xOffset + blocks - 1;
-
-    }
-    var self = this;
-    window.requestAnimationFrame(function() {
-        self.drawScene();
-    });
-};
 
 /* updates the spectrogram and the scales */
 Spectrogram.prototype.drawScene = function() {

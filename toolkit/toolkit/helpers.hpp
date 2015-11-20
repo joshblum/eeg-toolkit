@@ -6,10 +6,12 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <armadillo>
 
 #include "helpers.hpp"
 
 using namespace std;
+using namespace arma;
 
 static inline unsigned long long getticks()
 {
@@ -48,6 +50,19 @@ static inline bool file_exists(string path)
 {
   struct stat buffer;
   return stat(path.c_str(), &buffer) == 0;
+}
+
+static inline void downsample(fmat& buf, uint extent)
+{
+  if (extent > 1) // don't downsample for 0 or 1
+  {
+    fmat new_buf = fmat(buf.n_rows, buf.n_cols/extent);
+    for (uword i = 0; i < new_buf.n_cols; i++)
+    {
+      new_buf.col(i) = buf.col(i * extent);
+    }
+    buf = new_buf;
+  }
 }
 
 #endif // HELPERS_H
