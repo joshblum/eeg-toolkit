@@ -20,13 +20,8 @@ installdeps: clean submodules dev-packages
 	make -C webapp/webapp installdeps
 
 dev-packages:
-ifeq ('$(OSX)', 'true')
-	cat dev-packages-osx.txt | xargs brew install
-else
-	# Run Linux commands
 	sudo apt-get update
 	cat dev-packages.txt | xargs sudo apt-get -y install
-endif
 	pip install -r requirements.txt
 
 install: installdeps ws_server

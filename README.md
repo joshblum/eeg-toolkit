@@ -28,14 +28,11 @@ TODO(joshblum): add instructions for importing data
 
 ## Development setup
 
-We have some installation commands that utilize `brew` or `apt-get`
-based on your system.
-
 All Python packages are install using `pip` from the `requirements.txt` file.
 If you wish to install via another method i.e. `conda`, all the packages and
 versions can be found in `requirements.txt`.
 
-The commands below install common packages for OSX or Linux and run the server.
+The commands below install common packages for Linux and run the server.
 
 Note: You need to use `sudo` if you are not working in a
 [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) when
