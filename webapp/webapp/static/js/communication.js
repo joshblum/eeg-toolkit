@@ -50,8 +50,7 @@ function sendMessage(type, content, visgoth_content) {
   }));
 }
 
-/* Request the spectrogram for a file.
-
+/*
    Arguments:
    mrn       the medical record number from which to load data.
    nfft      the FFT length used for calculating the spectrogram.
@@ -60,10 +59,10 @@ function sendMessage(type, content, visgoth_content) {
    overlap   the amount of overlap between consecutive spectra.
    channel   the channel (LL, LP, ...) we are requesting
 */
-function requestFileSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
-    updateSpectrogramStartTimes();
+function requestSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
+    SPECTROGRAMS[IDS[channel]].updateStartRequestTime();
     // TODO (joshblum): need a new field for request action to allow updates for panning
-    visgoth.sendProfiledMessage("request_file_spectrogram", {
+    visgoth.sendProfiledMessage("spectrogram", {
         mrn: mrn,
         nfft: nfft,
         startTime: startTime,

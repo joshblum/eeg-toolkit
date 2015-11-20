@@ -112,7 +112,7 @@ void send_change_points(WsServer* server,
 }
 
 
-void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json json)
+void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json json)
 {
   Json content = json["content"];
   Json visgoth_content = json["visgoth_content"];
@@ -165,10 +165,10 @@ void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connecti
   // TODO add error checking for null fields
   string type = json["type"].string_value();
 
-  if (type == "request_file_spectrogram")
+  if (type == "spectrogram")
   {
     cout << "Json data: " << json.dump() << endl;
-    on_file_spectrogram(server, connection, json);
+    serve_spectrogram(server, connection, json);
   }
   else if (type == "information")
   {
