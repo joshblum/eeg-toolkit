@@ -123,41 +123,6 @@ ws.onopen = function() {
         var spectrogram = SPECTROGRAMS[i];
         spectrogram.logGLInfo();
     }
-    reloadSpectrogram();
+    reloadSpectrograms();
 };
 
-/* Test the keyup event for a submission and then reload the spectrogram.
- */
-function submitSpectrogram(e) {
-    var which = e.which || e.keyCode;
-    if (which === 13) {
-        reloadSpectrogram();
-    }
-}
-
-/* Loads the spectrogram for the currently seleced file/FFT-length.
-
-   Reads the input field to get the current file and the
-   select field to get the current FFT length.
-
-   This only sends the request for a spectrogram. Delivering the
-   spectrogram is up to the server.
-*/
-function reloadSpectrogram() {
-    var patientIdentifier = getElementById("patientIdentifierByMRN").value;
-    var fftLen = parseFloat(getElementById("fftLen").value);
-    var startTime = parseFloat(getElementById("specStartTime").value);
-    var endTime = parseFloat(getElementById("specEndTime").value);
-    // first we try to load a file
-    if (patientIdentifier) {
-        console.log("Requesting spectrogram for: " + patientIdentifier);
-        for (var ch = 0; ch < IDS.length; ch++) {
-          requestFileSpectrogram(patientIdentifier, fftLen, startTime, endTime,
-            OVERLAP, ch);
-        }
-    }
-    if (!patientIdentifier) {
-        console.log("Could not load spectrogram: No file selected");
-        return;
-    }
-}

@@ -13,9 +13,14 @@
       <div class="input-field col s1">
         {% include "menu-nav.html" %}
       </div>
-      <div class="input-field offset-s3 col s1">
+      <div class="input-field offset-s2 col s1">
           <input id="patientIdentifierByMRN" name="patientIdentifierByMRN" type="text" value="007">
           <label for="patientIdentifierByData">MRN</label>
+      </div>
+      <div class="input-field col s1-2">
+          <a class="btn-floating waves-effect waves-light blue lighten-1" id="decreaseInterval">
+            <i class="material-icons right">skip_previous</i>
+          </a>
       </div>
       <div class="input-field col s1">
           <label for="specStartTime">Start Time (hrs):</label>
@@ -25,13 +30,18 @@
           <label for="specEndTime">End Time:</label>
           <input id="specEndTime" class="specTime" type="text" value="1.0">
       </div>
-      <div class="input-field col s2">
-          <a class="submit-btn btn waves-effect waves-light blue lighten-1" id="patientIdentifierMRNSubmit">
-        Load
-        <i class="material-icons right">send</i>
-      </a>
+      <div class="input-field col s1-2">
+          <a class="btn-floating waves-effect waves-light blue lighten-1" id="increaseInterval">
+            <i class="material-icons right">skip_next</i>
+          </a>
       </div>
-      <div class="input-field col s1 offset-s2">
+      <div class="input-field col s2">
+        <a class="btn waves-effect waves-light blue lighten-1" id="patientIdentifierMRNSubmit">
+        Load
+          <i class="material-icons right">send</i>
+        </a>
+      </div>
+      <div class="input-field col s1 offset-s1">
         <!-- Modal Trigger -->
         <a class="waves-effect waves-light btn modal-trigger blue lighten-1" href="#settingsModal">
           <i class="material-icons">settings</i>
