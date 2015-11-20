@@ -38,14 +38,19 @@ int SpecParams::get_nfft(int pad)
   return fmax(get_next_pow_2(shift) + pad, shift);
 }
 
-float SpecParams::get_valid_start_time()
+float SpecParams::get_valid_start_time(int nsamples)
 {
-  return fmax(0, start_time);
+  return clip_time(nsamples, fmax(0.0, start_time));
 }
 
 float SpecParams::get_valid_end_time(int nsamples)
 {
-  return fmin(nsamples / (fs * 60.0 * 60.0), end_time);
+  return clip_time(nsamples, end_time);
+}
+
+float SpecParams::clip_time(int nsamples, float time)
+{
+  return fmin(nsamples / (fs * 60.0 * 60.0), time);
 }
 
 int SpecParams::get_nsamples(int nsamples, float duration)
@@ -87,11 +92,14 @@ SpecParams::SpecParams(StorageBackend* backend,
   shift = fs * 4;
   nstep = fs * 1;
   nfft = get_nfft(pad);
-  start_time = get_valid_start_time();
+  float min_interval = 1;
+  start_time = get_valid_start_time(nsamples);
   end_time = get_valid_end_time(nsamples);
 
-  // ensure start_time is before end_time
-  if (start_time > end_time)
+  if (start_time == end_time)
+  {
+    start_time = fmax(0, start_time - min_interval);
+  } else if (start_time > end_time)
   {
     float tmp = start_time;
     start_time = end_time;

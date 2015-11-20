@@ -25,8 +25,9 @@ class SpecParams
     }
 
     int get_nfft(int pad);
-    float get_valid_start_time();
-    float get_valid_end_time(int data_len);
+    float clip_time(int nsamples, float time);
+    float get_valid_start_time(int nsamples);
+    float get_valid_end_time(int nsamples);
     int get_nsamples(int data_len, float duration);
     int get_nblocks(int nsamples);
     int get_nfreqs();
