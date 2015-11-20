@@ -121,7 +121,7 @@ void on_file_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> conn
   string mrn = content["mrn"].string_value();
   float start_time = content["startTime"].number_value();
   float end_time = content["endTime"].number_value();
-  int ch = content["channel"].number_value();
+  int ch = content["channel"].int_value();
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..

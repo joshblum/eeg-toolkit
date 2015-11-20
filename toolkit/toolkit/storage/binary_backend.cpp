@@ -34,10 +34,10 @@ ArrayMetadata BinaryBackend::get_array_metadata(string mrn)
 
   string err;
   Json json = Json::parse(header, err);
-  int fs = json["fs"].number_value();
-  int nsamples = json["nsamples"].number_value();
-  int nrows = json["nrows"].number_value();
-  int ncols = json["ncols"].number_value();
+  int fs = json["fs"].int_value();
+  int nsamples = json["nsamples"].int_value();
+  int nrows = json["nrows"].int_value();
+  int ncols = json["ncols"].int_value();
   ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nrows, ncols);
   metadata.optional_metadata = Json::object
   {
@@ -82,7 +82,7 @@ void BinaryBackend::open_array(string mrn)
 void BinaryBackend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 {
   ArrayMetadata metadata = get_cache(mrn);
-  uint32_t header_offset = metadata.optional_metadata["header_offset"].number_value();
+  uint32_t header_offset = metadata.optional_metadata["header_offset"].int_value();
   int nrows = metadata.nrows;
 
   ch = CH_REVERSE_IDX[ch];
@@ -103,7 +103,7 @@ void BinaryBackend::read_array(string mrn, int ch, int start_offset, int end_off
 void BinaryBackend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
 {
   ArrayMetadata metadata = get_cache(mrn);
-  uint32_t header_offset = metadata.optional_metadata["header_offset"].number_value();
+  uint32_t header_offset = metadata.optional_metadata["header_offset"].int_value();
   int nrows = metadata.nrows;
   int ncols = metadata.ncols;
 
@@ -131,7 +131,7 @@ void BinaryBackend::read_array(string mrn, int start_offset, int end_offset, fma
 void BinaryBackend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
 {
   ArrayMetadata metadata = get_cache(mrn);
-  uint32_t header_offset = metadata.optional_metadata["header_offset"].number_value();
+  uint32_t header_offset = metadata.optional_metadata["header_offset"].int_value();
   int nrows = metadata.nrows;
 
   string array_name = mrn_to_array_name(mrn);
