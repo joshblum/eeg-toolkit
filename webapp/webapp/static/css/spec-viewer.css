@@ -53,7 +53,7 @@
 .progressBar {
     position: absolute;
     margin-left: calc(40%);
-    margin-top: calc(4%);
+    margin-top: calc(5%);
     width: 200px;
 }
 
@@ -69,4 +69,8 @@
 .s1-2
 {
   width: 4.15%;
+}
+
+.spec-loading {
+  opacity: 0.3;
 }

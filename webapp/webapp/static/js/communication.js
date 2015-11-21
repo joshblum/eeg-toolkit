@@ -60,7 +60,9 @@ function sendMessage(type, content, visgoth_content) {
    channel   the channel (LL, LP, ...) we are requesting
 */
 function requestSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
-    SPECTROGRAMS[IDS[channel]].updateStartRequestTime();
+    var spectrogram = SPECTROGRAMS[IDS[channel]];
+    spectrogram.updateStartRequestTime();
+    spectrogram.updateProgressBar(0);
     // TODO (joshblum): need a new field for request action to allow updates for panning
     visgoth.sendProfiledMessage("spectrogram", {
         mrn: mrn,
@@ -110,8 +112,7 @@ ws.onmessage = function(event) {
             content.nblocks, content.nfreqs, content.fs,
             content.startTime, content.endTime);
         spectrogram.logElaspedTime();
-    } else if (type === "loading_progress") {
-        spectrogram.updateProgressBar(content.progress);
+        spectrogram.updateProgressBar(1);
     } else {
         console.log(type, content);
     }

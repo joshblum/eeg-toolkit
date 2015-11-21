@@ -189,12 +189,13 @@ Spectrogram.prototype.logElaspedTime = function() {
  * If progress is 0 or 1, the progress bar will be turned invisible.
  */
 Spectrogram.prototype.updateProgressBar = function(progress) {
-    if (progress === 0 || progress === 1) {
-        this.progressBar.hidden = true;
-    } else {
-        this.progressBar.hidden = false;
-        this.progressBar.value = progress;
-    }
+  if (progress === 0) {
+    $(this.progressBar).removeClass("hide");
+    $(this.specView).addClass("spec-loading");
+  } else if (progress === 1) {
+    $(this.progressBar).addClass("hide");
+    $(this.specView).removeClass("spec-loading");
+  }
 };
 
 /* link shaders and save uniforms and attributes
