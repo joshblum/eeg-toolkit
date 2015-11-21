@@ -102,5 +102,11 @@ $(document).ready(function() {
     $("#increaseInterval").click(increaseInterval);
     $("#decreaseInterval").click(decreaseInterval);
     // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
-    $('.modal-trigger').leanModal();
+    $(".modal-trigger").leanModal();
+    $("#specInterval").keyup(function(e) {
+      var which = e.which || e.keyCode;
+      if (which === 13) {
+          $("#settingsModal").closeModal();
+      }
+    });
 });
