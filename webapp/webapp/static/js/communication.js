@@ -104,9 +104,8 @@ ws.onmessage = function(event) {
     var canvasId = content.canvasId || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
-        getElementById("specStartTime").value = content.startTime.toFixed(3);
-        getElementById("specEndTime").value = content.endTime.toFixed(3);
-
+        setTime("specStartTime", content.startTime);
+        setTime("specEndTime", content.endTime);
         spectrogram.updateStartLoadTime();
         spectrogram.render(new Float32Array(event.data, headerLen + 4),
             content.nblocks, content.nfreqs, content.fs,

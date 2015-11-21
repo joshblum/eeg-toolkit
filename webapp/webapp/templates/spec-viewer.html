@@ -73,8 +73,6 @@
     </h4>
     <div class="row divider"></div>
     <div class="row">
-      <div class="input-field col offset-s1">
-      </div>
       <div class="input-field col s3 hide">
           <select id="fftLen" name="fftLen">
               <option value="128">128</option>
@@ -95,6 +93,10 @@
           </select>
           <label for="specMode">Mode:</label>
       </div>
+      <div class="input-field col s2">
+          <input id="specInterval" type="text" value="1.0">
+          <label for="specInterval">Interval (hrs):</label>
+      </div>
       <div class="input-field col s3">
           <input id="specInterpolation" checked type="checkbox">
           <label for="specInterpolation">Interpolate</label>
@@ -104,12 +106,14 @@
           <label for="specLogarithmic">Logarithmic</label>
       </div>
     </div>
+    <div class="row divider"></div>
     <table class="responsive-table">
+      Keyboard Shortcuts:
       <tbody>
         <tr>
           <td>
             <span class="code"> Shift </span> <span class="code"> scroll </span>
-            <span>Change Amplitude Range</span>
+            <span>Change amplitude range</span>
           </td>
           <td>
             <span class="code"> control </span> <span class="code"> scroll </span>

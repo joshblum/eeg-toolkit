@@ -1,7 +1,5 @@
 "use strict"
 
-var INTERVAL = 1.0; // change startTime and endTime by an hour
-
 /* initialize all canvases */
 function initSpectrograms() {
     /* get WebGL context and load required extensions */
@@ -30,19 +28,33 @@ function reloadSpectrograms() {
     }
 }
 
+function setTime(timeId, timeValue) {
+    getElementById(timeId).value = parseFloat(timeValue.toFixed(3));
+}
+
 function increaseInterval() {
-    var specStartTime = getElementById("specStartTime");
-    specStartTime.value = parseFloat(specStartTime.value) + INTERVAL;
-    var specEndTime = getElementById("specEndTime");
-    specEndTime.value = parseFloat(specEndTime.value) + INTERVAL;
+    var interval = parseFloat(getElementById("specInterval").value);
+    var specStartTime = parseFloat(getElementById("specStartTime").value);
+    var specEndTime = parseFloat(getElementById("specEndTime").value);
+    if (specEndTime - specStartTime === interval) {
+      setTime("specStartTime", specStartTime + interval);
+      setTime("specEndTime", specEndTime + interval);
+    } else {
+      setTime("specEndTime", specStartTime + interval);
+    }
     reloadSpectrograms();
 }
 
 function decreaseInterval() {
-    var specStartTime = getElementById("specStartTime");
-    specStartTime.value = Math.max(0, parseFloat(specStartTime.value) - INTERVAL);
-    var specEndTime = getElementById("specEndTime");
-    specEndTime.value = Math.max(INTERVAL, parseFloat(specEndTime.value) - INTERVAL);
+    var interval = parseFloat(getElementById("specInterval").value);
+    var specStartTime = parseFloat(getElementById("specStartTime").value);
+    var specEndTime = parseFloat(getElementById("specEndTime").value);
+    if (specEndTime - specStartTime === interval) {
+      setTime("specStartTime", Math.max(0, specStartTime - interval));
+      setTime("specEndTime", Math.max(interval, specEndTime - interval));
+    } else {
+      setTime("specStartTime", Math.max(0, specStartTime - interval));
+    }
     reloadSpectrograms();
 }
 
