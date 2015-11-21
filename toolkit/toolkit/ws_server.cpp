@@ -20,12 +20,12 @@ using namespace json11;
 typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
 
 void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
-                  string msg_type, Json content, float* data, size_t data_size)
+                  string type, Json content, float* data, size_t data_size)
 {
   unsigned long long start = getticks();
   Json msg = Json::object
   {
-    {"type", msg_type},
+    {"type", type},
     {"content", content}
   };
   string header = msg.dump();
@@ -40,16 +40,15 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
   auto send_stream = make_shared<WsServer::SendStream>();
   send_stream->write((char*) &header_len, sizeof(uint32_t));
   send_stream->write(header.c_str(), header_len);
-  if (data != NULL)
+  if (data != nullptr)
   {
     send_stream->write((char*) data, data_size);
   }
 
-  string action = content["action"].string_value();
   // server.send is an asynchronous function
-  server->send(connection, send_stream, [action, start](const boost::system::error_code & ec)
+  server->send(connection, send_stream, [type, start](const boost::system::error_code & ec)
   {
-    log_time_diff("send_message::" + action, start);
+    log_time_diff("send_message::" + type, start);
     if (ec)
     {
       cout << "Server: Error sending message. " <<
@@ -73,7 +72,6 @@ void send_frowvec(WsServer* server,
 
   Json content = Json::object
   {
-    {"action", "change_points"},
     {"type", type},
     {"canvasId", canvasId}
   };
@@ -88,7 +86,6 @@ void send_spectrogram(WsServer* server,
 {
   Json content = Json::object
   {
-    {"action", "spectrogram"},
     {"nblocks", (int) spec_mat.n_cols},
     {"nfreqs", (int) spec_mat.n_rows},
     {"fs", spec_params.fs},
