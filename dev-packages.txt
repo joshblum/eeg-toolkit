@@ -5,3 +5,6 @@ htop
 pkg-config
 supervisor
 valgrind
+python-dev
+python-pip
+build-essential
