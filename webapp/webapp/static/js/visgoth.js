@@ -104,6 +104,7 @@ var FpsProfiler = new VisgothProfiler(VisgothLabels.fps, function(stats) {
 });
 
 var MockExtentProfiler = new VisgothProfiler(VisgothLabels.extent, function(stats) {
+  // Index 0 is hard-coded, corresponds to the 'LL' spectrogram
   var extent_state = stats[this.label][0].state;
   return extent_state[extent_state.length - 1];
 });
@@ -113,18 +114,17 @@ var MockExtentProfiler = new VisgothProfiler(VisgothLabels.extent, function(stat
 //  Visgoth  //
 // ********* //
 function Visgoth() {
-  this.profilers = [
-    BandwidthProfiler,
-    NetworkLatencyProfiler,
-    FpsProfiler,
-    MockExtentProfiler,
-  ];
+  this.profilers = {};
+  this.profilers[VisgothLabels.bandwidth] = BandwidthProfiler;
+  this.profilers[VisgothLabels.networkLatency] = NetworkLatencyProfiler;
+  this.profilers[VisgothLabels.fps] = FpsProfiler;
+  this.profilers[VisgothLabels.extent] = MockExtentProfiler;
 
   this.stats = {};
   var profiler;
-  for (var i in this.profilers) {
-    profiler = this.profilers[i];
-    this.stats[profiler.label] = [];
+  for (var label in this.profilers) {
+    profiler = this.profilers[label];
+    this.stats[label] = [];
   }
 
   this.clientId = guid();
@@ -139,10 +139,9 @@ Visgoth.prototype.registerStat = function(visgothStat) {
 
 Visgoth.prototype.getProfileData = function() {
   var profile = {};
-  var profiler, label;
-  for (var i in this.profilers) {
-    profiler = this.profilers[i];
-    label = profiler.label;
+  var profiler;
+  for (var label in this.profilers) {
+    profiler = this.profilers[label];
     profile[label] = profiler.getProfileData(this.stats);
   }
   return profile;
