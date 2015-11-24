@@ -182,10 +182,16 @@ Spectrogram.prototype.updateStartLoadTime = function() {
 };
 
 /* Log the elapsed time to generate a spectrogram */
-Spectrogram.prototype.logElaspedTime = function() {
+Spectrogram.prototype.logElapsedTime = function(profileDumpKey) {
     this.networkLatencyStat.measurePerformance();
     this.bufferLoadTimeStat.measurePerformance();
+    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.networkLatency);
+    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.bandwidth);
 };
+
+Spectrogram.prototype.logExtent = function(profileDumpKey) {
+    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.extent);
+}
 
 /*
  * Sets the progress bar. If `progress` is `0` the bar is shown, if `progress`
@@ -293,7 +299,7 @@ Spectrogram.prototype.getShader = function(id) {
  *  nblocks    the width of the data, the number of blocks.
  *  nfreqs     the height of the data, the number of frequency bins.
 */
-Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, endTime) {
+Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, endTime, profileDumpKey) {
     this.networkBufferSizeStat.addValue(data.byteLength);
 
     // calculate the number of textures needed
@@ -371,6 +377,7 @@ Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, en
     var self = this;
     window.requestAnimationFrame(function() {
         self.drawScene();
+        visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.fps);
     });
 };
 

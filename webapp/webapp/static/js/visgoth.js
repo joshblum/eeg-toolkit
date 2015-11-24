@@ -128,6 +128,7 @@ function Visgoth() {
   }
 
   this.clientId = guid();
+  this.profileDumps = {};
 }
 
 Visgoth.prototype.registerStat = function(visgothStat) {
@@ -155,9 +156,75 @@ Visgoth.prototype.getMetadata = function() {
 };
 
 Visgoth.prototype.sendProfiledMessage = function(type, content) {
+  // TODO: When running future experiments where we vary all parameters,
+  // this.getProfileData() cannot synchronously compute the profile data
+  // (varying extent is okay because it's synchronous with sending messages).
   var visgoth_content = {
     "metadata": this.getMetadata(),
     "profile": this.getProfileData(),
   };
   sendMessage(type, content, visgoth_content);
 };
+
+Visgoth.prototype.clearStats = function() {
+  var profilerStats;
+  for (var label in this.profilers) {
+    profilerStats = this.stats[label];
+    for (var j in profilerStats) {
+      profilerStats[j].state = [];
+    }
+  }
+}
+
+// Aggregate and dump state for a single profile stat during a given request.
+Visgoth.prototype.dumpProfileStat = function(key, profilerLabel) {
+  if (!(key in this.profileDumps)) {
+    this.profileDumps[key] = {};
+  }
+
+  this.profileDumps[key][profilerLabel] = this.profilers[profilerLabel].getProfileData(this.stats);
+}
+
+// **** Visgoth experiment **** //
+Visgoth.prototype.EXTENTS = [1, 2, 4];
+Visgoth.prototype.INTERVAL = 10;
+
+Visgoth.prototype.setExtent = function(extent) {
+  // Only necessary for the first spectrogram since visgoth is hard-coded to
+  // only look at that one, but oh well.
+  var extentState = this.stats[VisgothLabels.extent];
+  for (var i in extentState) {
+    extentState[i].addValue(extent);
+  }
+}
+
+// The test function for Visgoth experiments.
+Visgoth.prototype.sample = function() {
+  requestSpectrogram("007", 1024, 0, 1, OVERLAP, 0);
+}
+
+Visgoth.prototype.run = function(extent) {
+  var extents = [extent];
+  if (isNaN(extent)) {
+    extents = this.EXTENTS;
+  }
+
+  this.profileDumps = {};
+  spectrogramRequestCount = 0;
+  
+  // Synchronously initialize the "extent" field for all profile dumps.
+  for (var i in extents) {
+    for (var j = 0; j < this.INTERVAL; j++) {
+      this.setExtent(extents[i]);
+      this.dumpProfileStat(i * this.INTERVAL + j, VisgothLabels.extent);
+    }
+  }
+
+  for (var i in extents) {
+    this.clearStats();
+    this.setExtent(extents[i]);
+    for (var i = 0; i < this.INTERVAL; i++) {
+      this.sample();
+    }
+  }
+}

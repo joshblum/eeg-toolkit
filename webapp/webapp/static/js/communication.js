@@ -4,6 +4,7 @@ var wsEndpoint = "/compute/spectrogram/";
 var wsPort = 8080;
 var ws = new ReconnectingWebSocket(getwsUrl(wsPort));
 ws.binaryType = "arraybuffer";
+var spectrogramRequestCount = 0;
 
 var OVERLAP = 0.5;
 
@@ -87,8 +88,10 @@ ws.onmessage = function(event) {
         spectrogram.updateStartLoadTime();
         spectrogram.render(new Float32Array(event.data, headerLen + 4),
             content.nblocks, content.nfreqs, content.fs,
-            content.startTime, content.endTime);
-        spectrogram.logElaspedTime();
+            content.startTime, content.endTime, spectrogramRequestCount);
+
+        spectrogram.logElapsedTime(spectrogramRequestCount);
+        spectrogramRequestCount++;
         spectrogram.updateProgressBar(1);
     } else {
         console.log(type, content);
