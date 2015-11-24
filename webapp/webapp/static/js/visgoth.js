@@ -228,3 +228,13 @@ Visgoth.prototype.run = function(extent) {
     }
   }
 }
+
+Visgoth.prototype.sendProfileDumps = function() {
+  $.post('/dump-visgoth', {
+    'profileDumps': JSON.stringify(this.profileDumps)
+  }, function(data) {
+    if (!data.success) {
+      console.log(data);
+    }
+  });
+}
