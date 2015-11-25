@@ -2,7 +2,7 @@
 
 var wsEndpoint = "/compute/spectrogram/";
 var wsPort = 8080;
-var ws = new WebSocket(getwsUrl(wsPort));
+var ws = new ReconnectingWebSocket(getwsUrl(wsPort));
 ws.binaryType = "arraybuffer";
 
 var OVERLAP = 0.5;
