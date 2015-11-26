@@ -52,17 +52,7 @@ docker-push: docker-build
 	-docker push $(REPO)/$(DOCKER_TOOLKIT_NAME):latest
 
 deploy:
-	fab prod deploy
-
-run: ws_server
-	./toolkit/toolkit/ws_server 8080 & \
-		python webapp/webapp/server.py
-
-prod-run: clean ws_server
-	supervisorctl reread
-	supervisorctl update
-	supervisorctl restart eeg:eeg
-	supervisorctl restart ws:ws
+	fab env prod_deploy
 
 pylint:
 	-flake8 .
