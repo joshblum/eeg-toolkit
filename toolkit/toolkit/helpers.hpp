@@ -65,5 +65,11 @@ static inline void downsample(fmat& buf, uint extent)
   }
 }
 
+static inline void cap_max_width(fmat& buf, int max_width)
+{
+  uint extent = ceil(buf.n_cols / (float) max_width);
+  downsample(buf, extent);
+}
+
 #endif // HELPERS_H
 

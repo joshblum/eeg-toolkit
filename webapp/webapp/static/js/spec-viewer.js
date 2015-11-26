@@ -28,6 +28,32 @@ function reloadSpectrograms() {
     }
 }
 
+/*
+   Arguments:
+   mrn       the medical record number from which to load data.
+   nfft      the FFT length used for calculating the spectrogram.
+   startTime the start time for the calculation
+   endTime   the end time for the calculation
+   overlap   the amount of overlap between consecutive spectra.
+   channel   the channel (LL, LP, ...) we are requesting
+*/
+function requestSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
+    var spectrogram = SPECTROGRAMS[IDS[channel]];
+    spectrogram.updateStartRequestTime();
+    spectrogram.updateProgressBar(0);
+    visgoth.sendProfiledMessage("spectrogram", {
+        mrn: mrn,
+        nfft: nfft,
+        startTime: startTime,
+        endTime: endTime,
+        overlap: overlap,
+        channel: channel,
+        maxWidth: spectrogram.specView.width,
+        maxHeight: spectrogram.specView.height,
+    });
+}
+
+
 function setTime(timeId, timeValue) {
     getElementById(timeId).value = parseFloat(timeValue.toFixed(3));
 }

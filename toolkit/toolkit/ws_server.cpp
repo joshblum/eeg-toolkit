@@ -119,6 +119,7 @@ void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connec
   float start_time = content["startTime"].number_value();
   float end_time = content["endTime"].number_value();
   int ch = content["channel"].int_value();
+  int max_width = content["maxWidth"].int_value();
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..
@@ -144,6 +145,7 @@ void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connec
   }
   log_time_diff("eeg_spectrogram", start);
   downsample(spec_mat, extent);
+  cap_max_width(spec_mat, max_width);
   send_spectrogram(server, connection, spec_params, ch_name, spec_mat);
 
   // cp_data_t cp_data;
