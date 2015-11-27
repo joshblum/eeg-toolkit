@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y -q \
 ADD ./toolkit /opt/toolkit/
 WORKDIR /opt/toolkit
 RUN make installdeps
-RUN make clean && make ws_server
+# create binaries and run daemons
+RUN start.sh
 EXPOSE 8080
 CMD ["./ws_server"]

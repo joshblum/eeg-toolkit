@@ -111,7 +111,8 @@ void convert_to_array(string mrn, string backend_name)
   }
   else
   {
-    cout << "Unknown backend: " << backend_name << endl;
+    StorageBackend backend;
+    backend.edf_to_array(mrn);
   }
 }
 
@@ -134,10 +135,6 @@ int main(int argc, char* argv[])
     if (argc == 3)
     {
       backend_name = argv[2];
-    }
-    else {
-      // default backend_name
-      backend_name = "HDF5Backend";
     }
     cout << "Using mrn: " << mrn << " and backend: " << backend_name << endl;
     convert_to_array(mrn, backend_name);

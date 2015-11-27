@@ -3,3 +3,5 @@ libboost-all-dev
 libfftw3-dev
 libssl-dev
 libhdf5-serial-dev
+python-pip
+python-dev

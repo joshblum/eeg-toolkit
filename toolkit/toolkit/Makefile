@@ -74,6 +74,7 @@ default: ws_server
 installdeps:
 	sudo apt-get update
 	cat packages.txt | xargs sudo apt-get -y install
+	pip install -r requirements.txt
 
 %.o : %.c
 	$(CXX) $(CFLAGS) -o $@ -c $<
