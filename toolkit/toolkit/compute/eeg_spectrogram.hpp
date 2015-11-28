@@ -2,6 +2,7 @@
 #define SPECTROGRAM_H
 
 // #define ARMA_NO_DEBUG // enable for no bounds checking
+
 #include <armadillo>
 #include "../storage/backends.hpp"
 #include "../config.hpp"
@@ -12,18 +13,6 @@ using namespace std;
 class SpecParams
 {
   private:
-    int get_next_pow_2(unsigned int v)
-    {
-      v--;
-      v |= v >> 1;
-      v |= v >> 2;
-      v |= v >> 4;
-      v |= v >> 8;
-      v |= v >> 16;
-      v++;
-      return v;
-    }
-
     int get_nfft(int pad);
     float clip_time(int nsamples, float time);
     float get_valid_start_time(int nsamples);

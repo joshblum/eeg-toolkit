@@ -116,6 +116,10 @@ void convert_to_array(string mrn, string backend_name)
   }
 }
 
+/*
+ * Command line program to convert an
+ * EDF file for the given `mrn` to the specified backend
+ */
 int main(int argc, char* argv[])
 {
   if (argc <= 3)

@@ -122,6 +122,9 @@ Spectrogram.prototype.init = function() {
     this.addListeners();
 };
 
+/*
+ * Add listeners for zooming and dispalying coordinate information
+ */
 Spectrogram.prototype.addListeners = function() {
     window.addEventListener("resize", this.updateCanvasResolutions, false);
     this.updateCanvasResolutions();
@@ -185,8 +188,8 @@ Spectrogram.prototype.logElaspedTime = function() {
 };
 
 /*
- * Sets the progress bar
- * If progress is 0 or 1, the progress bar will be turned invisible.
+ * Sets the progress bar. If `progress` is `0` the bar is shown, if `progress`
+ * is `1` the bar is hidden.
  */
 Spectrogram.prototype.updateProgressBar = function(progress) {
   if (progress === 0) {
@@ -198,18 +201,19 @@ Spectrogram.prototype.updateProgressBar = function(progress) {
   }
 };
 
-/* link shaders and save uniforms and attributes
-
-   saves the following attributes to global scope:
-   - vertexPositionAttribute: aVertexPosition
-   - textureCoordAttribute: aTextureCoord
-
-   saves the following uniforms to global scope:
-   - samplerUniform: uSampler
-   - zoomUniform: mZoom
-   - ampRangeUniform: vAmpRange
-   - specSizeUniform: vSpecSize
-   - specModeUniform: uSpecMode
+/*
+ *  Link shaders and save uniforms and attributes.
+ *
+ *  saves the following attributes to the spectrogram object:
+ *  - vertexPositionAttribute: aVertexPosition
+ *  - textureCoordAttribute: aTextureCoord
+ *
+ *  saves the following uniforms to the spectrogram object:
+ *  - samplerUniform: uSampler
+ *  - zoomUniform: mZoom
+ *  - ampRangeUniform: vAmpRange
+ *  - specSizeUniform: vSpecSize
+ *  - specModeUniform: uSpecMode
 */
 Spectrogram.prototype.loadSpectrogramShaders = function() {
     var fragmentShader = this.getShader("fragmentShader");
@@ -241,12 +245,13 @@ Spectrogram.prototype.loadSpectrogramShaders = function() {
     this.specLogarithmicUniform = this.gl.getUniformLocation(shaderProgram, "bSpecLogarithmic");
 };
 
-/* load and compile a shader
-
-   Attributes:
-   id    the id of a script element that contains the shader source.
-
-   Returns the compiled shader.
+/*
+ *  Load and compile a shader.
+ *
+ *  Attributes:
+ *  id    the id of a script element that contains the shader source.
+ *
+ *  Returns the compiled shader.
 */
 Spectrogram.prototype.getShader = function(id) {
     var script = getElementById(id);
@@ -271,21 +276,22 @@ Spectrogram.prototype.getShader = function(id) {
 };
 
 
-/* loads a spectrogram into video memory and fills VBOs
-
-   If there is more data than fits into a single texture, several
-   textures are allocated and the data is written into consecutive
-   textures. According vertex positions are saved into an equal number
-   of VBOs.
-
-   - saves textures into a global array `spectrogramTextures`.
-   - saves vertexes into a global array `vertexPositionBuffers`.
-   - saves texture coordinates into global `textureCoordBuffer`.
-
-   Attributes:
-   data       a Float32Array containing nblocks x nfreqs values.
-   nblocks    the width of the data, the number of blocks.
-   nfreqs     the height of the data, the number of frequency bins.
+/*
+ *  Loads a spectrogram into video memory and fills VBOs.
+ *
+ *  If there is more data than fits into a single texture, several
+ *  textures are allocated and the data is written into consecutive
+ *  textures. According vertex positions are saved into an equal number
+ *  of VBOs.
+ *
+ *  - saves textures into array `spectrogramTextures`.
+ *  - saves vertexes into array `vertexPositionBuffers`.
+ *  - saves texture coordinates into `textureCoordBuffer`.
+ *
+ *  Attributes:
+ *  data       a Float32Array containing nblocks x nfreqs values.
+ *  nblocks    the width of the data, the number of blocks.
+ *  nfreqs     the height of the data, the number of frequency bins.
 */
 Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, endTime) {
     this.networkBufferSizeStat.addValue(data.byteLength);
@@ -368,6 +374,9 @@ Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, en
     });
 };
 
+/*
+ * Convert a time in hours to a time in seconds.
+ */
 function hoursToSeconds(time){
   return 60 * 60 * time;
 }
@@ -431,13 +440,14 @@ Spectrogram.prototype.drawSpectrogram = function() {
     }
 };
 
-/* format a time in mm:ss.ss
-
-   Attributes:
-   seconds    a time in seconds.
-
-   returns    a formatted string containing minutes, seconds, and
-     hundredths.
+/*
+ *  Format a time in mm:ss.ss.
+ *
+ *  Attributes:
+ *  seconds    a time in seconds.
+ *
+ *  returns    a formatted string containing minutes, seconds, and
+ *    hundredths.
 */
 Spectrogram.prototype.formatTime = function(seconds) {
     var minutes = Math.floor(seconds / 60);
@@ -455,11 +465,12 @@ Spectrogram.prototype.formatTime = function(seconds) {
     return hours + ":" + minutes + ":" + seconds;
 };
 
-/* draw the time scale canvas
-
-   The time scale prints the minimum and maximum currently visible
-   time and an axis with two ticks. Minimum and maximum time are taken
-   from specViewSize.(min|max)T.
+/*
+ *  Draw the time scale canvas.
+ *
+ *  The time scale prints the minimum and maximum currently visible
+ *  time and an axis with two ticks. Minimum and maximum time are taken
+ *  from specViewSize.(min|max)T.
 */
 Spectrogram.prototype.drawSpecTimeScale = function() {
     var ctx = this.specTimeScale.getContext("2d");
@@ -485,15 +496,16 @@ Spectrogram.prototype.freqLin2Log = function(f) {
     return Math.pow(this.specSize.widthF(), f / this.specSize.widthF());
 };
 
-/* format a frequency
-
-   Attributes:
-   frequency   a frequency in Hz.
-
-   returns     a formatted string with the frequency in Hz or kHz,
-     with an appropriate number of decimals. If logarithmic
-     frequency is enabled, the returned frequency will be
-     appropriately distorted.
+/*
+ *  Format a frequency.
+ *
+ *  Attributes:
+ *  frequency   a frequency in Hz.
+ *
+ *  returns     a formatted string with the frequency in Hz or kHz,
+ *    with an appropriate number of decimals. If logarithmic
+ *    frequency is enabled, the returned frequency will be
+ *    appropriately distorted.
 */
 Spectrogram.prototype.formatFrequency = function(frequency) {
     frequency = getElementById("specLogarithmic").checked ? this.freqLin2Log(frequency) : frequency;
@@ -511,11 +523,12 @@ Spectrogram.prototype.formatFrequency = function(frequency) {
     }
 };
 
-/* draw the frequency scale canvas
-
-   The frequency scale prints the minimum and maximum currently
-   visible frequency and an axis with two ticks. Minimum and maximum
-   frequency are taken from specViewSize.(min|max)F.
+/*
+ *  Draw the frequency scale canvas.
+ *
+ *  The frequency scale prints the minimum and maximum currently
+ *  visible frequency and an axis with two ticks. Minimum and maximum
+ *  frequency are taken from specViewSize.(min|max)F.
 */
 Spectrogram.prototype.drawSpecFrequencyScale = function() {
     var ctx = this.specFrequencyScale.getContext("2d");
@@ -536,18 +549,19 @@ Spectrogram.prototype.drawSpecFrequencyScale = function() {
     ctx.fillText(text, 8, ctx.canvas.height - 8);
 };
 
-/* zoom or pan when on scrolling
-
-   If no modifier is pressed, scrolling scrolls the spectrogram.
-
-   If alt or shift is pressed, scrolling changes the displayed amplitude range.
-   Pressing shift as well switches X/Y scrolling.
-
-   If ctrl is pressed, scrolling zooms in or out. If ctrl and shift is
-   pressed, scrolling only zooms the time axis.
-
-   At no time will any of this zoom or pan outside of the spectrogram
-   view area.
+/*
+ *  Zoom or pan when on scrolling.
+ *
+ *  If no modifier is pressed, scrolling scrolls the spectrogram.
+ *
+ *  If alt or shift is pressed, scrolling changes the displayed amplitude range.
+ *  Pressing shift as well switches X/Y scrolling.
+ *
+ *  If ctrl is pressed, scrolling zooms in or out. If ctrl and shift is
+ *  pressed, scrolling only zooms the time axis.
+ *
+ *  At no time will any of this zoom or pan outside of the spectrogram
+ *  view area.
 */
 Spectrogram.prototype.onwheel = function(wheel) {
     var stepF = this.specViewSize.widthF() / 100;
@@ -618,11 +632,10 @@ Spectrogram.prototype.onwheel = function(wheel) {
     });
 };
 
-/* update the specDataView with cursor position.
-
-   The specDataView should contain the current cursor position in
-   frequency/time coordinates. It is updated every time the mouse is
-   moved on the spectrogram.
+/*
+ * Update the specDataView with cursor position. The specDataView should
+ * contain the current cursor position in frequency/time coordinates. It is
+ * updated every time the mouse is moved on the spectrogram.
 */
 Spectrogram.prototype.onmousemove = function(mouse) {
     var t = this.specViewSize.scaleT(mouse.layerX / this.specView.clientWidth);
@@ -632,11 +645,3 @@ Spectrogram.prototype.onmousemove = function(mouse) {
         "&plusmn; " + (this.specViewSize.widthA() / 2).toFixed(2) + " dB";
 };
 
-/* update spectrogram display mode on keypress */
-window.onkeypress = function(e) {
-    // prevent the default action of submitting the GET parameters.
-    var which = e.which || e.keyCode;
-    if (which === 13) {
-        e.preventDefault();
-    }
-};

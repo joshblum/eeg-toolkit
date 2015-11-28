@@ -6,13 +6,12 @@ using namespace std;
 
 // backend config
 #define BACKEND BinaryBackend
+// Helpers to print string name of backend
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-#ifdef __linux__
+// Path to EEG data
 #define BASEDIR "/home/ubuntu"
-#endif
-
 #define DATADIR BASEDIR"/eeg-data/eeg-data/"
 
 // websocket server config
@@ -105,11 +104,11 @@ typedef struct ch_diff
   ch_t ch; // channel name
   // store an array of channels used
   // in the diff. The diff is computed by
-  // subtracting channels: (i+1) - (i)
+  // subtracting channels: (i + 1) - (i)
   ch_idx_t ch_idx[NUM_DIFFS];
 } ch_diff_t;
 
-
+// Brain regions for EEG
 static const int NUM_DIFF = 4;
 const ch_diff_t DIFFERENCE_PAIRS[NUM_DIFF] =
 {
@@ -138,6 +137,7 @@ const ch_diff_t DIFFERENCE_PAIRS[NUM_DIFF] =
   {.ch = RL, .ch_idx = {FP2, F8, T4, T6, O2}},
 };
 
+// String names for brain regions
 static const string CH_NAME_MAP[NUM_DIFF] = {"LL", "LP", "RP", "RL"};
 
 #endif // CONFIG_H

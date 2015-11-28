@@ -19,6 +19,10 @@ using namespace json11;
 
 typedef SimpleWeb::SocketServer<SimpleWeb::WS> WsServer;
 
+/*
+ * Send a binary encoded message with the given json header and optional data
+ * buffer.
+ */
 void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
                   string type, Json content, float* data, size_t data_size)
 {
@@ -59,6 +63,9 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
   }, BINARY_OPCODE);
 }
 
+/*
+ * Log json data to stdout.
+ */
 void log_json(Json content)
 {
   cout << "Sending content " << content.dump() << endl;
@@ -108,7 +115,10 @@ void send_change_points(WsServer* server,
   send_frowvec(server, connection, canvasId, "summed_signal", cp_data->m);
 }
 
-
+/*
+ * Compute the spectrogram and send to the client.
+ * A cached version is used if available.
+ */
 void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connection, Json json)
 {
   Json content = json["content"];
@@ -179,6 +189,9 @@ void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connecti
   }
 }
 
+/*
+ * Start the websocket server with default port `WS_DEFAULT_PORT`
+ */
 int main(int argc, char* argv[])
 {
   int port;

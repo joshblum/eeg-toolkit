@@ -52,6 +52,9 @@ void viz_to_csv(string mrn)
   }
 }
 
+/*
+ * Command line program to convert cached spectrogram output to a CSV format
+ */
 int main(int argc, char* argv[])
 {
   if (argc <= 3)

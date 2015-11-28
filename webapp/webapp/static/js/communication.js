@@ -36,11 +36,12 @@ function getURLParameters() {
     return params;
 }
 
-/* Send a message.
-
-   Arguments:
-   type      the message type as string.
-   content   the message content as json-serializable data.
+/*
+ *  Send a message.
+ *
+ *  Arguments:
+ *  type      the message type as string.
+ *  content   the message content as json-serializable data.
 */
 function sendMessage(type, content, visgoth_content) {
   ws.send(JSON.stringify({
@@ -50,14 +51,15 @@ function sendMessage(type, content, visgoth_content) {
   }));
 }
 
-/* Parses a message
-
-   Each message must contain the message type, the message content,
-   and an optional binary payload. The decoded message will be
-   forwarded to different functions based on the message type.
-
-   Arguments:
-   event     the message, either as string or ArrayBuffer.
+/*
+ * Parses a message.
+ *
+ *  Each message must contain the message type, the message content,
+ *  and an optional binary payload. The decoded message will be
+ *  forwarded to different functions based on the message type.
+ *
+ *  Arguments:
+ *  event     the message, either as string or ArrayBuffer.
 */
 ws.onmessage = function(event) {
     var header, headerLen;

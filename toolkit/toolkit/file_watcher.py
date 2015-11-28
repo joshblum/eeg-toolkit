@@ -1,7 +1,6 @@
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-import logging
 import subprocess
 import os
 import time
@@ -33,6 +32,11 @@ class FileConverter(PatternMatchingEventHandler):
 
 
 def main():
+  """
+    Watch the directory `BASE_DIR` for files with the extension `*.edf` and
+    convert them to the appropiate `StorageBackend` format and precompute the
+    spectrogram results.
+  """
   event_handler = FileConverter('*.edf')
 
   observer = Observer()

@@ -13,6 +13,9 @@
 using namespace arma;
 using namespace std;
 
+/*
+ * Print attributes of a SpecParams object
+ */
 void SpecParams::print()
 {
   cout << "spec_params: {" << endl;
@@ -48,6 +51,10 @@ float SpecParams::get_valid_end_time(int nsamples)
   return clip_time(nsamples, end_time);
 }
 
+/*
+ * Ensure that the given `time` does not exceed
+ * the number of samples, `nsamples`
+ */
 float SpecParams::clip_time(int nsamples, float time)
 {
   return fmin(nsamples / (fs * 60.0 * 60.0), time);
@@ -73,11 +80,13 @@ int SpecParams::get_nfreqs()
   return nfft / 2 + 1;
 }
 
+/*
+ * Add attributes to the `SpecParams` object
+ * used to calculate the spectrogram
+ */
 SpecParams::SpecParams(StorageBackend* backend,
                        string mrn, float _start_time, float _end_time)
 {
-  // TODO(joshblum): implement full multitaper method
-  // and remove hard coding
   this->mrn = mrn;
   this->backend = backend;
   start_time = _start_time;
@@ -87,6 +96,8 @@ SpecParams::SpecParams(StorageBackend* backend,
 
   fs = backend->get_fs(mrn);
 
+  // TODO(joshblum): implement full multitaper method
+  // and remove hard coding
   nsamples = backend->get_nsamples(mrn);
   int pad = 0;
   shift = fs * 4;
@@ -126,6 +137,9 @@ void hamming(int windowLength, float* buf)
   }
 }
 
+/*
+ * Take the absolute value of the complex FFT result
+ */
 static inline float abs(fftw_complex* arr, int i)
 {
   return sqrt(arr[i][0] * arr[i][0] + arr[i][1] * arr[i][1]);
@@ -133,8 +147,9 @@ static inline float abs(fftw_complex* arr, int i)
 
 // copy pasta http://ofdsp.blogspot.co.il/2011/08/short-time-fourier-transform-with-fftw3.html
 /*
- * Fill the `spec_mat` matrix with values for the spectrogram for the given diff.
- * `spec_mat` is expected to be initialized and the results are added to allow averaging
+ * Fill the `spec_mat` matrix with values for the spectrogram for the given
+ * diff.  `spec_mat` is expected to be initialized and the results are added to
+ * allow averaging
  */
 void STFT(SpecParams* spec_params, frowvec& diff, fmat& spec_mat)
 {
@@ -219,7 +234,6 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
   spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
   spec_mat.fill(0); // can we eliminate this?
 
-  // write edf method to do diff on the fly?
   int nsamples = spec_params->nsamples;
 
   int ch_idx1, ch_idx2;
@@ -227,7 +241,6 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
   int start_offset = spec_params->start_offset;
   int end_offset = spec_params->end_offset;
 
-  // should this just move to the spec_params struct?
   frowvec vec1 = frowvec(nsamples);
   frowvec vec2 = frowvec(nsamples);
   spec_params->backend->read_array(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);

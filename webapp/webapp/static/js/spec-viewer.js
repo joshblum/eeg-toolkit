@@ -29,13 +29,13 @@ function reloadSpectrograms() {
 }
 
 /*
-   Arguments:
-   mrn       the medical record number from which to load data.
-   nfft      the FFT length used for calculating the spectrogram.
-   startTime the start time for the calculation
-   endTime   the end time for the calculation
-   overlap   the amount of overlap between consecutive spectra.
-   channel   the channel (LL, LP, ...) we are requesting
+ *  Arguments:
+ *  mrn       the medical record number from which to load data.
+ *  nfft      the FFT length used for calculating the spectrogram.
+ *  startTime the start time for the calculation
+ *  endTime   the end time for the calculation
+ *  overlap   the amount of overlap between consecutive spectra.
+ *  channel   the channel (LL, LP, ...) we are requesting
 */
 function requestSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
     var spectrogram = SPECTROGRAMS[IDS[channel]];
@@ -53,11 +53,16 @@ function requestSpectrogram(mrn, nfft, startTime, endTime, overlap, channel) {
     });
 }
 
-
+/*
+ * Set the time of the given `timeId` as a formatted float.
+ */
 function setTime(timeId, timeValue) {
     getElementById(timeId).value = parseFloat(timeValue.toFixed(3));
 }
 
+/*
+ * Increase the time interval in viewing range
+ */
 function increaseInterval() {
     var interval = parseFloat(getElementById("specInterval").value);
     var specStartTime = parseFloat(getElementById("specStartTime").value);
@@ -71,6 +76,9 @@ function increaseInterval() {
     reloadSpectrograms();
 }
 
+/*
+ * Decrease the time interval in viewing range
+ */
 function decreaseInterval() {
     var interval = parseFloat(getElementById("specInterval").value);
     var specStartTime = parseFloat(getElementById("specStartTime").value);
@@ -106,7 +114,8 @@ function testPanning() {
     id = setInterval(pan, 15 * 1000);
 }
 
-/* Test the keyup event for a submission and then reload the spectrogram.
+/*
+ * Test the keyup event for a submission and then reload the spectrogram.
  */
 function submitSpectrogram(e) {
     var which = e.which || e.keyCode;

@@ -29,6 +29,9 @@ class NotImplementedError: public exception
   }
 };
 
+/*
+ * Object to store 2D array metadata
+ */
 class ArrayMetadata
 {
   public:
@@ -78,6 +81,9 @@ typedef struct cell
   float sample;
 } cell_t;
 
+/*
+ * Abstraction for array based storage engine
+ */
 template <class T>
 class AbstractStorageBackend
 {
@@ -125,12 +131,19 @@ class AbstractStorageBackend
       data_cache.erase(mrn);
     }
 
+    /*
+     * Internal method which determines where
+     * a data file lives in the filesystem
+     */
     string _mrn_to_array_name(string mrn, string file_ext) {
       return DATADIR + mrn + file_ext;
     }
 
     virtual string mrn_to_array_name(string mrn) = 0;
 
+    /*
+     * Returns a bool if the given array name is a cached array
+     */
     bool is_cached_array(string array_name)
     {
       return array_name.find(cache_tag) != string::npos;
@@ -138,17 +151,24 @@ class AbstractStorageBackend
 
 
   public:
+    /*
+     * Convert a `mrn` and `ch_name` to the appropiate cached name
+     */
     string mrn_to_cached_mrn_name(string mrn, string ch_name)
     {
       return mrn + "-" + ch_name + cache_tag;
     }
 
+    /*
+     * Determine if an array exists given the `mrn`
+     */
     bool array_exists(string mrn)
     {
       string array_name = mrn_to_array_name(mrn);
       return file_exists(array_name);
     }
 
+    /////// METADATA GETTERS ///////
     int get_fs(string mrn)
     {
       return get_array_metadata(mrn).fs;

@@ -68,6 +68,10 @@ void storage_example(string mrn)
   cout << endl;
 }
 
+/*
+ * Command line program to test basic functionality when computing a
+ * spectrogram or using different storage backends.
+ */
 int main(int argc, char* argv[])
 {
   if (argc <= 4)

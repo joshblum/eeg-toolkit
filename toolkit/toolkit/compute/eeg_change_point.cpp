@@ -1,5 +1,7 @@
 #include "eeg_change_point.hpp"
 
+#include <armadillo>
+
 using namespace arma;
 
 static inline int round_up(int num_to_round, int multiple)

@@ -6,6 +6,10 @@
 
 using namespace std;
 
+/*
+ * Command line program to convert a given `mrn` to precalculated spectrograms
+ * uses the current backend defined in `config.hpp`
+ */
 int main(int argc, char* argv[])
 {
   if (argc <= 2)
