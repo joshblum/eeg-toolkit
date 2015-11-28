@@ -5,14 +5,17 @@
 using namespace std;
 
 // backend config
+#ifndef BACKEND
 #define BACKEND BinaryBackend
+#endif
 // Helpers to print string name of backend
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
 // Path to EEG data
-#define BASEDIR "/home/ubuntu"
-#define DATADIR BASEDIR"/eeg-data/eeg-data/"
+#ifndef DATADIR
+#define DATADIR "/home/ubuntu/eeg-data/eeg-data/"
+#endif
 
 // websocket server config
 #define WS_DEFAULT_PORT 8080

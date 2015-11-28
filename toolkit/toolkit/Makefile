@@ -67,12 +67,21 @@ LDFLAGS := -lfftw3\
 					-l:$(TILEDBLIBNAME)
 
 ifeq ($(DEBUG),1)
-	 CFLAGS += -O0\
-						 -g\
-						 -DDEBUG # -g needed for test framework assertions
+	# -g needed for test framework assertions
+	CFLAGS += -O0\
+						 -g
+	 OPTS += -DDEBUG
 else
-	CFLAGS += -O3\
-						-DNDEBUG
+	CFLAGS += -O3
+	OPTS += -DNDEBUG
+endif
+
+ifneq ($(BACKEND),)
+	OPTS += -DBACKEND=$(BACKEND)
+endif
+
+ifneq ($(DATADIR),)
+	OPTS += -DDATADIR=$(DATADIR)
 endif
 
 default: ws_server
@@ -83,10 +92,10 @@ installdeps:
 	pip install -r requirements.txt
 
 %.o : %.c
-	$(CXX) $(CFLAGS) -o $@ -c $<
+	$(CXX) $(OPTS) $(CFLAGS) -o $@ -c $<
 
 %.o : %.cpp
-	$(CXX) $(CFLAGS) -o $@ -c $<
+	$(CXX) $(OPTS) $(CFLAGS) -o $@ -c $<
 
 ws_server: $(WSOBJ)
 	$(CXX) -o $@ $(WSOBJ) $(LDFLAGS)
