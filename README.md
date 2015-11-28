@@ -47,6 +47,7 @@ websocket to talk to the websocket server, `ws_server`. The `ws_server` is
 responsible for computing and serving the EEG data that the frontend then
 displays. Below is a screenshot of interface in action:
 
+![screenshot](https://raw.githubusercontent.com/joshblum/eeg-toolkit/master/screenshot.png)
 
 To run the different components you can run the following:
 
