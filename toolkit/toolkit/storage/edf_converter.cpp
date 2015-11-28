@@ -139,6 +139,8 @@ int main(int argc, char* argv[])
     if (argc == 3)
     {
       backend_name = argv[2];
+    } else {
+      backend_name = TOSTRING(BACKEND);
     }
     cout << "Using mrn: " << mrn << " and backend: " << backend_name << endl;
     convert_to_array(mrn, backend_name);
