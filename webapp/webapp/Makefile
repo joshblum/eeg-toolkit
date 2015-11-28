@@ -1,4 +1,5 @@
-.PHONY: clean installdeps
+.PHONY: installdeps\
+	clean
 
 installdeps:
 	pip install -r requirements.txt

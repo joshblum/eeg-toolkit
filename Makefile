@@ -1,4 +1,18 @@
-.PHONY: clean ws_server run installdeps lint pylint jslint prod-run install deploy submodules submodule-update dev-packages docker-install docker-run docker-stop docker-push
+.PHONY: clean\
+	ws_server\
+	submodule-update\
+	submodules\
+	installdeps\
+	dev-packages\
+	install\
+	docker-install\
+	docker-run\
+	docker-stop\
+	docker-push\
+	deploy\
+	pylint\
+	jslint\
+	lint
 
 REPO := "joshblum"
 DOCKER_WEBAPP_NAME := "eeg-toolkit-webapp"
@@ -9,11 +23,11 @@ default: ws_server
 ws_server:
 	make -C toolkit/toolkit/ ws_server
 
-submodule-update:
-	git submodule foreach git checkout master; git pull --rebase origin master
-
 submodules:
 	git submodule update --init --recursive
+
+submodule-update:
+	git submodule foreach git checkout master; git pull --rebase origin master
 
 installdeps: clean submodules dev-packages
 	make -C toolkit/toolkit installdeps

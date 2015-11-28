@@ -1,4 +1,9 @@
-.PHONY: clean main ws_server edf_converter viz_converter precompute_spectrogram installdeps
+.PHONY: ws_server\
+	installdeps\
+	edf_converter\
+	viz_converter\
+	precompute_spectrogram\
+	clean
 
 CXX = c++
 
