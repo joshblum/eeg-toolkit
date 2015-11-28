@@ -8,6 +8,6 @@ ADD ./toolkit /opt/toolkit/
 WORKDIR /opt/toolkit
 RUN make installdeps
 # create binaries and run daemons
-RUN start.sh
+RUN ./start.sh
 EXPOSE 8080
 CMD ["./ws_server"]
