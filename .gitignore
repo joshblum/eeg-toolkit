@@ -61,7 +61,8 @@ pip-delete-this-directory.txt
 *.out
 *.app
 
-main
+test
 ws_server
 edf_converter
 precompute_spectrogram
+viz_converter

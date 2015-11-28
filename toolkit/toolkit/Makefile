@@ -1,5 +1,6 @@
 .PHONY: ws_server\
 	installdeps\
+	test\
 	edf_converter\
 	viz_converter\
 	precompute_spectrogram\
@@ -23,9 +24,9 @@ WSSRC := $(COMPUTESRC)\
 				$(STORAGESRC)\
 				$(VISGOTHSRC)\
 				ws_server.cpp
-MAINSRC := $(COMPUTESRC)\
+TESTSRC := $(COMPUTESRC)\
 					$(STORAGESRC)\
-					main.cpp
+					test.cpp
 EDFCONVERTSRC := $(STORAGESRC)\
 								storage/edf_converter.cpp
 VIZCONVERTSRC := $(STORAGESRC)\
@@ -37,7 +38,7 @@ PRECOMPUTESRC := $(COMPUTESRC)\
 
 COBJ := $(CSRC:.c=.o)
 WSOBJ := $(COBJ) $(WSSRC:.cpp=.o)
-MAINOBJ := $(COBJ) $(MAINSRC:.cpp=.o)
+TESTOBJ := $(COBJ) $(TESTSRC:.cpp=.o)
 EDFCONVERTOBJ := $(COBJ) $(EDFCONVERTSRC:.cpp=.o)
 VIZCONVERTOBJ := $(COBJ) $(VIZCONVERTSRC:.cpp=.o)
 PREOCMPUTEOBJ := $(COBJ) $(PRECOMPUTESRC:.cpp=.o)
@@ -90,8 +91,8 @@ installdeps:
 ws_server: $(WSOBJ)
 	$(CXX) -o $@ $(WSOBJ) $(LDFLAGS)
 
-main: $(MAINOBJ)
-	$(CXX) -o $@ $(MAINOBJ) $(LDFLAGS)
+test: $(TESTOBJ)
+	$(CXX) -o $@ $(TESTOBJ) $(LDFLAGS)
 
 edf_converter: $(EDFCONVERTOBJ)
 	$(CXX) -o $@ $(EDFCONVERTOBJ) $(LDFLAGS)
@@ -106,7 +107,7 @@ clean:
 	find . -type f -name '*.*~' -delete
 	find . -type f -name '*.[dSYM|o|d]' -delete
 	find . -type f -name ws_server -delete
-	find . -type f -name main -delete
+	find . -type f -name test -delete
 	find . -type f -name edf_converter -delete
 	find . -type f -name viz_converter -delete
 	find . -type f -name precompute_spectrogram -delete
