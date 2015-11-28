@@ -271,8 +271,7 @@ void precompute_spectrogram(string mrn)
   int fs = backend.get_fs(mrn);
   int nsamples = backend.get_nsamples(mrn);
 
-  int chunk_size = 10000000;
-  int nchunks = ceil(nsamples / (float) chunk_size);
+  int nchunks = ceil(nsamples / (float) WRITE_CHUNK_SIZE);
   cout << "Computing " << nchunks << " chunks and " << nsamples << " samples." << endl;
 
 
@@ -301,7 +300,7 @@ void precompute_spectrogram(string mrn)
     backend.open_array(cached_mrn_name);
 
     start_offset = 0;
-    end_offset = min(nsamples, chunk_size);
+    end_offset = min(nsamples, WRITE_CHUNK_SIZE);
 
     start_time = samples_to_hours(fs, start_offset);
     end_time = samples_to_hours(fs, end_offset);
@@ -311,7 +310,7 @@ void precompute_spectrogram(string mrn)
     cached_start_offset = 0;
     cached_end_offset = spec_params.nblocks;
 
-    for (; end_offset <= nsamples; end_offset = min(end_offset + chunk_size, nsamples))
+    for (; end_offset <= nsamples; end_offset = min(end_offset + WRITE_CHUNK_SIZE, nsamples))
     {
       start_time = samples_to_hours(fs, start_offset);
       end_time = samples_to_hours(fs, end_offset);
@@ -329,9 +328,9 @@ void precompute_spectrogram(string mrn)
         break;
       }
 
-      if (!((end_offset / chunk_size) % 50))
+      if (!((end_offset / WRITE_CHUNK_SIZE) % 50))
       {
-        cout << "Wrote " << end_offset / chunk_size << " chunks for ch: " << CH_NAME_MAP[ch] << endl;
+        cout << "Wrote " << end_offset / WRITE_CHUNK_SIZE << " chunks for ch: " << CH_NAME_MAP[ch] << endl;
       }
     }
     backend.close_array(cached_mrn_name);

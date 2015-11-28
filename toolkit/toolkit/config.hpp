@@ -17,6 +17,16 @@ using namespace std;
 #define DATADIR "/home/ubuntu/eeg-data/eeg-data/"
 #endif
 
+// Max size to read
+#ifndef READ_CHUNK_SIZE
+#define READ_CHUNK_SIZE 4000000 // 4 * 1 000 000 = 4MB chunks
+#endif
+
+// Max size to write
+#ifndef WRITE_CHUNK_SIZE
+#define WRITE_CHUNK_SIZE 4000000 // 4 * 1 000 000 = 4MB chunks
+#endif
+
 // websocket server config
 #define WS_DEFAULT_PORT 8080
 

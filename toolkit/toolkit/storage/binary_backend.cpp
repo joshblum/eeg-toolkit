@@ -183,13 +183,13 @@ void BinaryBackend::edf_to_array(string mrn)
   {
     ch = CHANNEL_ARRAY[i];
     start_offset = 0;
-    end_offset = min(nsamples, CHUNK_SIZE);
+    end_offset = min(nsamples, READ_CHUNK_SIZE);
     frowvec chunk_buf = frowvec(end_offset);
 
     // read chunks from each signal and write them
-    for (; end_offset <= nsamples; end_offset = min(end_offset + CHUNK_SIZE, nsamples))
+    for (; end_offset <= nsamples; end_offset = min(end_offset + READ_CHUNK_SIZE, nsamples))
     {
-      if (end_offset - start_offset != CHUNK_SIZE) {
+      if (end_offset - start_offset != READ_CHUNK_SIZE) {
         chunk_buf.resize(end_offset - start_offset);
       }
       edf_backend.read_array(mrn, ch, start_offset, end_offset, chunk_buf);
@@ -202,9 +202,9 @@ void BinaryBackend::edf_to_array(string mrn)
         break;
       }
 
-      if (!(ch % 2 || (end_offset / CHUNK_SIZE) % 10)) // print for even channels every 10 chunks (40MB)
+      if (!(ch % 2 || (end_offset / READ_CHUNK_SIZE) % 10)) // print for even channels every 10 chunks (40MB)
       {
-        cout << "Wrote " << end_offset / CHUNK_SIZE << " chunks for ch: " << ch << endl;
+        cout << "Wrote " << end_offset / READ_CHUNK_SIZE << " chunks for ch: " << ch << endl;
       }
     }
   }

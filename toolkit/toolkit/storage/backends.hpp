@@ -13,7 +13,6 @@
 #include "H5Cpp.h"
 #include "TileDB/core/include/capis/tiledb.h"
 
-#define CHUNK_SIZE 4000000 // 4 * 1 000 000 = 4MB chunks
 #define CELL_SIZE (sizeof(int32_t) * 2 + sizeof(float)) // struct gets padded to 24 bytes
 
 using namespace std;

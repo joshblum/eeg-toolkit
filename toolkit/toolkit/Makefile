@@ -84,6 +84,14 @@ ifneq ($(DATADIR),)
 	OPTS += -DDATADIR=$(DATADIR)
 endif
 
+ifneq ($(READ_CHUNK_SIZE),)
+	OPTS += -DREAD_CHUNK_SIZE=$(READ_CHUNK_SIZE)
+endif
+
+ifneq ($(WRITE_CHUNK_SIZE),)
+	OPTS += -DWRITE_CHUNK_SIZE=$(WRITE_CHUNK_SIZE)
+endif
+
 default: ws_server
 
 installdeps:
