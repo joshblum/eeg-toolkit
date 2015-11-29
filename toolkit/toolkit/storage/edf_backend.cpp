@@ -127,7 +127,3 @@ void EDFBackend::close_array(string mrn)
     }
 }
 
-void EDFBackend::edf_to_array(string mrn)
-{
-  throw NotImplementedError();
-}

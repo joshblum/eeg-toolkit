@@ -13,7 +13,7 @@ void viz_to_csv(string mrn)
   if (!backend.array_exists(mrn))
   {
     cout << "Converting to array: " << mrn << endl;
-    backend.edf_to_array(mrn);
+    edf_to_array(&backend, mrn);
   }
 
   fmat mat;

@@ -11,6 +11,7 @@ CXX = c++
 CSRC := storage/EDFlib/edflib.c
 STORAGESRC := storage/binary_backend.cpp\
 					storage/edf_backend.cpp\
+					storage/edf_to_array.cpp\
 					storage/hdf5_backend.cpp\
 					storage/tiledb_backend.cpp\
 					json11/json11.cpp # required by binary_backend for metadata

@@ -210,7 +210,6 @@ class EDFBackend: public AbstractStorageBackend<edf_hdr_struct*>
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string mrn);
 };
 
 class BinaryBackend: public AbstractStorageBackend<ArrayMetadata>
@@ -226,7 +225,6 @@ class BinaryBackend: public AbstractStorageBackend<ArrayMetadata>
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string mrn);
 };
 
  // TODO(joshblum): why can't we pass by ref?
@@ -244,7 +242,6 @@ class HDF5Backend: public AbstractStorageBackend<DataSet>
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string mrn);
 };
 
 typedef pair<TileDB_CTX*, int> tiledb_cache_pair;
@@ -267,10 +264,12 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
     void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
     void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
     void close_array(string mrn);
-    void edf_to_array(string mrn);
 };
 
 typedef BACKEND StorageBackend;
+
+template <typename T>
+void edf_to_array(AbstractStorageBackend<T>* backend, string mrn);
 
 #endif // BACKENDS_H
 

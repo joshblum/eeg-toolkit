@@ -97,22 +97,22 @@ void convert_to_array(string mrn, string backend_name)
   if (backend_name == "HDF5Backend")
   {
     HDF5Backend hdf5_backend;
-    hdf5_backend.edf_to_array(mrn);
+    edf_to_array(&hdf5_backend, mrn);
   }
   else if (backend_name == "TileDBBackend")
   {
     TileDBBackend tiledb_backend;
-    tiledb_backend.edf_to_array(mrn);
+    edf_to_array(&tiledb_backend, mrn);
   }
   else if (backend_name == "BinaryBackend")
   {
     BinaryBackend binary_backend;
-    binary_backend.edf_to_array(mrn);
+    edf_to_array(&binary_backend, mrn);
   }
   else
   {
     StorageBackend backend;
-    backend.edf_to_array(mrn);
+    edf_to_array(&backend, mrn);
   }
 }
 
