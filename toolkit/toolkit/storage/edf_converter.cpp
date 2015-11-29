@@ -92,27 +92,32 @@ void edf_to_bin(string mrn)
   edf_to_file(mrn, path, type);
 }
 
-void convert_to_array(string mrn, string backend_name)
+size_t gigabytes_to_bytes(size_t num_gb)
+{
+  return num_gb * 1000000000;
+}
+
+void convert_to_array(string mrn, string backend_name, size_t desired_size)
 {
   if (backend_name == "HDF5Backend")
   {
     HDF5Backend hdf5_backend;
-    edf_to_array(&hdf5_backend, mrn);
+    edf_to_array(&hdf5_backend, mrn, desired_size);
   }
   else if (backend_name == "TileDBBackend")
   {
     TileDBBackend tiledb_backend;
-    edf_to_array(&tiledb_backend, mrn);
+    edf_to_array(&tiledb_backend, mrn, desired_size);
   }
   else if (backend_name == "BinaryBackend")
   {
     BinaryBackend binary_backend;
-    edf_to_array(&binary_backend, mrn);
+    edf_to_array(&binary_backend, mrn, desired_size);
   }
   else
   {
     StorageBackend backend;
-    edf_to_array(&backend, mrn);
+    edf_to_array(&backend, mrn, desired_size);
   }
 }
 
@@ -122,7 +127,7 @@ void convert_to_array(string mrn, string backend_name)
  */
 int main(int argc, char* argv[])
 {
-  if (argc <= 3)
+  if (argc <= 4)
   {
     string mrn;
     if (argc >= 2)
@@ -139,11 +144,26 @@ int main(int argc, char* argv[])
     if (argc == 3)
     {
       backend_name = argv[2];
-    } else {
+    }
+    else
+    {
       backend_name = TOSTRING(BACKEND);
     }
-    cout << "Using mrn: " << mrn << " and backend: " << backend_name << endl;
-    convert_to_array(mrn, backend_name);
+
+    size_t desired_size;
+    if (argc == 4)
+    {
+      desired_size = atoi(argv[3]);
+    }
+    else
+    {
+      desired_size = 0;
+    }
+
+    desired_size = gigabytes_to_bytes(desired_size);
+
+    cout << "Using mrn: " << mrn << " and backend: " << backend_name << " with desired_size: " << desired_size << endl;
+    convert_to_array(mrn, backend_name, desired_size);
   }
   else
   {

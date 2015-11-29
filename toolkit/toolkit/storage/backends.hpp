@@ -269,7 +269,7 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
 typedef BACKEND StorageBackend;
 
 template <typename T>
-void edf_to_array(AbstractStorageBackend<T>* backend, string mrn);
+void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired_size=0);
 
 #endif // BACKENDS_H
 
