@@ -74,7 +74,7 @@ static const int CHANNEL_ARRAY[NCHANNELS] = {
   F7,
   F8,
   FP1,
-  FP1,
+  FP2,
   P3,
   P4,
   T3,
