@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 
     desired_size = gigabytes_to_bytes(desired_size);
 
-    cout << "Using mrn: " << mrn << " and backend: " << backend_name << " with desired_size: " << desired_size << endl;
+    cout << "Using mrn: " << mrn << " and backend: " << backend_name << " with desired_size: " << desired_size << " and READ_CHUNK_SIZE: " << READ_CHUNK_SIZE << endl;
     convert_to_array(mrn, backend_name, desired_size);
   }
   else

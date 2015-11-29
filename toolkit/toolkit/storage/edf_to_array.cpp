@@ -31,7 +31,7 @@ void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired
     nrows = nsamples;
   }
 
-  ArrayMetadata metadata = ArrayMetadata(fs, nsamples, nrows, ncols);
+  ArrayMetadata metadata = ArrayMetadata(fs, nrows, nrows, ncols);
   backend->create_array(mrn, &metadata);
   backend->open_array(mrn);
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
@@ -44,15 +44,12 @@ void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired
     start_read_offset = 0;
     start_write_offset = 0;
     end_read_offset = min(nsamples, READ_CHUNK_SIZE);
-    end_write_offset = min(nsamples, READ_CHUNK_SIZE);
+    end_write_offset = min(end_read_offset - start_read_offset, READ_CHUNK_SIZE);
     frowvec chunk_buf = frowvec(end_read_offset);
 
-    size_t cur_row_size = 0;
     // read chunks from each signal and write them
     for (; end_read_offset <= nsamples; end_read_offset = min(end_read_offset + READ_CHUNK_SIZE, nsamples))
     {
-      end_write_offset = min(end_write_offset + READ_CHUNK_SIZE, nrows);
-
       if (end_read_offset - start_read_offset != READ_CHUNK_SIZE) {
         chunk_buf.resize(end_read_offset - start_read_offset);
       }
@@ -65,6 +62,7 @@ void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired
         break;
       }
 
+      end_write_offset = min(end_write_offset + end_read_offset - start_read_offset, nrows);
       start_read_offset = end_read_offset;
       start_write_offset = end_write_offset;
 
@@ -74,10 +72,9 @@ void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired
         start_read_offset = max(0, end_read_offset - READ_CHUNK_SIZE);
       }
 
-      if (!(ch % 2 || (end_write_offset / READ_CHUNK_SIZE) % 10)) // print for even channels every 10 chunks (40MB)
+      if (!(ch % 2 || (end_write_offset / READ_CHUNK_SIZE) % 10))
       {
         cout << "Wrote " << end_write_offset / READ_CHUNK_SIZE << " chunks for ch: " << ch << endl;
-      cout << "start_write_offset: " << start_write_offset << " end_write_offset: " << end_write_offset << " cur_row_size: " << cur_row_size << endl;
       }
     }
   }

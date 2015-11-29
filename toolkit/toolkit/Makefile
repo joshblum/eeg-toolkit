@@ -85,12 +85,12 @@ ifneq ($(DATADIR),)
 	OPTS += -DDATADIR=$(DATADIR)
 endif
 
-ifneq ($(READ_CHUNK_SIZE),)
-	OPTS += -DREAD_CHUNK_SIZE=$(READ_CHUNK_SIZE)
+ifneq ($(READ_CHUNK),)
+	OPTS += -DREAD_CHUNK=$(READ_CHUNK)
 endif
 
-ifneq ($(WRITE_CHUNK_SIZE),)
-	OPTS += -DWRITE_CHUNK_SIZE=$(WRITE_CHUNK_SIZE)
+ifneq ($(WRITE_CHUNK),)
+	OPTS += -DWRITE_CHUNK=$(WRITE_CHUNK)
 endif
 
 default: ws_server
