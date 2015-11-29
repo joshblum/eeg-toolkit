@@ -3,6 +3,9 @@
 #include<string>
 #include<armadillo>
 
+#include <cxxabi.h>
+#include "../helpers.hpp"
+
 using namespace std;
 using namespace arma;
 
@@ -14,6 +17,9 @@ using namespace arma;
 template<typename T>
 void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired_size)
 {
+  // Capture start time
+  unsigned long long start = getticks();
+
   EDFBackend edf_backend;
   edf_backend.open_array(mrn);
 
@@ -78,8 +84,13 @@ void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired
       }
     }
   }
-
   cout << "Write complete" << endl;
+
+  // Logging for experiments
+  double diff_secs = ticks_to_seconds(getticks() - start);
+  int status;
+  char* class_name_pretty = abi::__cxa_demangle(typeid(backend).name(),0,0,&status);
+  cout << "experiment_data::" << mrn << "," << class_name_pretty << "," << desired_size << "," << READ_CHUNK_SIZE << "," << diff_secs << endl;
 }
 
 // Explicit template declarations
