@@ -48,7 +48,7 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
     start_read_offset = 0;
     start_write_offset = 0;
     end_read_offset = min(nsamples, READ_CHUNK_SIZE);
-    end_write_offset = min(end_read_offset - start_read_offset, READ_CHUNK_SIZE);
+    end_write_offset = min(end_read_offset - start_read_offset, nrows);
     frowvec chunk_buf = frowvec(end_read_offset);
 
     // read chunks from each signal and write them
