@@ -117,7 +117,7 @@ Spectrogram.prototype.init = function() {
     this.loadSpectrogramShaders();
 
     // load dummy data
-    this.render(new Float32Array(), 0, 0, 200, 0, 1);
+    this.render(new Float32Array(1), 1, 1, 200, 0, 1);
 
     this.addListeners();
 };

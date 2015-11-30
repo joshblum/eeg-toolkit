@@ -92,9 +92,15 @@ SpecParams::SpecParams(StorageBackend* backend,
   start_time = _start_time;
   end_time = _end_time;
 
-  backend->open_array(mrn);
-
-  fs = backend->get_fs(mrn);
+  if (backend->array_exists(mrn))
+  {
+    backend->open_array(mrn);
+    fs = backend->get_fs(mrn);
+  }
+  else
+  {
+    fs = 0;
+  }
 
   // TODO(joshblum): implement full multitaper method
   // and remove hard coding

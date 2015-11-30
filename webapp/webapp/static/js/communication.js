@@ -86,9 +86,16 @@ ws.onmessage = function(event) {
         setTime("specStartTime", content.startTime);
         setTime("specEndTime", content.endTime);
         spectrogram.updateStartLoadTime();
-        spectrogram.render(new Float32Array(event.data, headerLen + 4),
+        if (content.nblocks === 0) {
+          if (spectrogram.id === "LL") {
+            Materialize.toast("Invalid MRN", 5000);
+          }
+          spectrogram.render(new Float32Array(1), 1, 1, 200, 0, 1);
+        } else {
+          spectrogram.render(new Float32Array(event.data, headerLen + 4),
             content.nblocks, content.nfreqs, content.fs,
             content.startTime, content.endTime, spectrogramRequestCount);
+        }
 
         spectrogram.logElapsedTime(spectrogramRequestCount);
         spectrogramRequestCount++;

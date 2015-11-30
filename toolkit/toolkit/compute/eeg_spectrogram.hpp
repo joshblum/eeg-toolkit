@@ -41,6 +41,10 @@ class SpecParams
     void print();
     SpecParams(StorageBackend* backend,
         string mrn, float start_time, float end_time);
+    ~SpecParams()
+    {
+      backend->close_array(mrn);
+    }
 };
 
 // does not need spec params

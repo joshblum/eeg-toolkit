@@ -150,9 +150,12 @@ void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connec
     backend.open_array(cached_mrn_name);
     backend.read_array(cached_mrn_name, spec_params.spec_start_offset, spec_params.spec_end_offset, spec_mat);
     backend.close_array(cached_mrn_name);
-  } else {
+  }
+  else if (backend.array_exists(mrn))
+  {
     eeg_spectrogram(&spec_params, ch, spec_mat);
   }
+
   log_time_diff("eeg_spectrogram", start);
   downsample(spec_mat, extent);
   cap_max_width(spec_mat, max_width);
@@ -161,8 +164,6 @@ void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connec
   // cp_data_t cp_data;
   // get_change_points(spec_mat, &cp_data);
   // send_change_points(server, connection, ch_name, &cp_data);
-
-  backend.close_array(mrn);
 }
 
 void receive_message(WsServer* server, shared_ptr<WsServer::Connection> connection, shared_ptr<WsServer::Message> message)
