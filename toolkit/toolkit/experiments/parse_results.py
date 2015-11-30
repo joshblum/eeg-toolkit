@@ -41,8 +41,9 @@ def get_desired_size_from_mrn(mrn):
 
 def ingestion_parser(lines):
   '''
-      Lines are given in a CSV format of: mrn,backend_name,desired_size(gb),read_chunk_size(mb),time
-      Returns a dictionary of (backend_name, desired_size, read_chunk_size) -> time.
+      Lines are given in a CSV format of:
+      mrn,backend_name,desired_size(gb),read_chunk_size(mb),time Returns a
+      dictionary of (backend_name, desired_size, read_chunk_size) -> time.
   '''
   values = defaultdict(list)
   for line in lines:
@@ -56,8 +57,9 @@ def ingestion_parser(lines):
 
 def precompute_parser(lines):
   '''
-      Lines are given in a CSV format of: mrn,backend_name,write_chunk_size(mb),time,tag
-      Returns a dictionary of (tag, backend_name, desired_size, write_chunk_size) -> time.
+      Lines are given in a CSV format of:
+      mrn,backend_name,write_chunk_size(mb),time,tag Returns a dictionary of
+      (tag, backend_name, desired_size, write_chunk_size) -> time.
   '''
   values = defaultdict(list)
   for line in lines:

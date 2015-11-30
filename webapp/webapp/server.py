@@ -68,9 +68,9 @@ def dump_visgoth():
     message = e.message
 
   return jsonify({
-    'success': success,
-    'message': message,
-    })
+      'success': success,
+      'message': message,
+  })
 
 
 if __name__ == '__main__':
