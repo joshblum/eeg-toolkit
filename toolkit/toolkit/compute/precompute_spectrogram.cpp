@@ -24,9 +24,10 @@ int main(int argc, char* argv[])
       // default medial record number
       mrn = "007";
     }
-    cout << "Using mrn: " << mrn << " and backend: " << TOSTRING(BACKEND) << endl;
-    precompute_spectrogram(mrn);
-    cout << "Completed." << endl;
+
+    cout << "Using mrn: " << mrn << " backend: " << TOSTRING(BACKEND) <<" and WRITE_CHUNK_SIZE: " << WRITE_CHUNK_SIZE << endl;
+    StorageBackend backend;
+    precompute_spectrogram(mrn, &backend);
   }
   else
   {

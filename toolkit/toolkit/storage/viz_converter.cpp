@@ -31,7 +31,7 @@ void viz_to_csv(string mrn)
     if (!backend.array_exists(cached_mrn_name))
     {
       cout << "Precomputing spectrogram: " << cached_mrn_name << endl;
-      precompute_spectrogram(mrn);
+      precompute_spectrogram(mrn, &backend);
     }
     cout << "Converting: " << cached_mrn_name << endl;
 

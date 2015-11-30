@@ -1,10 +1,6 @@
 from collections import defaultdict
 import pprint
 
-# Pretty print class names
-CLASS_NAME_MAP = {
-    'AbstractStorageBackend<ArrayMetadata>*': 'BinaryBackend'
-}
 DELIMITER = 'experiment_data::'
 
 
@@ -20,7 +16,7 @@ def parse_log(filename):
       for line in f:
         if line.startswith(DELIMITER):
           line = line[len(DELIMITER):]
-          lines.append(line)
+          lines.append(line.rstrip())
   except IOError:
     print 'File %s not found.' % filename
 
@@ -35,6 +31,14 @@ def bytes_to_mb(byte_str):
   return '%smb' % (int(byte_str) / 10**6)
 
 
+def get_desired_size_from_mrn(mrn):
+  '''
+    For a mrn of the form xxx-xgb.xxx, returns the strinng 'xgb'
+  '''
+  mrn = mrn.split('.')[0]
+  return mrn.split('-')[-1]
+
+
 def ingestion_parser(lines):
   '''
       Lines are given in a CSV format of: mrn,backend_name,desired_size(gb),read_chunk_size(mb),time
@@ -43,8 +47,24 @@ def ingestion_parser(lines):
   values = defaultdict(list)
   for line in lines:
     mrn, backend_name, desired_size, read_chunk_size, time = line.split(',')
-    key = (CLASS_NAME_MAP.get(backend_name), bytes_to_gb(
-        desired_size), bytes_to_mb(read_chunk_size))
+    key = (backend_name, bytes_to_gb(desired_size),
+           bytes_to_mb(read_chunk_size))
+    value = float(time)
+    values[key].append(value)
+  return values
+
+
+def precompute_parser(lines):
+  '''
+      Lines are given in a CSV format of: mrn,backend_name,write_chunk_size(mb),time,tag
+      Returns a dictionary of (tag, backend_name, desired_size, write_chunk_size) -> time.
+  '''
+  values = defaultdict(list)
+  for line in lines:
+    mrn, backend_name, write_chunk_size, time, tag = line.split(
+        ',')
+    desired_size = get_desired_size_from_mrn(mrn)
+    key = (tag, backend_name, desired_size, bytes_to_mb(write_chunk_size))
     value = float(time)
     values[key].append(value)
   return values
@@ -62,13 +82,16 @@ def avg_values(values):
 
 EXPERIMENTS = {
     'ingestion': ('ingestion_results.txt', ingestion_parser),
+    'precompute': ('precompute_results.txt', precompute_parser),
 }
 
 
 def main():
-  for filename, parser in EXPERIMENTS.itervalues():
+  for exp_name, value_pair in EXPERIMENTS.iteritems():
+    filename, parser = value_pair
     lines = parse_log(filename)
     values = parser(lines)
+    print exp_name
     pprint.pprint(avg_values(values))
 
 

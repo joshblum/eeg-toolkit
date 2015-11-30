@@ -1,7 +1,6 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#include <cxxabi.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <iostream>
@@ -116,13 +115,6 @@ static inline void cap_max_width(fmat& buf, int max_width)
 {
   uint extent = ceil(buf.n_cols / (float) max_width);
   downsample(buf, extent);
-}
-
-template <typename T>
-static inline string pretty_print_classname(T obj)
-{
-  int status;
-  return abi::__cxa_demangle(typeid(obj).name(), 0, 0, &status);
 }
 
 #endif // HELPERS_H

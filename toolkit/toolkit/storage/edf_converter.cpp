@@ -97,37 +97,13 @@ size_t gigabytes_to_bytes(size_t num_gb)
   return num_gb * 1000000000;
 }
 
-void convert_to_array(string mrn, string backend_name, size_t desired_size)
-{
-  if (backend_name == "HDF5Backend")
-  {
-    HDF5Backend hdf5_backend;
-    edf_to_array(mrn, &hdf5_backend, desired_size);
-  }
-  else if (backend_name == "TileDBBackend")
-  {
-    TileDBBackend tiledb_backend;
-    edf_to_array(mrn, &tiledb_backend, desired_size);
-  }
-  else if (backend_name == "BinaryBackend")
-  {
-    BinaryBackend binary_backend;
-    edf_to_array(mrn, &binary_backend, desired_size);
-  }
-  else
-  {
-    StorageBackend backend;
-    edf_to_array(mrn, &backend, desired_size);
-  }
-}
-
 /*
  * Command line program to convert an
  * EDF file for the given `mrn` to the specified backend
  */
 int main(int argc, char* argv[])
 {
-  if (argc <= 4)
+  if (argc <= 3)
   {
     string mrn;
     if (argc >= 2)
@@ -140,20 +116,10 @@ int main(int argc, char* argv[])
       mrn = "007";
     }
 
-    string backend_name;
+    size_t desired_size;
     if (argc == 3)
     {
-      backend_name = argv[2];
-    }
-    else
-    {
-      backend_name = TOSTRING(BACKEND);
-    }
-
-    size_t desired_size;
-    if (argc == 4)
-    {
-      desired_size = atoi(argv[3]);
+      desired_size = atoi(argv[2]);
     }
     else
     {
@@ -162,12 +128,13 @@ int main(int argc, char* argv[])
 
     desired_size = gigabytes_to_bytes(desired_size);
 
-    cout << "Using mrn: " << mrn << " backend: " << backend_name << " with desired_size: " << desired_size << " and READ_CHUNK_SIZE: " << READ_CHUNK_SIZE << endl;
-    convert_to_array(mrn, backend_name, desired_size);
+    cout << "Using mrn: " << mrn << " backend: " << TOSTRING(BACKEND) << " with desired_size: " << desired_size << " and READ_CHUNK_SIZE: " << READ_CHUNK_SIZE << endl;
+    StorageBackend backend;
+    edf_to_array(mrn, &backend, desired_size);
   }
   else
   {
-    cout << "\nusage: ./edf_converter <mrn> <backend_name>\n" << endl;
+    cout << "\nusage: ./edf_converter <mrn> <desired_size>\n" << endl;
   }
   return 1;
 }

@@ -9,6 +9,7 @@ cd $WORK_DIR
 
 MRN="005"
 RESULTS_FILE="experiments/ingestion_results.txt"
+mv $RESULTS_FILE $RESULTS_FILE-bak-$(date +%s)
 
 NUM_RUNS=3
 BACKENDS="BinaryBackend HDF5Backend"
@@ -27,9 +28,9 @@ for i in $(seq 1 ${NUM_RUNS}); do
     for file_size in $FILE_SIZES; do
       for read_chunk in $READ_CHUNK_SIZES; do
         make clean;
-        make edf_converter READ_CHUNK=$read_chunk;
+        make edf_converter READ_CHUNK=$read_chunk BACKEND=$backend;
         # edf_converter <mrn> <backend> <desired_size>
-        ./edf_converter ${MRN}-${file_size}gb $backend $file_size | tee -a $RESULTS_FILE
+        ./edf_converter ${MRN}-${file_size}gb $file_size | tee -a $RESULTS_FILE
       done;
     done;
   done;

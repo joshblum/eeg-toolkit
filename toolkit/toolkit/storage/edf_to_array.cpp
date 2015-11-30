@@ -13,8 +13,7 @@ using namespace arma;
  * have extra data to match the `desired_size`.  Otherwise, the file will be
  * converted directly with no additional data.
  */
-template<typename T>
-void edf_to_array(string mrn, AbstractStorageBackend<T>* backend, size_t desired_size)
+void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
 {
   // Capture start time
   unsigned long long start = getticks();
@@ -76,27 +75,17 @@ void edf_to_array(string mrn, AbstractStorageBackend<T>* backend, size_t desired
       {
         start_read_offset = max(0, end_read_offset - READ_CHUNK_SIZE);
       }
+    }
 
-      if (!(ch % 2 || (end_write_offset / READ_CHUNK_SIZE) % 10))
-      {
-        cout << "Wrote " << end_write_offset / READ_CHUNK_SIZE << " chunks for ch: " << ch << endl;
-      }
+    if (!(ch % 2))
+    {
+      cout << "Wrote ch: " << ch << endl;
     }
   }
   cout << "Write complete" << endl;
 
   // Logging for experiments
   double diff_secs = ticks_to_seconds(getticks() - start);
-  string classname_pretty = pretty_print_classname(backend);
-  cout << "experiment_data::" << mrn << "," << classname_pretty << "," << desired_size << "," << READ_CHUNK_SIZE << "," << diff_secs << endl;
+  cout << EXPERIMENT_TAG << mrn << "," << TOSTRING(BACKEND) << "," << desired_size << "," << READ_CHUNK_SIZE << "," << diff_secs << endl;
 }
 
-// Explicit template declarations
-// BinaryBackend
-template void edf_to_array(string mrn, AbstractStorageBackend<ArrayMetadata>* backend, size_t desired_size);
-
-// HDF5Backend
-template void edf_to_array(string mrn, AbstractStorageBackend<DataSet>* backend, size_t desired_size);
-
-// TileDBBackend
-template void edf_to_array(string mrn, AbstractStorageBackend<tiledb_cache_pair>* backend, size_t desired_size);
