@@ -4,6 +4,7 @@
 	submodules\
 	installdeps\
 	dev-packages\
+	mount-volume\
 	install\
 	docker-install\
 	docker-run\
@@ -17,6 +18,9 @@
 REPO := "joshblum"
 DOCKER_WEBAPP_NAME := "eeg-toolkit-webapp"
 DOCKER_TOOLKIT_NAME := "eeg-toolkit-toolkit"
+
+MOUNT_POINT := "home/ubuntu/eeg-data/eeg-data"
+DEVICE := "/dev/vdb"
 
 default: ws_server
 
@@ -40,12 +44,16 @@ dev-packages:
 	cat dev-packages.txt | xargs sudo apt-get -y install
 	pip install -r requirements.txt
 
+mount-volume:
+	mkfs.ext4 $(DEVICE)
+	mkdir -p $(MOUNT_POINT)
+	mount $(DEVICE) $(MOUNT_POINT)
+
 install: installdeps ws_server
 
 docker-install:
 	curl -sSL https://get.docker.com/ | sh
 	sudo usermod -aG docker ubuntu
-
 
 docker-build: clean submodules
 	-cd webapp && docker build -t $(REPO)/$(DOCKER_WEBAPP_NAME):latest .
@@ -53,7 +61,7 @@ docker-build: clean submodules
 
 docker-run:
 	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(REPO)/$(DOCKER_WEBAPP_NAME)
-	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v /home/ubuntu/eeg-data:/home/ubuntu/eeg-data $(REPO)/$(DOCKER_TOOLKIT_NAME)
+	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v $(MOUNT_POINT):$(MOUNT_POINT) $(REPO)/$(DOCKER_TOOLKIT_NAME)
 
 docker-stop:
 	-docker stop $(DOCKER_WEBAPP_NAME)
