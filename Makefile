@@ -32,6 +32,7 @@ submodule-update:
 
 installdeps: clean submodules dev-packages
 	make -C toolkit/toolkit installdeps
+	make -C toolkit/toolkit/storage/TileDB
 	make -C webapp/webapp installdeps
 
 dev-packages:
