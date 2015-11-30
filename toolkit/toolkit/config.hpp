@@ -19,15 +19,15 @@ using namespace std;
 
 // Max size to read
 #ifndef READ_CHUNK
-#define READ_CHUNK 4
+#define READ_CHUNK 4 // MB
 #endif
-#define READ_CHUNK_SIZE (1000000 * READ_CHUNK) // MB
+#define READ_CHUNK_SIZE ((int) (1000000 * READ_CHUNK / sizeof(float))) // nsamples
 
 // Max size to write
 #ifndef WRITE_CHUNK
-#define WRITE_CHUNK 4
+#define WRITE_CHUNK 4 // MB
 #endif
-#define WRITE_CHUNK_SIZE (1000000 * WRITE_CHUNK) // MB
+#define WRITE_CHUNK_SIZE ((int) 1000000 * WRITE_CHUNK / sizeof(float))) // nsamples
 
 // Delimiter for log lines related to the experiments
 #define EXPERIMENT_TAG "experiment_data::"
