@@ -3,7 +3,6 @@
 #include<string>
 #include<armadillo>
 
-#include <cxxabi.h>
 #include "../helpers.hpp"
 
 using namespace std;
@@ -15,7 +14,7 @@ using namespace arma;
  * converted directly with no additional data.
  */
 template<typename T>
-void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired_size)
+void edf_to_array(string mrn, AbstractStorageBackend<T>* backend, size_t desired_size)
 {
   // Capture start time
   unsigned long long start = getticks();
@@ -88,17 +87,16 @@ void edf_to_array(AbstractStorageBackend<T>* backend, string mrn, size_t desired
 
   // Logging for experiments
   double diff_secs = ticks_to_seconds(getticks() - start);
-  int status;
-  char* class_name_pretty = abi::__cxa_demangle(typeid(backend).name(),0,0,&status);
-  cout << "experiment_data::" << mrn << "," << class_name_pretty << "," << desired_size << "," << READ_CHUNK_SIZE << "," << diff_secs << endl;
+  string classname_pretty = pretty_print_classname(backend);
+  cout << "experiment_data::" << mrn << "," << classname_pretty << "," << desired_size << "," << READ_CHUNK_SIZE << "," << diff_secs << endl;
 }
 
 // Explicit template declarations
 // BinaryBackend
-template void edf_to_array(AbstractStorageBackend<ArrayMetadata>* backend, string mrn, size_t desired_size);
+template void edf_to_array(string mrn, AbstractStorageBackend<ArrayMetadata>* backend, size_t desired_size);
 
 // HDF5Backend
-template void edf_to_array(AbstractStorageBackend<DataSet>* backend, string mrn, size_t desired_size);
+template void edf_to_array(string mrn, AbstractStorageBackend<DataSet>* backend, size_t desired_size);
 
 // TileDBBackend
-template void edf_to_array(AbstractStorageBackend<tiledb_cache_pair>* backend, string mrn, size_t desired_size);
+template void edf_to_array(string mrn, AbstractStorageBackend<tiledb_cache_pair>* backend, size_t desired_size);

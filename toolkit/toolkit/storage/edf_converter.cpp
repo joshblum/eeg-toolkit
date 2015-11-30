@@ -102,22 +102,22 @@ void convert_to_array(string mrn, string backend_name, size_t desired_size)
   if (backend_name == "HDF5Backend")
   {
     HDF5Backend hdf5_backend;
-    edf_to_array(&hdf5_backend, mrn, desired_size);
+    edf_to_array(mrn, &hdf5_backend, desired_size);
   }
   else if (backend_name == "TileDBBackend")
   {
     TileDBBackend tiledb_backend;
-    edf_to_array(&tiledb_backend, mrn, desired_size);
+    edf_to_array(mrn, &tiledb_backend, desired_size);
   }
   else if (backend_name == "BinaryBackend")
   {
     BinaryBackend binary_backend;
-    edf_to_array(&binary_backend, mrn, desired_size);
+    edf_to_array(mrn, &binary_backend, desired_size);
   }
   else
   {
     StorageBackend backend;
-    edf_to_array(&backend, mrn, desired_size);
+    edf_to_array(mrn, &backend, desired_size);
   }
 }
 
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 
     desired_size = gigabytes_to_bytes(desired_size);
 
-    cout << "Using mrn: " << mrn << " and backend: " << backend_name << " with desired_size: " << desired_size << " and READ_CHUNK_SIZE: " << READ_CHUNK_SIZE << endl;
+    cout << "Using mrn: " << mrn << " backend: " << backend_name << " with desired_size: " << desired_size << " and READ_CHUNK_SIZE: " << READ_CHUNK_SIZE << endl;
     convert_to_array(mrn, backend_name, desired_size);
   }
   else

@@ -29,6 +29,8 @@ using namespace std;
 #endif
 #define WRITE_CHUNK_SIZE (1000000 * WRITE_CHUNK) // MB
 
+// Delimiter for log lines related to the experiments
+#define EXPERIMENT_TAG "experiment_data::"
 // websocket server config
 #define WS_DEFAULT_PORT 8080
 
