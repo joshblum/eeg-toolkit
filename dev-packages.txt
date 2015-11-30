@@ -2,6 +2,7 @@ astyle
 cmake
 gdb
 htop
+iotop
 pkg-config
 supervisor
 valgrind
