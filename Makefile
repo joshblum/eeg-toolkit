@@ -48,6 +48,7 @@ mount-volume:
 	mkfs.ext4 $(DEVICE)
 	mkdir -p $(MOUNT_POINT)
 	mount $(DEVICE) $(MOUNT_POINT)
+	sudo chown -R ubuntu:ubuntu $(MOUNT_POINT)
 
 install: installdeps ws_server
 
