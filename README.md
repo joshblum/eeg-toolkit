@@ -54,6 +54,7 @@ To run the different components you can run the following:
 ```bash
 # run the websocket server
 cd toolkit/toolkit
+export LD_LIBRARY_PATH=storage/TileDB/core/lib/release
 ./ws_server
 ```
 
