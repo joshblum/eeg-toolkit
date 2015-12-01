@@ -27,7 +27,7 @@ using namespace std;
 #ifndef WRITE_CHUNK
 #define WRITE_CHUNK 4 // MB
 #endif
-#define WRITE_CHUNK_SIZE ((int) 1000000 * WRITE_CHUNK / sizeof(float))) // nsamples
+#define WRITE_CHUNK_SIZE ((int) (1000000 * WRITE_CHUNK / sizeof(float))) // nsamples
 
 // Delimiter for log lines related to the experiments
 #define EXPERIMENT_TAG "experiment_data::"
