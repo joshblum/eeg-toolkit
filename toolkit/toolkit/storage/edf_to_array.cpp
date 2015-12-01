@@ -48,12 +48,19 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
     start_read_offset = 0;
     start_write_offset = 0;
     end_read_offset = min(nsamples, READ_CHUNK_SIZE);
-    end_write_offset = min(end_read_offset - start_read_offset, nrows);
+    end_write_offset = 0;
     frowvec chunk_buf = frowvec(end_read_offset);
 
     // read chunks from each signal and write them
     for (; end_read_offset <= nsamples; end_read_offset = min(end_read_offset + READ_CHUNK_SIZE, nsamples))
     {
+      // Accounts if we get many small chunks at the end to fill the desired_size
+      if (end_read_offset == nsamples && start_read_offset != 0)
+      {
+        start_read_offset = max(0, end_read_offset - READ_CHUNK_SIZE);
+      }
+      end_write_offset = min(end_write_offset + end_read_offset - start_read_offset, nrows);
+
       if (end_read_offset - start_read_offset != READ_CHUNK_SIZE) {
         chunk_buf.resize(end_read_offset - start_read_offset);
       }
@@ -65,16 +72,8 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
       {
         break;
       }
-
-      end_write_offset = min(end_write_offset + end_read_offset - start_read_offset, nrows);
-      start_read_offset = end_read_offset;
       start_write_offset = end_write_offset;
-
-      // Accounts if we get many small chunks at the end to fill the desired_size
-      if (end_read_offset == nsamples && start_read_offset != 0)
-      {
-        start_read_offset = max(0, end_read_offset - READ_CHUNK_SIZE);
-      }
+      start_read_offset = end_read_offset;
     }
 
     if (!(ch % 2))
