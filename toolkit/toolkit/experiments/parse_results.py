@@ -88,9 +88,10 @@ EXPERIMENTS = {
 }
 
 
-def main():
+def main(backend_name):
   for exp_name, value_pair in EXPERIMENTS.iteritems():
     filename, parser = value_pair
+    filename += '-%s' % backend_name
     lines = parse_log(filename)
     values = parser(lines)
     print exp_name
@@ -98,4 +99,9 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  import sys
+  if len(sys.argv) != 2:
+    print 'usage: python parse_results.py [BinaryBackend|HDF5Backend|TileDBBackend]'
+  else:
+    backend_name = sys.argv[1]
+    main(backend_name)
