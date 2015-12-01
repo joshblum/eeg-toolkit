@@ -10,6 +10,9 @@ if [ "$#" -ne 1 ]; then
 fi
 
 BACKEND=$1
+EMAIL="joshblum@mit.edu"
+HOSTNAME=$(hostname)
+EXP_NAME="ingestion experiment"
 
 WORK_DIR=".."
 cd $WORK_DIR
@@ -38,4 +41,7 @@ for file_size in $FILE_SIZES; do
     ./edf_converter ${MRN}-${file_size}gb $file_size |& tee -a $RESULTS_FILE
   done;
 done;
+
+PAYLOAD="${HOSTNAME} completed ${EXP_NAME} for ${BACKEND} $(date)"
+./experiments/send_mail.sh "$EMAIL" "$PAYLOAD"
 
