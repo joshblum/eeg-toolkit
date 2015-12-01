@@ -38,22 +38,47 @@ string TileDBBackend::get_group()
 
 ArrayMetadata TileDBBackend::get_array_metadata(string mrn)
 {
-  // TODO(joshblum) store this in TileDB metadata when it's implemented
-  int fs = 256;
-  int nsamples = 0;
-  if (mrn == "007") { // tmp fix for testing
-    nsamples = 84992;
-  } else if (mrn == "005")
-  {
-    nsamples = 3686400;
-  }
-  int nrows = nsamples;
-  int ncols = NCHANNELS;
+  string array_name = mrn_to_array_name(mrn) + "-metadata";
+
+  ifstream file;
+  file.open(array_name, ios::binary);
+
+  uint32_t header_len;
+  file.read((char*) &header_len, sizeof(uint32_t));
+
+  string header = "";
+  header.resize(header_len, ' ');
+  file.read((char*) header.c_str(), header_len);
+  file.close();
+
+  string err;
+  Json json = Json::parse(header, err);
+  int fs = json["fs"].int_value();
+  int nsamples = json["nsamples"].int_value();
+  int nrows = json["nrows"].int_value();
+  int ncols = json["ncols"].int_value();
   return ArrayMetadata(fs, nsamples, nrows, ncols);
+}
+
+void TileDBBackend::write_metadata(string mrn, ArrayMetadata* metadata)
+{
+  ofstream file;
+  string path = mrn_to_array_name(mrn) + "-metadata";
+  file.open(path, ios::trunc|ios::binary);
+
+  // Store metadata in header;
+  string header = metadata->to_string();
+  uint32_t header_len = get_byte_aligned_length(header);
+  header.resize(header_len, ' ');
+  file.write((char*) &header_len, sizeof(uint32_t));
+  file.write(header.c_str(), header_len);
+  file.close();
 }
 
 void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
 {
+  // tmp fix until TileDB metadata is implemented
+  write_metadata(mrn, metadata);
   string group = get_group();
   string workspace = get_workspace();
   string array_name = get_array_name(mrn);
@@ -103,7 +128,7 @@ void TileDBBackend::read_array(string mrn, int start_offset, int end_offset, fma
 {
   double* range = new double[RANGE_SIZE];
   range[0] = 0;
-  range[1] = 512; //(TODO)joshblum: remove hardcording when metadata is working //get_ncols(mrn);
+  range[1] = get_ncols(mrn);
   range[2] = start_offset;
   range[3] = end_offset;
   _read_array(mrn, range, buf);

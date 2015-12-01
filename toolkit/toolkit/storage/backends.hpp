@@ -89,6 +89,7 @@ class AbstractStorageBackend
   protected:
     // mrn to array obj pointer
     unordered_map<string, T> data_cache;
+    unordered_map<string, ArrayMetadata> metadata_cache;
     const char* cache_tag = "-cached";
 
     bool in_cache(string mrn)
@@ -109,7 +110,9 @@ class AbstractStorageBackend
       {
         open_array(mrn);
         return get_cache(mrn);
-      } else {
+      }
+      else
+      {
         return iter->second;
       }
     }
@@ -148,6 +151,27 @@ class AbstractStorageBackend
       return array_name.find(cache_tag) != string::npos;
     }
 
+    /*
+     * Get the ArrayMetadata for the given `mrn`, populating the
+     * `metadata_cache` if it empty.
+     */
+    ArrayMetadata _get_array_metadata(string mrn)
+    {
+      ArrayMetadata metadata;
+      auto iter = metadata_cache.find(mrn);
+      if (iter == metadata_cache.end())
+      {
+        metadata = get_array_metadata(mrn);
+        metadata_cache[mrn] = metadata;
+      }
+      else
+      {
+        metadata = iter->second;
+      }
+
+      return metadata;
+    }
+
 
   public:
     /*
@@ -170,22 +194,22 @@ class AbstractStorageBackend
     /////// METADATA GETTERS ///////
     int get_fs(string mrn)
     {
-      return get_array_metadata(mrn).fs;
+      return _get_array_metadata(mrn).fs;
     }
 
     int get_nsamples(string mrn)
     {
-      return get_array_metadata(mrn).nsamples;
+      return _get_array_metadata(mrn).nsamples;
     }
 
     int get_nrows(string mrn)
     {
-      return get_array_metadata(mrn).nrows;
+      return _get_array_metadata(mrn).nrows;
     }
 
     int get_ncols(string mrn)
     {
-      return get_array_metadata(mrn).ncols;
+      return _get_array_metadata(mrn).ncols;
     }
 
     virtual ArrayMetadata get_array_metadata(string mrn) = 0;
@@ -255,6 +279,7 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
     string get_workspace();
     void _open_array(string mrn, const char* mode);
     void _read_array(string mrn, double* range, fmat& buf);
+    void write_metadata(string mrn, ArrayMetadata* metadata);
 
   public:
     ArrayMetadata get_array_metadata(string mrn);

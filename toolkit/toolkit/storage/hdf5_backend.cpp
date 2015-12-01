@@ -104,7 +104,6 @@ void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], voi
   DataSet dataset = get_cache(mrn);
   hsize_t stride[DATA_RANK], block[DATA_RANK];
 
-  // TODO(joshblum): use this for downsampling
   stride[0] = 1;
   stride[1] = 1;
 

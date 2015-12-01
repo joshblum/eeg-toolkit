@@ -39,7 +39,7 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
   backend->create_array(mrn, &metadata);
   backend->open_array(mrn);
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
-  cout << "Array metadata: " << metadata.to_string() << endl;;
+  cout << "Array metadata: " << backend->get_array_metadata(mrn).to_string() << endl;;
 
   int ch, start_read_offset, end_read_offset, start_write_offset, end_write_offset;
   for (int i = 0; i < ncols; i++)
