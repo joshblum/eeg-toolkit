@@ -31,6 +31,10 @@ for i in $(seq 1 ${NUM_RUNS}); do
     for read_chunk in $READ_CHUNK_SIZES; do
       make clean
       make edf_converter READ_CHUNK=$read_chunk BACKEND=$BACKEND
+
+      # clear file systems caches
+      sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+
       # edf_converter <mrn> <desired_size>
       ./edf_converter ${MRN}-${file_size}gb $file_size |& tee -a $RESULTS_FILE
     done;

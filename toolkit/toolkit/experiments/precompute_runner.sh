@@ -26,6 +26,10 @@ for i in $(seq 1 ${NUM_RUNS}); do
     for write_chunk in $WRITE_CHUNK_SIZES; do
     make clean
     make precompute_spectrogram WRITE_CHUNK=$write_chunk BACKEND=$BACKEND
+
+    # clear file systems caches
+    sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+
     # precompute_spectrogram <mrn>
     ./precompute_spectrogram ${MRN}-${file_size}gb |& tee -a $RESULTS_FILE
     done;
