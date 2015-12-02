@@ -56,7 +56,7 @@ void compute_example(string mrn, float start_time, float end_time)
 void storage_example(string mrn)
 {
   StorageBackend backend;
-  edf_to_array(&backend, mrn);
+  edf_to_array(mrn, &backend);
   backend.open_array(mrn);
   cout << "fs: " << backend.get_fs(mrn) << " nsamples: " << backend.get_nsamples(mrn) << endl;
   frowvec buf = frowvec(NSAMPLES);
