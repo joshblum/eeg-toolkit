@@ -169,8 +169,8 @@ void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_of
     for (uword j = 0; j < buf.n_cols; j++)
     {
       // x (col) coord, y (row) coord, attribute
-      cell.x = start_offset + j;
-      cell.y = ch == ALL ? i : CH_REVERSE_IDX[ch];
+      cell.x = ch == ALL ? start_offset + j : CH_REVERSE_IDX[ch];
+      cell.y = ch == ALL ? i : start_offset + j;
       cell.sample = buf(i, j);
       tiledb_cell_write_sorted(tiledb_ctx, array_id, &cell);
     }
