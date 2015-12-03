@@ -304,10 +304,6 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
     string cached_mrn_name = backend->mrn_to_cached_mrn_name(mrn, ch_name);
 
     cout << "Creating: " << cached_mrn_name << endl;
-    if (backend->array_exists(cached_mrn_name))
-    {
-      continue;
-    }
     backend->create_array(cached_mrn_name, &metadata);
     backend->open_array(cached_mrn_name);
 
