@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <iostream>
+#include <vector>
 #include <iomanip>
 #include <string>
 #include <armadillo>
@@ -115,6 +116,21 @@ static inline void cap_max_width(fmat& buf, int max_width)
 {
   uint extent = ceil(buf.n_cols / (float) max_width);
   downsample(buf, extent);
+}
+
+static inline vector<string> &split(const string &s, char delim, vector<string> &elems) {
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+static inline vector<string> split(const string &s, char delim) {
+    vector<string> elems;
+    split(s, delim, elems);
+    return elems;
 }
 
 #endif // HELPERS_H

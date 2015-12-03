@@ -5,6 +5,7 @@
 #include "storage/backends.hpp"
 #include "compute/eeg_spectrogram.hpp"
 #include "compute/eeg_change_point.hpp"
+#include "visgoth/visgoth.hpp"
 
 using namespace std;
 using namespace arma;
@@ -28,6 +29,13 @@ void example_spectrogram(fmat& spec_mat, SpecParams* spec_params)
     eeg_spectrogram(spec_params, LL, spec_mat);
   }
   log_time_diff("example_spectrogram:", start);
+  Visgoth visgoth = Visgoth();
+  Json json = Json::object
+  {
+    {"extent", 1},
+  };
+  uint extent = visgoth.get_extent(1);
+  downsample(spec_mat, extent);
 
   printf("Spectrogram shape as_mat: (%d, %d)\n",
          spec_params->nblocks, spec_params->nfreqs);

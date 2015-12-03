@@ -133,7 +133,7 @@ void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connec
   string ch_name = CH_NAME_MAP[ch];
 
   StorageBackend backend; // perhaps this should be a global thing..
-  Visgoth visgoth;
+  Visgoth visgoth = Visgoth();
   // TODO(joshblum): add flag for downsampling, call visgoth to get downsample factor
   uint extent = visgoth.get_extent(visgoth_content["profile"]); // downsampling factor
   SpecParams spec_params = SpecParams(&backend, mrn, start_time, end_time);

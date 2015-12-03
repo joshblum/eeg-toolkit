@@ -17,7 +17,8 @@ STORAGESRC := storage/binary_backend.cpp\
 					json11/json11.cpp # required by binary_backend for metadata
 COMPUTESRC := compute/eeg_spectrogram.cpp\
 					compute/eeg_change_point.cpp
-VISGOTHSRC := visgoth/visgoth.cpp
+VISGOTHSRC := visgoth/visgoth.cpp\
+							visgoth/collectd.cpp
 TILEDBLIBPATH := storage/TileDB/core/lib/release
 TILEDBLIBNAME := libtiledb.so
 
@@ -27,6 +28,7 @@ WSSRC := $(COMPUTESRC)\
 				ws_server.cpp
 TESTSRC := $(COMPUTESRC)\
 					$(STORAGESRC)\
+					$(VISGOTHSRC)\
 					test.cpp
 EDFCONVERTSRC := $(STORAGESRC)\
 								storage/edf_converter.cpp
