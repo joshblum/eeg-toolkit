@@ -89,6 +89,12 @@ void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
   TileDB_CTX* tiledb_ctx;
   tiledb_ctx_init(tiledb_ctx);
 
+  if (array_exists(mrn))
+  {
+    // Necessary for clean since arrays are not cleared when redefined
+    tiledb_array_delete(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str());
+  }
+
   // Store the array schema
   tiledb_array_define(tiledb_ctx, workspace.c_str(), group.c_str(), array_schema_str.c_str());
   tiledb_ctx_finalize(tiledb_ctx);
