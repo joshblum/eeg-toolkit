@@ -79,3 +79,35 @@ when added to the data directory. By default the data directory is
 The `file_watcher` will monitor the filesystem for files with the extension
 `.edf` to convert them for use.
 
+## Experiments
+As part of the evaluation of the system we have two experiments to compare
+different backend implementations for different workloads. The first experiment
+ingests EDF files to convert them to a `StorageBackend` format. This experiment
+is run as follows:
+
+```bash
+cd toolkit/toolkit/experiments
+./ingestion_runner.sh [BinaryBackend|HDF5Backend|TileDBBackend]
+```
+
+The second experiment precomputes and stores the spectrogram calculation and
+can be run with the following commands:
+
+```bash
+cd toolkit/toolkit/experiments
+./precompute_runner.sh [BinaryBackend|HDF5Backend|TileDBBackend]
+```
+
+Finally, to analyze the results, the following script, also located in
+`toolkit/toolkit/experiments` should be used:
+
+```bash
+python parse_results.py [BinaryBackend|HDF5Backend|TileDBBackend]
+```
+
+This outputs a JSON blob with results data which can then be analyzed. The
+experiments expect an EDF file with `mrn="005"` to be present (in the data
+directory, described above) to perform the calculations. As they are written,
+both experiments need approximately 300GB of disk space to run. Depending on
+the backend, the processing can take several days. Grab a coffee after
+starting.
