@@ -209,14 +209,15 @@ Visgoth.prototype.setExtent = function(extent) {
 
 // The test function for Visgoth experiments.
 Visgoth.prototype.sample = function() {
-  requestSpectrogram("007", 1024, 0, 1, OVERLAP, 0);
+  requestSpectrogram("005", 1024, 0, 1, OVERLAP, 0);
 }
 
 // Run j-th trial for i-th extent. Try to schedule the next one after
 // Visgoth.DELAY ms.
-Visgoth.prototype.runOnce = function(extents, i, j) {
+Visgoth.prototype.runOnce = function(extents, i, j, callbackFn) {
   // We're done running all extents.
   if (i >= extents.length) {
+    callbackFn();
     return;
   }
 
@@ -230,7 +231,8 @@ Visgoth.prototype.runOnce = function(extents, i, j) {
   this.setExtent(extents[i]);
   this.sample();
 
-  setTimeout(Visgoth.prototype.runOnce.bind(this), this.DELAY, extents, i, j+1);
+  setTimeout(Visgoth.prototype.runOnce.bind(this), this.DELAY, extents, i, j+1,
+             callbackFn);
 }
 
 Visgoth.prototype.run = function(extent) {
@@ -250,7 +252,7 @@ Visgoth.prototype.run = function(extent) {
     }
   }
 
-  this.runOnce(extents, 0, 0);
+  this.runOnce(extents, 0, 0, Visgoth.prototype.sendProfileDumps.bind(this));
 }
 
 Visgoth.prototype.sendProfileDumps = function() {
