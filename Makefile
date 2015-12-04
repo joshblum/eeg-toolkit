@@ -4,6 +4,7 @@
 	submodules\
 	installdeps\
 	dev-packages\
+	prepare-volume\
 	mount-volume\
 	install\
 	docker-install\
@@ -19,7 +20,7 @@ REPO := "joshblum"
 DOCKER_WEBAPP_NAME := "eeg-toolkit-webapp"
 DOCKER_TOOLKIT_NAME := "eeg-toolkit-toolkit"
 
-MOUNT_POINT := "home/ubuntu/eeg-data/eeg-data"
+MOUNT_POINT := "/home/ubuntu/eeg-data/eeg-data"
 DEVICE := "/dev/vdb"
 
 default: ws_server
@@ -44,10 +45,12 @@ dev-packages:
 	cat dev-packages.txt | xargs sudo apt-get -y install
 	pip install -r requirements.txt
 
+prepare-volume:
+	sudo mkfs.ext4 $(DEVICE)
+
 mount-volume:
-	mkfs.ext4 $(DEVICE)
 	mkdir -p $(MOUNT_POINT)
-	mount $(DEVICE) $(MOUNT_POINT)
+	sudo mount $(DEVICE) $(MOUNT_POINT)
 	sudo chown -R ubuntu:ubuntu $(MOUNT_POINT)
 
 install: installdeps ws_server
