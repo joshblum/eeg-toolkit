@@ -252,7 +252,7 @@ class BinaryBackend: public AbstractStorageBackend<ArrayMetadata>
 };
 
  // TODO(joshblum): why can't we pass by ref?
-class HDF5Backend: public AbstractStorageBackend<DataSet>
+class HDF5Backend: public AbstractStorageBackend<H5File>
 {
   protected:
     string mrn_to_array_name(string mrn);

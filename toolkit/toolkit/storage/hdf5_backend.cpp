@@ -22,7 +22,8 @@ string HDF5Backend::mrn_to_array_name(string mrn)
 
 ArrayMetadata HDF5Backend::get_array_metadata(string mrn)
 {
-  DataSet dataset = get_cache(mrn);
+  H5File file = get_cache(mrn);
+  DataSet dataset = file.openDataSet(mrn);
   Attribute attr = dataset.openAttribute(ATTR_NAME);
   int attr_data[NUM_ATTR];
   attr.read(PredType::NATIVE_INT, attr_data);
@@ -30,6 +31,7 @@ ArrayMetadata HDF5Backend::get_array_metadata(string mrn)
   int nsamples = attr_data[NSAMPLES_IDX];
   int nrows = attr_data[NROWS_IDX];
   int ncols = attr_data[NCOLS_IDX];
+  dataset.close();
   return ArrayMetadata(fs, nsamples, nrows, ncols);
 }
 
@@ -43,7 +45,26 @@ void HDF5Backend::create_array(string mrn, ArrayMetadata* metadata)
   data_dims[0] = metadata->nrows;
   data_dims[1] = metadata->ncols;
   DataSpace dataspace(DATA_RANK, data_dims);
-  DataSet dataset = file.createDataSet(mrn, PredType::NATIVE_FLOAT, dataspace);
+
+  hsize_t chunk_dims[DATA_RANK];
+
+  if (is_cached_array(mrn)){
+    chunk_dims[0] = min(metadata->nrows, WRITE_CHUNK_SIZE);
+    chunk_dims[1] = metadata->ncols;
+  }
+  else
+  {
+    chunk_dims[0] = min(metadata->nrows, READ_CHUNK_SIZE);
+    chunk_dims[1] = 1;
+  }
+
+  // Modify dataset creation property to enable chunking
+  DSetCreatPropList prop;
+  prop.setChunk(DATA_RANK, chunk_dims);
+
+  // Create the chunked dataset.  Note the use of pointer.
+  DataSet *dataset = new DataSet(file.createDataSet(mrn,
+                           PredType::NATIVE_FLOAT, dataspace, prop));
 
   int attr_data[NUM_ATTR];
   attr_data[FS_IDX] = metadata->fs;
@@ -53,9 +74,10 @@ void HDF5Backend::create_array(string mrn, ArrayMetadata* metadata)
   hsize_t attr_dims[ATTR_RANK] = {NUM_ATTR};
   DataSpace attrspace = DataSpace(ATTR_RANK, attr_dims);
 
-  Attribute attribute = dataset.createAttribute(ATTR_NAME, PredType::STD_I32BE, attrspace);
+  Attribute attribute = dataset->createAttribute(ATTR_NAME, PredType::STD_I32BE, attrspace);
 
   attribute.write(PredType::NATIVE_INT, attr_data);
+  dataset->close();
 }
 
 void HDF5Backend::open_array(string mrn)
@@ -70,13 +92,11 @@ void HDF5Backend::open_array(string mrn)
   }
   string array_name = mrn_to_array_name(mrn);
   H5File file(array_name, H5F_ACC_RDWR);
-  DataSet dataset = file.openDataSet(mrn);
-  put_cache(mrn, dataset);
+  put_cache(mrn, file);
 }
 
 void HDF5Backend::read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf)
 {
-  DataSet dataset = get_cache(mrn);
   hsize_t offset[DATA_RANK], count[DATA_RANK];
 
   offset[0] = start_offset; // start_offset rows down
@@ -101,7 +121,8 @@ void HDF5Backend::read_array(string mrn, int start_offset, int end_offset, fmat&
 
 void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf)
 {
-  DataSet dataset = get_cache(mrn);
+  H5File file = get_cache(mrn);
+  DataSet dataset = file.openDataSet(mrn);
   hsize_t stride[DATA_RANK], block[DATA_RANK];
 
   stride[0] = 1;
@@ -115,11 +136,14 @@ void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], voi
   dataspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
 
   dataset.read(buf, PredType::NATIVE_FLOAT, memspace, dataspace);
+  dataspace.close();
+  dataset.close();
 }
 
 void HDF5Backend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
 {
-  DataSet dataset = get_cache(mrn);
+  H5File file = get_cache(mrn);
+  DataSet dataset = file.openDataSet(mrn);
   hsize_t offset[DATA_RANK], count[DATA_RANK];
 
   offset[0] = start_offset; // start_offset rows down
@@ -133,14 +157,15 @@ void HDF5Backend::write_array(string mrn, int ch, int start_offset, int end_offs
 
   DataSpace memspace(DATA_RANK, count, NULL);
   dataset.write(buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
-
+  dataspace.close();
+  dataset.close();
 }
 
 void HDF5Backend::close_array(string mrn)
 {
   if (in_cache(mrn)) {
-    DataSet dataset = get_cache(mrn);
-    dataset.close();
+    H5File file = get_cache(mrn);
+    file.close();
     pop_cache(mrn);
   }
 }
