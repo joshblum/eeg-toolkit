@@ -80,6 +80,13 @@ ws.onmessage = function(event) {
 
     var type = msg.type;
     var content = msg.content;
+    var serverProfile = msg.serverProfile;
+
+    for (var stat in serverProfile) {
+      visgoth.dumpProfileValue(spectrogramRequestCount, stat,
+                               serverProfile[stat]);
+    }
+
     var canvasId = content.canvasId || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {

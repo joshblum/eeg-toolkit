@@ -176,13 +176,21 @@ Visgoth.prototype.clearStats = function() {
   }
 }
 
-// Aggregate and dump state for a single profile stat during a given request.
-Visgoth.prototype.dumpProfileStat = function(key, profilerLabel) {
+Visgoth.prototype.initProfileKey = function(key) {
   if (!(key in this.profileDumps)) {
     this.profileDumps[key] = {};
   }
+}
 
+// Aggregate and dump state for a single profile stat during a given request.
+Visgoth.prototype.dumpProfileStat = function(key, profilerLabel) {
+  this.initProfileKey(key);
   this.profileDumps[key][profilerLabel] = this.profilers[profilerLabel].getProfileData(this.stats);
+}
+
+Visgoth.prototype.dumpProfileValue = function(key, label, value) {
+  this.initProfileKey(key);
+  this.profileDumps[key][label] = value;
 }
 
 // **** Visgoth experiment **** //

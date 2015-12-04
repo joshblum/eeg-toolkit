@@ -27,10 +27,12 @@ void send_message(WsServer* server, shared_ptr<WsServer::Connection> connection,
                   string type, Json content, float* data, size_t data_size)
 {
   unsigned long long start = getticks();
+  Visgoth visgoth = Visgoth();
   Json msg = Json::object
   {
     {"type", type},
-    {"content", content}
+    {"content", content},
+    {"serverProfile", visgoth.get_collectd_stats()},
   };
   string header = msg.dump();
 
