@@ -28,7 +28,11 @@ def bytes_to_gb(byte_str):
 
 
 def bytes_to_mb(byte_str):
-  return '%smb' % (int(byte_str) / 10**6)
+  """
+    The logs  have an error where the value is / sizeof(float).
+    We multiply here to compensate
+  """
+  return '%smb' % (4*int(byte_str) / 10**6)
 
 
 def get_desired_size_from_mrn(mrn):
