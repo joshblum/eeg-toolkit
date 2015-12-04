@@ -101,6 +101,9 @@ installdeps:
 	sudo apt-get update
 	cat packages.txt | xargs sudo apt-get -y install
 	pip install -r requirements.txt
+	# setup collectd
+	cat visgoth/collectd.conf | sudo tee -a /etc/collectd/collectd.conf
+	sudo /etc/init.d/collectd restart
 
 %.o : %.c
 	$(CXX) $(OPTS) $(CFLAGS) -o $@ -c $<

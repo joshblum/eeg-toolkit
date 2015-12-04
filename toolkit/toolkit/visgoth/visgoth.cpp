@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "sys/socket.h"
 #include "collectd.hpp"
@@ -13,28 +14,41 @@ using namespace std;
 using namespace json11;
 
 
-Visgoth::Visgoth()
+Visgoth::Visgoth() {}
+
+Json Visgoth::get_collectd_stats()
 {
-  //vector<string> lines = collectd.get("eeg-toolkit-dev.csail.mit.edu/users/users");
-  //collectd.get("eeg-toolkit-dev.csail.mit.edu/users/users");
+  unordered_map<string, float> float_values;
   vector<string> lines = collectd.list();
-  for (vector<string>::iterator it = lines.begin(); it != lines.end(); it++)
+  for (auto l_it = lines.begin(); l_it != lines.end(); l_it++)
   {
-    cout << *it << endl;
-    vector<string> val = split(*it, ' ');
-    string stamp = val[0];
-    string key = val[1];
-    vector<string> glines = collectd.get(key);
-    cout << stamp << " " << key << " ";
-    for (vector<string>::iterator it1 = glines.begin(); it1 != glines.end(); it1++)
+    string list_key = split(*l_it, ' ')[1]; // stamp key
+    for (auto k_it = collectd_keys.begin(); k_it != collectd_keys.end(); k_it++)
     {
-      cout << *it1 << ", ";
+      string collectd_key = k_it->second;
+      string visgoth_key = k_it->first;
+      if (list_key.find(collectd_key) != string::npos)
+      {
+        vector<string> glines = collectd.get(list_key);
+        for (auto g_it = glines.begin(); g_it != glines.end(); g_it++)
+        {
+          vector<string> vals = split(*g_it, ' '); // v1=x v2=y
+          for (auto v_it = vals.begin(); v_it != vals.end(); v_it++)
+          {
+            vector<string> value_vec = split(*v_it, '='); // v1=x
+            string value = value_vec[0];
+            float float_val = stof(value_vec[1]);
+            float_values[visgoth_key + "-" + value] += float_val;
+          }
+        }
+      }
     }
-    cout << endl;
   }
+  return Json(float_values);
 }
 
 uint Visgoth::get_extent(Json profile_data)
 {
+  cout << get_collectd_stats().dump() << endl;
   return profile_data["extent"].int_value();
 }

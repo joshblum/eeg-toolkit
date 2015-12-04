@@ -5,3 +5,4 @@ libssl-dev
 libhdf5-serial-dev
 python-pip
 python-dev
+collectd

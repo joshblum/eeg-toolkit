@@ -2,6 +2,7 @@
 #define COLLECTD_H
 
 #include <string>
+#include "../config.hpp"
 #include "../json11/json11.hpp"
 
 using namespace std;
@@ -10,8 +11,7 @@ using namespace json11;
 class Collectd
 {
   private:
-    // TODO(joshblum): put into config
-    const char* socket_path = "/var/run/collectd-unixsock";
+    const char* socket_path = COLLECTD_SOCK;
     int fd;
     uint _cmd(string cmd);
     string _readline();
