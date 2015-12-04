@@ -59,9 +59,6 @@ void BinaryBackend::create_array(string mrn, ArrayMetadata* metadata)
   file.write((char*) &header_len, sizeof(uint32_t));
   file.write(header.c_str(), header_len);
   size_t data_size = metadata->nrows * metadata->ncols * sizeof(float);
-  float* tmp = (float*) malloc(data_size);
-  file.write((char*) tmp, data_size); // allow us to seek into the file
-  free(tmp);
   file.close();
 }
 
