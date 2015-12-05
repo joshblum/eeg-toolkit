@@ -58,7 +58,6 @@ void BinaryBackend::create_array(string mrn, ArrayMetadata* metadata)
   header.resize(header_len, ' ');
   file.write((char*) &header_len, sizeof(uint32_t));
   file.write(header.c_str(), header_len);
-  size_t data_size = metadata->nrows * metadata->ncols * sizeof(float);
   file.close();
 }
 
