@@ -6,6 +6,7 @@
 	dev-packages\
 	prepare-volume\
 	mount-volume\
+	umount-volume\
 	install\
 	docker-install\
 	docker-run\
@@ -52,6 +53,9 @@ mount-volume:
 	mkdir -p $(MOUNT_POINT)
 	sudo mount $(DEVICE) $(MOUNT_POINT)
 	sudo chown -R ubuntu:ubuntu $(MOUNT_POINT)
+
+umount-volume:
+	sudo umount $(DEVICE)
 
 install: installdeps ws_server
 
