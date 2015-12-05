@@ -92,11 +92,19 @@ void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
   if (array_exists(mrn))
   {
     // Necessary for clean since arrays are not cleared when redefined
-    tiledb_array_delete(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str());
+    if (tiledb_array_delete(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str()))
+    {
+      cout << "TileDB delete error." << endl;
+      exit(-1);
+    }
   }
 
   // Store the array schema
-  tiledb_array_define(tiledb_ctx, workspace.c_str(), group.c_str(), array_schema_str.c_str());
+  if (tiledb_array_define(tiledb_ctx, workspace.c_str(), group.c_str(), array_schema_str.c_str()))
+  {
+    cout << "TileDB define error." << endl;
+    exit(-1);
+  }
   tiledb_ctx_finalize(tiledb_ctx);
 }
 
@@ -117,6 +125,11 @@ void TileDBBackend::_open_array(string mrn, const char* mode)
   string workspace = get_workspace();
   string array_name = get_array_name(mrn);
   int array_id = tiledb_array_open(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str(), mode);
+  if (array_id == -1)
+  {
+    cout << "TileDB open error." << endl;
+    exit(-1);
+  }
   put_cache(mrn, tiledb_cache_pair(tiledb_ctx, array_id));
 }
 
