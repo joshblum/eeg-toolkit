@@ -96,15 +96,16 @@ SpecParams::SpecParams(StorageBackend* backend,
   {
     backend->open_array(mrn);
     fs = backend->get_fs(mrn);
+    // TODO(joshblum): implement full multitaper method
+    // and remove hard coding
+    nsamples = backend->get_nsamples(mrn);
   }
   else
   {
     fs = 0;
+    nsamples = 0;
   }
 
-  // TODO(joshblum): implement full multitaper method
-  // and remove hard coding
-  nsamples = backend->get_nsamples(mrn);
   int pad = 0;
   shift = fs * 4;
   nstep = fs * 1;

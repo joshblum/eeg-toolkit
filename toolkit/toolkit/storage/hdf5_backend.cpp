@@ -84,7 +84,7 @@ void HDF5Backend::open_array(string mrn)
 {
   if (!array_exists(mrn)) {
     cout << "Error array " << mrn_to_array_name(mrn) << " does not exist!" << endl;
-    exit(1);
+    exit(-1);
   }
   if (in_cache(mrn))
   {
