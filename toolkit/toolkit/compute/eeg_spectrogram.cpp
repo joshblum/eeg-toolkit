@@ -131,7 +131,7 @@ SpecParams::SpecParams(StorageBackend* backend,
   start_offset = hours_to_samples(fs, start_time);
   end_offset = hours_to_samples(fs, end_time) - 1; // exclusive range
   spec_start_offset = get_nblocks(start_offset);
-  spec_end_offset = get_nblocks(end_offset - start_offset + 1);
+  spec_end_offset = get_nblocks(end_offset + 1);
 }
 
 
