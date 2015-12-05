@@ -25,7 +25,7 @@ class SpecParams
     string mrn; // patient medical record number
     StorageBackend* backend; // array storage backend
     float start_time; // start time of the spectrogram
-    float end_time; // end time of spectogram
+    float end_time; // end time of spectrogram
     int start_offset; // start offset of raw data
     int end_offset; // end offset of raw data
     int spec_start_offset; // start offset of spectrogram data
