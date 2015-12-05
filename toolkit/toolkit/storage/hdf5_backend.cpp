@@ -102,10 +102,10 @@ void HDF5Backend::read_array(string mrn, int ch, int start_offset, int end_offse
   offset[0] = start_offset; // start_offset rows down
   offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
 
-  count[0] = end_offset - start_offset;
+  count[0] = buf.n_cols;
   count[1] = buf.n_rows; // only ever get one column
 
-  _read_array(mrn, offset, count, buf.memptr());
+  _read_array(mrn, offset, count, buf);
 }
 
 void HDF5Backend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
@@ -114,12 +114,12 @@ void HDF5Backend::read_array(string mrn, int start_offset, int end_offset, fmat&
   offset[0] = start_offset; // start_offset rows down
   offset[1] = 0; //  we want all columns
 
-  count[0] = end_offset - start_offset;
+  count[0] = buf.n_cols;
   count[1] = buf.n_rows;
-  _read_array(mrn, offset, count, buf.memptr());
+  _read_array(mrn, offset, count, buf);
 }
 
-void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf)
+void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], fmat& buf)
 {
   H5File file = get_cache(mrn);
   DataSet dataset = file.openDataSet(mrn);
@@ -135,7 +135,7 @@ void HDF5Backend::_read_array(string mrn, hsize_t offset[], hsize_t count[], voi
   DataSpace dataspace = dataset.getSpace();
   dataspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
 
-  dataset.read(buf, PredType::NATIVE_FLOAT, memspace, dataspace);
+  dataset.read(buf.memptr(), PredType::NATIVE_FLOAT, memspace, dataspace);
   dataspace.close();
   dataset.close();
 }
@@ -149,7 +149,7 @@ void HDF5Backend::write_array(string mrn, int ch, int start_offset, int end_offs
   offset[0] = start_offset; // start_offset rows down
   offset[1] = CH_REVERSE_IDX[ch]; // get the correct column
 
-  count[0] = end_offset - start_offset;
+  count[0] = buf.n_cols;
   count[1] = buf.n_rows;
 
   DataSpace dataspace = dataset.getSpace();

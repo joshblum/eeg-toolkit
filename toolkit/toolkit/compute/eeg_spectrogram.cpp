@@ -298,6 +298,7 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
   SpecParams spec_params = SpecParams(backend, mrn, start_time, end_time);
   spec_params.print();
   ArrayMetadata metadata = ArrayMetadata(fs, spec_params.nblocks, spec_params.nblocks, spec_params.nfreqs);
+  cout << metadata.to_string() << endl;
 
   for (int ch = 0; ch < NUM_DIFF; ch++)
   {
@@ -323,7 +324,9 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
     {
       start_time = samples_to_hours(fs, start_offset);
       end_time = samples_to_hours(fs, end_offset);
+
       spec_params = SpecParams(backend, mrn, start_time, end_time);
+      spec_params.nsamples = end_offset - start_offset;
 
       compute_time_start = getticks();
       eeg_spectrogram(&spec_params, ch, spec_mat);
@@ -341,11 +344,6 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
       if (end_offset == nsamples)
       {
         break;
-      }
-
-      if (!((end_offset / WRITE_CHUNK_SIZE) % 50))
-      {
-        cout << "Wrote " << end_offset / WRITE_CHUNK_SIZE << " chunks for ch: " << CH_NAME_MAP[ch] << endl;
       }
     }
     backend->close_array(cached_mrn_name);

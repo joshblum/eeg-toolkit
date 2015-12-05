@@ -256,7 +256,7 @@ class HDF5Backend: public AbstractStorageBackend<H5File>
 {
   protected:
     string mrn_to_array_name(string mrn);
-    void _read_array(string mrn, hsize_t offset[], hsize_t count[], void* buf);
+    void _read_array(string mrn, hsize_t offset[], hsize_t count[], fmat& buf);
 
   public:
     ArrayMetadata get_array_metadata(string mrn);
