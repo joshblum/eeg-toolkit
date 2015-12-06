@@ -66,6 +66,11 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
       }
 
       edf_backend.read_array(mrn, ch, start_read_offset, end_read_offset, chunk_buf);
+
+      if (end_write_offset - start_write_offset < (int) chunk_buf.n_elem) {
+        chunk_buf.resize(end_write_offset - start_write_offset);
+      }
+
       backend->write_array(mrn, ch, start_write_offset, end_write_offset, chunk_buf);
 
       if ((desired_size == 0 && end_read_offset == nsamples) || end_write_offset >= nrows)
