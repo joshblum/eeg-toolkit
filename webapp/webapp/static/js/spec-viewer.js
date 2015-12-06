@@ -92,28 +92,6 @@ function decreaseInterval() {
     reloadSpectrograms();
 }
 
-function testPanning() {
-    var mrn = "005";
-    var startTime = 0;
-    var endTime = 1;
-    var interval = 0.5;
-    getElementById("patientIdentifierByName").value = mrn;
-    var id;
-
-    function pan() {
-        getElementById("specStartTime").value = startTime;
-        getElementById("specEndTime").value = endTime;
-        console.log("startTime: " + startTime + " endTime: " + endTime);
-        startTime += interval;
-        endTime += interval;
-        reloadSpectrograms();
-        if (endTime > 70) {
-            clearInterval(id);
-        }
-    }
-    id = setInterval(pan, 15 * 1000);
-}
-
 /*
  * Test the keyup event for a submission and then reload the spectrogram.
  */
