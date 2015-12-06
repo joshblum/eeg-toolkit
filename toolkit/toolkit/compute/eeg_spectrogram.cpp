@@ -158,7 +158,7 @@ static inline float abs(fftw_complex* arr, int i)
  * diff.  `spec_mat` is expected to be initialized and the results are added to
  * allow averaging
  */
-void STFT(SpecParams* spec_params, frowvec& diff, fmat& spec_mat)
+void FFT(SpecParams* spec_params, frowvec& diff, fmat& spec_mat)
 {
   fftw_complex    *data, *fft_result;
   fftw_plan       plan_forward;
@@ -244,6 +244,7 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
   int nsamples = spec_params->nsamples;
 
   int ch_idx1, ch_idx2;
+  // Get the column which contains the first channel for the region.
   ch_idx1 = DIFFERENCE_PAIRS[ch].ch_idx[0];
   int start_offset = spec_params->start_offset;
   int end_offset = spec_params->end_offset;
@@ -254,12 +255,13 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
+    // Get the column which contains the next channel for the region.
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
     spec_params->backend->read_array(spec_params->mrn, ch_idx2, start_offset, end_offset, vec2);
     frowvec diff = vec2 - vec1;
 
-    // fill in the spec matrix with fft values
-    STFT(spec_params, diff, spec_mat);
+    // fill in the spec matrix with FFT values
+    FFT(spec_params, diff, spec_mat);
     swap(vec1, vec2);
   }
   spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
