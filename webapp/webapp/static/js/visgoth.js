@@ -194,9 +194,9 @@ Visgoth.prototype.dumpProfileValue = function(key, label, value) {
 }
 
 // **** Visgoth experiment **** //
-Visgoth.prototype.EXTENTS = [1, 2, 4, 8, 16, 32, 64, 128];
+Visgoth.prototype.MAX_EXTENT = 16; // Try all extents up to MAX_EXTENT, skip by 1
 Visgoth.prototype.TRIALS = 100;  // Number of times each extent should be run.
-Visgoth.prototype.DELAY = 6000;  // Time to wait before trying another profile.
+Visgoth.prototype.DELAY = 9000;  // Time to wait before trying another profile.
 
 Visgoth.prototype.setExtent = function(extent) {
   // Only necessary for the first spectrogram since visgoth is hard-coded to
@@ -209,50 +209,53 @@ Visgoth.prototype.setExtent = function(extent) {
 
 // The test function for Visgoth experiments.
 Visgoth.prototype.sample = function() {
-  requestSpectrogram("005", 1024, 0, 1, OVERLAP, 0);
+  requestSpectrogram("005", 1024, 0, 10, OVERLAP, 0);
 }
 
 // Run j-th trial for i-th extent. Try to schedule the next one after
 // Visgoth.DELAY ms.
-Visgoth.prototype.runOnce = function(extents, i, j, callbackFn) {
+Visgoth.prototype.runOnce = function(current_extent, max_extent, j, callbackFn) {
   // We're done running all extents.
-  if (i >= extents.length) {
+  if (current_extent > max_extent) {
     callbackFn();
     return;
   }
 
   // We're done running one extent.
   if (j >= this.TRIALS) {
-    i = i + 1;
+    current_extent++;
     j = 0;
   }
 
   this.clearStats();
-  this.setExtent(extents[i]);
+  this.setExtent(current_extent);
   this.sample();
 
-  setTimeout(Visgoth.prototype.runOnce.bind(this), this.DELAY, extents, i, j+1,
-             callbackFn);
+  setTimeout(Visgoth.prototype.runOnce.bind(this), this.DELAY, current_extent,
+             max_extent, j+1, callbackFn);
 }
 
 Visgoth.prototype.run = function(extent) {
-  var extents = [extent];
+  var start_extent = extent;
+  var max_extent = extent;
   if (isNaN(extent)) {
-    extents = this.EXTENTS;
+    start_extent = 1;
+    max_extent = this.MAX_EXTENT;
   }
 
   this.profileDumps = {};
   spectrogramRequestCount = 0;
-  
+
   // Synchronously initialize the "extent" field for all profile dumps.
-  for (var i in extents) {
+  for (var i = start_extent; i <= max_extent; i++) {
     for (var j = 0; j < this.TRIALS; j++) {
-      this.setExtent(extents[i]);
+      this.setExtent(i);
       this.dumpProfileStat(i * this.TRIALS + j, VisgothLabels.extent);
     }
   }
 
-  this.runOnce(extents, 0, 0, Visgoth.prototype.sendProfileDumps.bind(this));
+  this.runOnce(start_extent, max_extent, 0,
+               Visgoth.prototype.sendProfileDumps.bind(this));
 }
 
 Visgoth.prototype.sendProfileDumps = function() {
