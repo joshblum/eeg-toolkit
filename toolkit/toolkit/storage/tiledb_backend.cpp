@@ -171,10 +171,6 @@ void TileDBBackend::_read_array(string mrn, double* range, fmat& buf)
 
 void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
 {
-  if (in_cache(mrn))
-  {
-    close_array(mrn); // we need to reopen in append mode
-  }
   _open_array(mrn, TILEDB_APPEND_MODE);
   tiledb_cache_pair pair = get_cache(mrn);
   TileDB_CTX* tiledb_ctx = pair.first;
@@ -194,9 +190,6 @@ void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_of
       tiledb_cell_write_sorted(tiledb_ctx, array_id, &cell);
     }
   }
-
-  // Finalize TileDB
-  close_array(mrn);
 }
 
 void TileDBBackend::close_array(string mrn)

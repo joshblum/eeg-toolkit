@@ -309,7 +309,6 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
 
     cout << "Creating: " << cached_mrn_name << endl;
     backend->create_array(cached_mrn_name, &metadata);
-    backend->open_array(cached_mrn_name);
 
     start_offset = 0;
     end_offset = min(nsamples, WRITE_CHUNK_SIZE);

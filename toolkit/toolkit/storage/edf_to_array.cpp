@@ -37,7 +37,6 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
 
   ArrayMetadata metadata = ArrayMetadata(fs, nrows, nrows, ncols);
   backend->create_array(mrn, &metadata);
-  backend->open_array(mrn);
   cout << "Converting mrn: " << mrn << " with " << nsamples << " samples and fs=" << fs <<endl;
   cout << "Array metadata: " << backend->get_array_metadata(mrn).to_string() << endl;;
 
@@ -71,6 +70,7 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
         chunk_buf.resize(end_write_offset - start_write_offset);
       }
 
+      // write_array handles opens or uses cached handle
       backend->write_array(mrn, ch, start_write_offset, end_write_offset, chunk_buf);
 
       if ((desired_size == 0 && end_read_offset == nsamples) || end_write_offset >= nrows)
@@ -86,10 +86,14 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
       cout << "Wrote ch: " << ch << endl;
     }
   }
-  cout << "Write complete" << endl;
+
+  // We handle the close, not `write_array`
+  backend->close_array(mrn);
 
   // Logging for experiments
   double diff_secs = ticks_to_seconds(getticks() - start);
+
+  cout << "Write complete." << endl;
   cout << EXPERIMENT_TAG << mrn << "," << TOSTRING(BACKEND) << "," << desired_size << "," << READ_CHUNK_SIZE << "," << diff_secs << endl;
 }
 
