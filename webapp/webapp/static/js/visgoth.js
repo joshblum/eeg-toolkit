@@ -194,9 +194,9 @@ Visgoth.prototype.dumpProfileValue = function(key, label, value) {
 }
 
 // **** Visgoth experiment **** //
-Visgoth.prototype.EXTENTS = [1, 2, 4];
-Visgoth.prototype.TRIALS = 10;  // Number of times each extent should be run.
-Visgoth.prototype.DELAY = 1000;  // Time to wait before trying another profile.
+Visgoth.prototype.EXTENTS = [1, 2, 4, 8, 16, 32, 64, 128];
+Visgoth.prototype.TRIALS = 100;  // Number of times each extent should be run.
+Visgoth.prototype.DELAY = 6000;  // Time to wait before trying another profile.
 
 Visgoth.prototype.setExtent = function(extent) {
   // Only necessary for the first spectrogram since visgoth is hard-coded to
