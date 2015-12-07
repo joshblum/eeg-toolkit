@@ -93,13 +93,14 @@ EXPERIMENTS = {
 
 
 def main(backend_name):
+  results = {}
   for exp_name, value_pair in EXPERIMENTS.iteritems():
     filename, parser = value_pair
     filename += '-%s' % backend_name
     lines = parse_log(filename)
-    values = parser(lines)
-    print exp_name
-    pprint.pprint(avg_values(values))
+    values = avg_values(parser(lines))
+    results[exp_name] = values
+  return results
 
 
 if __name__ == '__main__':
@@ -108,4 +109,5 @@ if __name__ == '__main__':
     print 'usage: python parse_results.py [BinaryBackend|HDF5Backend|TileDBBackend]'
   else:
     backend_name = sys.argv[1]
-    main(backend_name)
+    results = main(backend_name)
+    pprint.pprint(results)
