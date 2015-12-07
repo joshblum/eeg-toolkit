@@ -83,7 +83,7 @@ void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
   string workspace = get_workspace();
   string array_name = get_array_name(mrn);
   // csv of array schema
-  string array_schema_str = array_name + ",1," + ATTR_NAME + ",2," + COL_NAME + "," + ROW_NAME + ",0," + to_string(metadata->ncols) + ",0," + to_string(metadata->nrows) + ",float32,int32,*,column-major,*,*,*,*";
+  string array_schema_str = array_name + ",1," + ATTR_NAME + ",2," + COL_NAME + "," + ROW_NAME + ",0," + to_string(metadata->ncols) + ",0," + to_string(metadata->nrows) + ",float32,int32,*,column-major,*,*,*,GZIP,GZIP";
 
   // Initialize TileDB
   TileDB_CTX* tiledb_ctx;
