@@ -54,7 +54,7 @@ void edf_to_array(string mrn, StorageBackend* backend, size_t desired_size)
     for (; end_read_offset <= nsamples; end_read_offset = min(end_read_offset + READ_CHUNK_SIZE, nsamples))
     {
       // Accounts if we get many small chunks at the end to fill the desired_size
-      if (end_read_offset == nsamples && start_read_offset != 0)
+      if (desired_size != 0 && end_read_offset == nsamples && start_read_offset != 0)
       {
         start_read_offset = max(0, end_read_offset - READ_CHUNK_SIZE);
       }
