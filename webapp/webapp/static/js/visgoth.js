@@ -215,16 +215,16 @@ Visgoth.prototype.sample = function() {
 // Run j-th trial for i-th extent. Try to schedule the next one after
 // Visgoth.DELAY ms.
 Visgoth.prototype.runOnce = function(current_extent, max_extent, j, callbackFn) {
-  // We're done running all extents.
-  if (current_extent > max_extent) {
-    callbackFn();
-    return;
-  }
-
   // We're done running one extent.
   if (j >= this.TRIALS) {
     current_extent++;
     j = 0;
+  }
+
+  // We're done running all extents.
+  if (current_extent > max_extent) {
+    callbackFn();
+    return;
   }
 
   this.clearStats();
@@ -244,13 +244,15 @@ Visgoth.prototype.run = function(extent) {
   }
 
   this.profileDumps = {};
+  this.clearStats();
   spectrogramRequestCount = 0;
 
   // Synchronously initialize the "extent" field for all profile dumps.
   for (var i = start_extent; i <= max_extent; i++) {
     for (var j = 0; j < this.TRIALS; j++) {
       this.setExtent(i);
-      this.dumpProfileStat(i * this.TRIALS + j, VisgothLabels.extent);
+      var request_num = (i - start_extent) * this.TRIALS + j
+      this.dumpProfileStat(request_num, VisgothLabels.extent);
     }
   }
 
