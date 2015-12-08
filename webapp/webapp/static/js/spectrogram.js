@@ -61,11 +61,13 @@ function Spectrogram(id) {
     this.specLogarithmicUniform = null;
 
     // for performance stats
+    this.latencyStat = new VisgothStat(VisgothLabels.latency, this.id);
     this.bufferLoadTimeStat = new VisgothStat(VisgothLabels.bufferLoadTime, this.id);
     this.networkLatencyStat = new VisgothStat(VisgothLabels.networkLatency, this.id);
     this.networkBufferSizeStat = new VisgothStat(VisgothLabels.networkBufferSize, this.id);
     this.fpsStat = new VisgothStat(VisgothLabels.fps, this.id);
     this.mockExtentStat = new VisgothStat(VisgothLabels.extent, this.id);
+    visgoth.registerStat(this.latencyStat);
     visgoth.registerStat(this.bufferLoadTimeStat);
     visgoth.registerStat(this.networkLatencyStat);
     visgoth.registerStat(this.networkBufferSizeStat);
@@ -174,6 +176,7 @@ Spectrogram.prototype.logGLInfo = function() {
 Spectrogram.prototype.updateStartRequestTime = function() {
     console.log("updating startRequestTime");
     this.networkLatencyStat.markStart();
+    this.latencyStat.markStart();
 };
 
 Spectrogram.prototype.updateStartLoadTime = function() {
@@ -181,16 +184,19 @@ Spectrogram.prototype.updateStartLoadTime = function() {
     this.bufferLoadTimeStat.markStart();
 };
 
-/* Log the elapsed time to generate a spectrogram */
-Spectrogram.prototype.logElapsedTime = function(profileDumpKey) {
-    this.networkLatencyStat.measurePerformance();
-    this.bufferLoadTimeStat.measurePerformance();
-    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.networkLatency);
-    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.bandwidth);
-};
-
 Spectrogram.prototype.logExtent = function(profileDumpKey) {
     visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.extent);
+}
+
+Spectrogram.prototype.logBufferLoadEnd = function(profileDumpKey) {
+    this.bufferLoadTimeStat.measurePerformance();
+    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.bufferLoadTime);
+}
+
+Spectrogram.prototype.logNetworkEnd = function(profileDumpKey) {
+    this.networkLatencyStat.measurePerformance();
+    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.networkLatency);
+    visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.bandwidth);
 }
 
 /*
@@ -378,6 +384,7 @@ Spectrogram.prototype.render = function(data, nblocks, nfreqs, fs, startTime, en
     window.requestAnimationFrame(function() {
         self.drawScene();
         visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.fps);
+        visgoth.dumpProfileStat(profileDumpKey, VisgothLabels.latency);
     });
 };
 
@@ -397,6 +404,7 @@ Spectrogram.prototype.drawScene = function() {
     this.drawSpecFrequencyScale();
 
     this.fpsStat.measurePerformance();
+    this.latencyStat.measurePerformance();
 };
 
 

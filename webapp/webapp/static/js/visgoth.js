@@ -12,6 +12,7 @@ function guid() {
 }
 
 var VisgothLabels = {
+  "latency": "latency",
   "bandwidth": "bandwidth",
   "networkLatency": "networkLatency",
   "fps": "fps",
@@ -55,7 +56,15 @@ VisgothStat.prototype.measurePerformance = function(shouldEnd) {
 // ***************** //
 function VisgothProfiler(label, getProfileDataFn) {
   this.label = label;
-  this.getProfileData = getProfileDataFn;
+  if (getProfileDataFn != undefined) {
+    this.getProfileData = getProfileDataFn;
+  }
+}
+
+// Default profile data function is to average all the stats for this label.
+VisgothProfiler.prototype.getProfileData = function(stats) {
+  stats = stats[this.label];
+  return this.avgStatArray(stats);
 }
 
 VisgothProfiler.prototype.sumArray = function(array) {
@@ -85,10 +94,9 @@ VisgothProfiler.prototype.avgStatArray = function(statArray) {
   }, []));
 };
 
-var NetworkLatencyProfiler = new VisgothProfiler(VisgothLabels.networkLatency, function(stats) {
-  stats = stats[this.label];
-  return this.avgStatArray(stats);
-});
+var LatencyProfiler = new VisgothProfiler(VisgothLabels.latency);
+var NetworkLatencyProfiler = new VisgothProfiler(VisgothLabels.networkLatency);
+var BufferLoadTimeProfiler = new VisgothProfiler(VisgothLabels.bufferLoadTime);
 
 var BandwidthProfiler = new VisgothProfiler(VisgothLabels.bandwidth, function(stats) {
   var networkLatencyStats = stats[VisgothLabels.networkLatency];
@@ -115,9 +123,11 @@ var MockExtentProfiler = new VisgothProfiler(VisgothLabels.extent, function(stat
 // ********* //
 function Visgoth() {
   this.profilers = {};
+  this.profilers[VisgothLabels.latency] = LatencyProfiler;
   this.profilers[VisgothLabels.bandwidth] = BandwidthProfiler;
   this.profilers[VisgothLabels.networkLatency] = NetworkLatencyProfiler;
   this.profilers[VisgothLabels.fps] = FpsProfiler;
+  this.profilers[VisgothLabels.bufferLoadTime] = BufferLoadTimeProfiler;
   this.profilers[VisgothLabels.extent] = MockExtentProfiler;
 
   this.stats = {};
@@ -223,7 +233,9 @@ Visgoth.prototype.runOnce = function(current_extent, max_extent, j, callbackFn) 
 
   // We're done running all extents.
   if (current_extent > max_extent) {
-    callbackFn();
+    if (callbackFn != undefined) {
+      callbackFn();
+    }
     return;
   }
 
