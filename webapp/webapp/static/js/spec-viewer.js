@@ -122,4 +122,8 @@ $(document).ready(function() {
           $("#settingsModal").closeModal();
       }
     });
+    $("#experiment-run").click(function(e) {
+      e.preventDefault();
+      visgoth.run();
+    });
 });
