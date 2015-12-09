@@ -40,7 +40,6 @@ installdeps: clean submodules dev-packages
 	make -C toolkit/toolkit installdeps
 	make -C toolkit/toolkit/storage/TileDB
 	make -C webapp/webapp installdeps
-	make -C experiment-results installdeps
 
 dev-packages:
 	sudo apt-get update
