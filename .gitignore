@@ -67,4 +67,5 @@ edf_converter
 precompute_spectrogram
 viz_converter
 
-*results.txt*
+old-data/
+.ipynb_checkpoints/

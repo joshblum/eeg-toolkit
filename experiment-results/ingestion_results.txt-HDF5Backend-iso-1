@@ -1,0 +1,416 @@
+Using mrn: 005-1gb backend: HDF5Backend with desired_size: 1000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-1gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-1gb,HDF5Backend,1000000000,16000000,401.074
+Using mrn: 005-1gb backend: HDF5Backend with desired_size: 1000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-1gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-1gb,HDF5Backend,1000000000,32000000,745.594
+Using mrn: 005-1gb backend: HDF5Backend with desired_size: 1000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-1gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-1gb,HDF5Backend,1000000000,64000000,1120.63
+Using mrn: 005-1gb backend: HDF5Backend with desired_size: 1000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-1gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-1gb,HDF5Backend,1000000000,128000000,1019.43
+Using mrn: 005-2gb backend: HDF5Backend with desired_size: 2000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-2gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-2gb,HDF5Backend,2000000000,16000000,571.927
+Using mrn: 005-2gb backend: HDF5Backend with desired_size: 2000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-2gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-2gb,HDF5Backend,2000000000,32000000,498.712
+Using mrn: 005-2gb backend: HDF5Backend with desired_size: 2000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-2gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-2gb,HDF5Backend,2000000000,64000000,888.832
+Using mrn: 005-2gb backend: HDF5Backend with desired_size: 2000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-2gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-2gb,HDF5Backend,2000000000,128000000,692.242
+Using mrn: 005-4gb backend: HDF5Backend with desired_size: 4000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-4gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-4gb,HDF5Backend,4000000000,16000000,762.061
+Using mrn: 005-4gb backend: HDF5Backend with desired_size: 4000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-4gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-4gb,HDF5Backend,4000000000,32000000,811.44
+Using mrn: 005-4gb backend: HDF5Backend with desired_size: 4000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-4gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-4gb,HDF5Backend,4000000000,64000000,951.065
+Using mrn: 005-4gb backend: HDF5Backend with desired_size: 4000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-4gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-4gb,HDF5Backend,4000000000,128000000,1003.87
+Using mrn: 005-8gb backend: HDF5Backend with desired_size: 8000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-8gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-8gb,HDF5Backend,8000000000,16000000,1364.82
+Using mrn: 005-8gb backend: HDF5Backend with desired_size: 8000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-8gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-8gb,HDF5Backend,8000000000,32000000,1321.85
+Using mrn: 005-8gb backend: HDF5Backend with desired_size: 8000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-8gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-8gb,HDF5Backend,8000000000,64000000,1183.78
+Using mrn: 005-8gb backend: HDF5Backend with desired_size: 8000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-8gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-8gb,HDF5Backend,8000000000,128000000,1485.17
+Using mrn: 005-16gb backend: HDF5Backend with desired_size: 16000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-16gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-16gb,HDF5Backend,16000000000,16000000,1454.3
+Using mrn: 005-16gb backend: HDF5Backend with desired_size: 16000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-16gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-16gb,HDF5Backend,16000000000,32000000,1789.82
+Using mrn: 005-16gb backend: HDF5Backend with desired_size: 16000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-16gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-16gb,HDF5Backend,16000000000,64000000,1379.26
+Using mrn: 005-16gb backend: HDF5Backend with desired_size: 16000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-16gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-16gb,HDF5Backend,16000000000,128000000,1661.79
+Using mrn: 005-32gb backend: HDF5Backend with desired_size: 32000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-32gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-32gb,HDF5Backend,32000000000,16000000,2694.26
+Using mrn: 005-32gb backend: HDF5Backend with desired_size: 32000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-32gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-32gb,HDF5Backend,32000000000,32000000,2953.38
+Using mrn: 005-32gb backend: HDF5Backend with desired_size: 32000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-32gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-32gb,HDF5Backend,32000000000,64000000,5114.72
+Using mrn: 005-32gb backend: HDF5Backend with desired_size: 32000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-32gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-32gb,HDF5Backend,32000000000,128000000,4554.04
+Using mrn: 005-64gb backend: HDF5Backend with desired_size: 64000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-64gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-64gb,HDF5Backend,64000000000,16000000,6362.14
+Using mrn: 005-64gb backend: HDF5Backend with desired_size: 64000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-64gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-64gb,HDF5Backend,64000000000,32000000,5800.98
+Using mrn: 005-64gb backend: HDF5Backend with desired_size: 64000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-64gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-64gb,HDF5Backend,64000000000,64000000,6206.85
+Using mrn: 005-64gb backend: HDF5Backend with desired_size: 64000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-64gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-64gb,HDF5Backend,64000000000,128000000,4311.44
+Using mrn: 005-128gb backend: HDF5Backend with desired_size: 128000000000 and READ_CHUNK_SIZE: 16000000
+Converting mrn: 005-128gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-128gb,HDF5Backend,128000000000,16000000,7087.12
+Using mrn: 005-128gb backend: HDF5Backend with desired_size: 128000000000 and READ_CHUNK_SIZE: 32000000
+Converting mrn: 005-128gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-128gb,HDF5Backend,128000000000,32000000,6354.22
+Using mrn: 005-128gb backend: HDF5Backend with desired_size: 128000000000 and READ_CHUNK_SIZE: 64000000
+Converting mrn: 005-128gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-128gb,HDF5Backend,128000000000,64000000,5122.9
+Using mrn: 005-128gb backend: HDF5Backend with desired_size: 128000000000 and READ_CHUNK_SIZE: 128000000
+Converting mrn: 005-128gb with 55377408 samples and fs=256
+Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
+Wrote ch: 0
+Wrote ch: 2
+Wrote ch: 8
+Wrote ch: 10
+Wrote ch: 12
+Wrote ch: 16
+Wrote ch: 18
+Wrote ch: 20
+Write complete
+experiment_data::005-128gb,HDF5Backend,128000000000,128000000,5343.9

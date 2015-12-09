@@ -1,0 +1,816 @@
+Using mrn: 005-1gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 1 chunks and 15625000 samples.
+spec_params: {
+	mrn: 005-1gb
+	start_time: 0
+	end_time: 17
+	start_offset: 0
+	end_offset: 15624999
+	spec_start_offset: 0
+	spec_end_offset: 15258
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 15625000
+	nblocks: 15258
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-1gb-LL-cached
+Creating: 005-1gb-LP-cached
+Creating: 005-1gb-RP-cached
+Creating: 005-1gb-RL-cached
+experiment_data::005-1gb,BinaryBackend,16000000,34,total_time
+experiment_data::005-1gb,BinaryBackend,16000000,33,compute_time
+experiment_data::005-1gb,BinaryBackend,16000000,0.48,write_time
+Using mrn: 005-1gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 1 chunks and 15625000 samples.
+spec_params: {
+	mrn: 005-1gb
+	start_time: 0
+	end_time: 17
+	start_offset: 0
+	end_offset: 15624999
+	spec_start_offset: 0
+	spec_end_offset: 15258
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 15625000
+	nblocks: 15258
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-1gb-LL-cached
+Creating: 005-1gb-LP-cached
+Creating: 005-1gb-RP-cached
+Creating: 005-1gb-RL-cached
+experiment_data::005-1gb,BinaryBackend,32000000,20,total_time
+experiment_data::005-1gb,BinaryBackend,32000000,20,compute_time
+experiment_data::005-1gb,BinaryBackend,32000000,0.43,write_time
+Using mrn: 005-1gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 1 chunks and 15625000 samples.
+spec_params: {
+	mrn: 005-1gb
+	start_time: 0
+	end_time: 17
+	start_offset: 0
+	end_offset: 15624999
+	spec_start_offset: 0
+	spec_end_offset: 15258
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 15625000
+	nblocks: 15258
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-1gb-LL-cached
+Creating: 005-1gb-LP-cached
+Creating: 005-1gb-RP-cached
+Creating: 005-1gb-RL-cached
+experiment_data::005-1gb,BinaryBackend,64000000,21,total_time
+experiment_data::005-1gb,BinaryBackend,64000000,21,compute_time
+experiment_data::005-1gb,BinaryBackend,64000000,0.39,write_time
+Using mrn: 005-1gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 1 chunks and 15625000 samples.
+spec_params: {
+	mrn: 005-1gb
+	start_time: 0
+	end_time: 17
+	start_offset: 0
+	end_offset: 15624999
+	spec_start_offset: 0
+	spec_end_offset: 15258
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 15625000
+	nblocks: 15258
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-1gb-LL-cached
+Creating: 005-1gb-LP-cached
+Creating: 005-1gb-RP-cached
+Creating: 005-1gb-RL-cached
+experiment_data::005-1gb,BinaryBackend,128000000,20,total_time
+experiment_data::005-1gb,BinaryBackend,128000000,20,compute_time
+experiment_data::005-1gb,BinaryBackend,128000000,0.39,write_time
+Using mrn: 005-2gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 2 chunks and 31250000 samples.
+spec_params: {
+	mrn: 005-2gb
+	start_time: 0
+	end_time: 34
+	start_offset: 0
+	end_offset: 31249999
+	spec_start_offset: 0
+	spec_end_offset: 30517
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 31250000
+	nblocks: 30517
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-2gb-LL-cached
+Creating: 005-2gb-LP-cached
+Creating: 005-2gb-RP-cached
+Creating: 005-2gb-RL-cached
+experiment_data::005-2gb,BinaryBackend,16000000,70,total_time
+experiment_data::005-2gb,BinaryBackend,16000000,69,compute_time
+experiment_data::005-2gb,BinaryBackend,16000000,0.9,write_time
+Using mrn: 005-2gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 1 chunks and 31250000 samples.
+spec_params: {
+	mrn: 005-2gb
+	start_time: 0
+	end_time: 34
+	start_offset: 0
+	end_offset: 31249999
+	spec_start_offset: 0
+	spec_end_offset: 30517
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 31250000
+	nblocks: 30517
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-2gb-LL-cached
+Creating: 005-2gb-LP-cached
+Creating: 005-2gb-RP-cached
+Creating: 005-2gb-RL-cached
+experiment_data::005-2gb,BinaryBackend,32000000,43,total_time
+experiment_data::005-2gb,BinaryBackend,32000000,42,compute_time
+experiment_data::005-2gb,BinaryBackend,32000000,0.84,write_time
+Using mrn: 005-2gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 1 chunks and 31250000 samples.
+spec_params: {
+	mrn: 005-2gb
+	start_time: 0
+	end_time: 34
+	start_offset: 0
+	end_offset: 31249999
+	spec_start_offset: 0
+	spec_end_offset: 30517
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 31250000
+	nblocks: 30517
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-2gb-LL-cached
+Creating: 005-2gb-LP-cached
+Creating: 005-2gb-RP-cached
+Creating: 005-2gb-RL-cached
+experiment_data::005-2gb,BinaryBackend,64000000,44,total_time
+experiment_data::005-2gb,BinaryBackend,64000000,43,compute_time
+experiment_data::005-2gb,BinaryBackend,64000000,0.87,write_time
+Using mrn: 005-2gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 1 chunks and 31250000 samples.
+spec_params: {
+	mrn: 005-2gb
+	start_time: 0
+	end_time: 34
+	start_offset: 0
+	end_offset: 31249999
+	spec_start_offset: 0
+	spec_end_offset: 30517
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 31250000
+	nblocks: 30517
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-2gb-LL-cached
+Creating: 005-2gb-LP-cached
+Creating: 005-2gb-RP-cached
+Creating: 005-2gb-RL-cached
+experiment_data::005-2gb,BinaryBackend,128000000,41,total_time
+experiment_data::005-2gb,BinaryBackend,128000000,40,compute_time
+experiment_data::005-2gb,BinaryBackend,128000000,0.82,write_time
+Using mrn: 005-4gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 4 chunks and 62500000 samples.
+spec_params: {
+	mrn: 005-4gb
+	start_time: 0
+	end_time: 68
+	start_offset: 0
+	end_offset: 62499999
+	spec_start_offset: 0
+	spec_end_offset: 61035
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 62500000
+	nblocks: 61035
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-4gb-LL-cached
+Creating: 005-4gb-LP-cached
+Creating: 005-4gb-RP-cached
+Creating: 005-4gb-RL-cached
+experiment_data::005-4gb,BinaryBackend,16000000,1.8e+02,total_time
+experiment_data::005-4gb,BinaryBackend,16000000,1.8e+02,compute_time
+experiment_data::005-4gb,BinaryBackend,16000000,1.4,write_time
+Using mrn: 005-4gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 2 chunks and 62500000 samples.
+spec_params: {
+	mrn: 005-4gb
+	start_time: 0
+	end_time: 68
+	start_offset: 0
+	end_offset: 62499999
+	spec_start_offset: 0
+	spec_end_offset: 61035
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 62500000
+	nblocks: 61035
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-4gb-LL-cached
+Creating: 005-4gb-LP-cached
+Creating: 005-4gb-RP-cached
+Creating: 005-4gb-RL-cached
+experiment_data::005-4gb,BinaryBackend,32000000,80,total_time
+experiment_data::005-4gb,BinaryBackend,32000000,79,compute_time
+experiment_data::005-4gb,BinaryBackend,32000000,1.5,write_time
+Using mrn: 005-4gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 1 chunks and 62500000 samples.
+spec_params: {
+	mrn: 005-4gb
+	start_time: 0
+	end_time: 68
+	start_offset: 0
+	end_offset: 62499999
+	spec_start_offset: 0
+	spec_end_offset: 61035
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 62500000
+	nblocks: 61035
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-4gb-LL-cached
+Creating: 005-4gb-LP-cached
+Creating: 005-4gb-RP-cached
+Creating: 005-4gb-RL-cached
+experiment_data::005-4gb,BinaryBackend,64000000,81,total_time
+experiment_data::005-4gb,BinaryBackend,64000000,79,compute_time
+experiment_data::005-4gb,BinaryBackend,64000000,1.6,write_time
+Using mrn: 005-4gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 1 chunks and 62500000 samples.
+spec_params: {
+	mrn: 005-4gb
+	start_time: 0
+	end_time: 68
+	start_offset: 0
+	end_offset: 62499999
+	spec_start_offset: 0
+	spec_end_offset: 61035
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 62500000
+	nblocks: 61035
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-4gb-LL-cached
+Creating: 005-4gb-LP-cached
+Creating: 005-4gb-RP-cached
+Creating: 005-4gb-RL-cached
+experiment_data::005-4gb,BinaryBackend,128000000,80,total_time
+experiment_data::005-4gb,BinaryBackend,128000000,79,compute_time
+experiment_data::005-4gb,BinaryBackend,128000000,1.4,write_time
+Using mrn: 005-8gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 8 chunks and 125000000 samples.
+spec_params: {
+	mrn: 005-8gb
+	start_time: 0
+	end_time: 1.4e+02
+	start_offset: 0
+	end_offset: 124999999
+	spec_start_offset: 0
+	spec_end_offset: 122070
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 125000000
+	nblocks: 122070
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-8gb-LL-cached
+Creating: 005-8gb-LP-cached
+Creating: 005-8gb-RP-cached
+Creating: 005-8gb-RL-cached
+experiment_data::005-8gb,BinaryBackend,16000000,4.1e+02,total_time
+experiment_data::005-8gb,BinaryBackend,16000000,4e+02,compute_time
+experiment_data::005-8gb,BinaryBackend,16000000,3.1,write_time
+Using mrn: 005-8gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 4 chunks and 125000000 samples.
+spec_params: {
+	mrn: 005-8gb
+	start_time: 0
+	end_time: 1.4e+02
+	start_offset: 0
+	end_offset: 124999999
+	spec_start_offset: 0
+	spec_end_offset: 122070
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 125000000
+	nblocks: 122070
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-8gb-LL-cached
+Creating: 005-8gb-LP-cached
+Creating: 005-8gb-RP-cached
+Creating: 005-8gb-RL-cached
+experiment_data::005-8gb,BinaryBackend,32000000,2e+02,total_time
+experiment_data::005-8gb,BinaryBackend,32000000,1.9e+02,compute_time
+experiment_data::005-8gb,BinaryBackend,32000000,2.8,write_time
+Using mrn: 005-8gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 2 chunks and 125000000 samples.
+spec_params: {
+	mrn: 005-8gb
+	start_time: 0
+	end_time: 1.4e+02
+	start_offset: 0
+	end_offset: 124999999
+	spec_start_offset: 0
+	spec_end_offset: 122070
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 125000000
+	nblocks: 122070
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-8gb-LL-cached
+Creating: 005-8gb-LP-cached
+Creating: 005-8gb-RP-cached
+Creating: 005-8gb-RL-cached
+experiment_data::005-8gb,BinaryBackend,64000000,1.7e+02,total_time
+experiment_data::005-8gb,BinaryBackend,64000000,1.7e+02,compute_time
+experiment_data::005-8gb,BinaryBackend,64000000,2.6,write_time
+Using mrn: 005-8gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 1 chunks and 125000000 samples.
+spec_params: {
+	mrn: 005-8gb
+	start_time: 0
+	end_time: 1.4e+02
+	start_offset: 0
+	end_offset: 124999999
+	spec_start_offset: 0
+	spec_end_offset: 122070
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 125000000
+	nblocks: 122070
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-8gb-LL-cached
+Creating: 005-8gb-LP-cached
+Creating: 005-8gb-RP-cached
+Creating: 005-8gb-RL-cached
+experiment_data::005-8gb,BinaryBackend,128000000,1.7e+02,total_time
+experiment_data::005-8gb,BinaryBackend,128000000,1.6e+02,compute_time
+experiment_data::005-8gb,BinaryBackend,128000000,3.1,write_time
+Using mrn: 005-16gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 16 chunks and 250000000 samples.
+spec_params: {
+	mrn: 005-16gb
+	start_time: 0
+	end_time: 2.7e+02
+	start_offset: 0
+	end_offset: 249999999
+	spec_start_offset: 0
+	spec_end_offset: 244140
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 250000000
+	nblocks: 244140
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-16gb-LL-cached
+Creating: 005-16gb-LP-cached
+Creating: 005-16gb-RP-cached
+Creating: 005-16gb-RL-cached
+experiment_data::005-16gb,BinaryBackend,16000000,7.3e+02,total_time
+experiment_data::005-16gb,BinaryBackend,16000000,7.2e+02,compute_time
+experiment_data::005-16gb,BinaryBackend,16000000,5.5,write_time
+Using mrn: 005-16gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 8 chunks and 250000000 samples.
+spec_params: {
+	mrn: 005-16gb
+	start_time: 0
+	end_time: 2.7e+02
+	start_offset: 0
+	end_offset: 249999999
+	spec_start_offset: 0
+	spec_end_offset: 244140
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 250000000
+	nblocks: 244140
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-16gb-LL-cached
+Creating: 005-16gb-LP-cached
+Creating: 005-16gb-RP-cached
+Creating: 005-16gb-RL-cached
+experiment_data::005-16gb,BinaryBackend,32000000,6.4e+02,total_time
+experiment_data::005-16gb,BinaryBackend,32000000,6.3e+02,compute_time
+experiment_data::005-16gb,BinaryBackend,32000000,5.8,write_time
+Using mrn: 005-16gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 4 chunks and 250000000 samples.
+spec_params: {
+	mrn: 005-16gb
+	start_time: 0
+	end_time: 2.7e+02
+	start_offset: 0
+	end_offset: 249999999
+	spec_start_offset: 0
+	spec_end_offset: 244140
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 250000000
+	nblocks: 244140
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-16gb-LL-cached
+Creating: 005-16gb-LP-cached
+Creating: 005-16gb-RP-cached
+Creating: 005-16gb-RL-cached
+experiment_data::005-16gb,BinaryBackend,64000000,4.3e+02,total_time
+experiment_data::005-16gb,BinaryBackend,64000000,4.2e+02,compute_time
+experiment_data::005-16gb,BinaryBackend,64000000,5,write_time
+Using mrn: 005-16gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 2 chunks and 250000000 samples.
+spec_params: {
+	mrn: 005-16gb
+	start_time: 0
+	end_time: 2.7e+02
+	start_offset: 0
+	end_offset: 249999999
+	spec_start_offset: 0
+	spec_end_offset: 244140
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 250000000
+	nblocks: 244140
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-16gb-LL-cached
+Creating: 005-16gb-LP-cached
+Creating: 005-16gb-RP-cached
+Creating: 005-16gb-RL-cached
+experiment_data::005-16gb,BinaryBackend,128000000,4.8e+02,total_time
+experiment_data::005-16gb,BinaryBackend,128000000,4.7e+02,compute_time
+experiment_data::005-16gb,BinaryBackend,128000000,5.5,write_time
+Using mrn: 005-32gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 32 chunks and 500000000 samples.
+spec_params: {
+	mrn: 005-32gb
+	start_time: 0
+	end_time: 5.4e+02
+	start_offset: 0
+	end_offset: 499999999
+	spec_start_offset: 0
+	spec_end_offset: 488281
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 500000000
+	nblocks: 488281
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-32gb-LL-cached
+Creating: 005-32gb-LP-cached
+Creating: 005-32gb-RP-cached
+Creating: 005-32gb-RL-cached
+experiment_data::005-32gb,BinaryBackend,16000000,1.7e+03,total_time
+experiment_data::005-32gb,BinaryBackend,16000000,1.6e+03,compute_time
+experiment_data::005-32gb,BinaryBackend,16000000,25,write_time
+Using mrn: 005-32gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 16 chunks and 500000000 samples.
+spec_params: {
+	mrn: 005-32gb
+	start_time: 0
+	end_time: 5.4e+02
+	start_offset: 0
+	end_offset: 499999999
+	spec_start_offset: 0
+	spec_end_offset: 488281
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 500000000
+	nblocks: 488281
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-32gb-LL-cached
+Creating: 005-32gb-LP-cached
+Creating: 005-32gb-RP-cached
+Creating: 005-32gb-RL-cached
+experiment_data::005-32gb,BinaryBackend,32000000,1.2e+03,total_time
+experiment_data::005-32gb,BinaryBackend,32000000,1.1e+03,compute_time
+experiment_data::005-32gb,BinaryBackend,32000000,19,write_time
+Using mrn: 005-32gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 8 chunks and 500000000 samples.
+spec_params: {
+	mrn: 005-32gb
+	start_time: 0
+	end_time: 5.4e+02
+	start_offset: 0
+	end_offset: 499999999
+	spec_start_offset: 0
+	spec_end_offset: 488281
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 500000000
+	nblocks: 488281
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-32gb-LL-cached
+Creating: 005-32gb-LP-cached
+Creating: 005-32gb-RP-cached
+Creating: 005-32gb-RL-cached
+experiment_data::005-32gb,BinaryBackend,64000000,1.2e+03,total_time
+experiment_data::005-32gb,BinaryBackend,64000000,1.2e+03,compute_time
+experiment_data::005-32gb,BinaryBackend,64000000,20,write_time
+Using mrn: 005-32gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 4 chunks and 500000000 samples.
+spec_params: {
+	mrn: 005-32gb
+	start_time: 0
+	end_time: 5.4e+02
+	start_offset: 0
+	end_offset: 499999999
+	spec_start_offset: 0
+	spec_end_offset: 488281
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 500000000
+	nblocks: 488281
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-32gb-LL-cached
+Creating: 005-32gb-LP-cached
+Creating: 005-32gb-RP-cached
+Creating: 005-32gb-RL-cached
+experiment_data::005-32gb,BinaryBackend,128000000,1.3e+03,total_time
+experiment_data::005-32gb,BinaryBackend,128000000,1.2e+03,compute_time
+experiment_data::005-32gb,BinaryBackend,128000000,32,write_time
+Using mrn: 005-64gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 63 chunks and 1000000000 samples.
+spec_params: {
+	mrn: 005-64gb
+	start_time: 0
+	end_time: 1.1e+03
+	start_offset: 0
+	end_offset: 999999999
+	spec_start_offset: 0
+	spec_end_offset: 976562
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 1000000000
+	nblocks: 976562
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-64gb-LL-cached
+Wrote 50 chunks for ch: LL
+Creating: 005-64gb-LP-cached
+Wrote 50 chunks for ch: LP
+Creating: 005-64gb-RP-cached
+Wrote 50 chunks for ch: RP
+Creating: 005-64gb-RL-cached
+Wrote 50 chunks for ch: RL
+experiment_data::005-64gb,BinaryBackend,16000000,3.8e+03,total_time
+experiment_data::005-64gb,BinaryBackend,16000000,3.7e+03,compute_time
+experiment_data::005-64gb,BinaryBackend,16000000,76,write_time
+Using mrn: 005-64gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 32 chunks and 1000000000 samples.
+spec_params: {
+	mrn: 005-64gb
+	start_time: 0
+	end_time: 1.1e+03
+	start_offset: 0
+	end_offset: 999999999
+	spec_start_offset: 0
+	spec_end_offset: 976562
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 1000000000
+	nblocks: 976562
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-64gb-LL-cached
+Creating: 005-64gb-LP-cached
+Creating: 005-64gb-RP-cached
+Creating: 005-64gb-RL-cached
+experiment_data::005-64gb,BinaryBackend,32000000,3.4e+03,total_time
+experiment_data::005-64gb,BinaryBackend,32000000,3.3e+03,compute_time
+experiment_data::005-64gb,BinaryBackend,32000000,1e+02,write_time
+Using mrn: 005-64gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 16 chunks and 1000000000 samples.
+spec_params: {
+	mrn: 005-64gb
+	start_time: 0
+	end_time: 1.1e+03
+	start_offset: 0
+	end_offset: 999999999
+	spec_start_offset: 0
+	spec_end_offset: 976562
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 1000000000
+	nblocks: 976562
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-64gb-LL-cached
+Creating: 005-64gb-LP-cached
+Creating: 005-64gb-RP-cached
+Creating: 005-64gb-RL-cached
+experiment_data::005-64gb,BinaryBackend,64000000,3.7e+03,total_time
+experiment_data::005-64gb,BinaryBackend,64000000,3.6e+03,compute_time
+experiment_data::005-64gb,BinaryBackend,64000000,82,write_time
+Using mrn: 005-64gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 8 chunks and 1000000000 samples.
+spec_params: {
+	mrn: 005-64gb
+	start_time: 0
+	end_time: 1.1e+03
+	start_offset: 0
+	end_offset: 999999999
+	spec_start_offset: 0
+	spec_end_offset: 976562
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 1000000000
+	nblocks: 976562
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-64gb-LL-cached
+Creating: 005-64gb-LP-cached
+Creating: 005-64gb-RP-cached
+Creating: 005-64gb-RL-cached
+experiment_data::005-64gb,BinaryBackend,128000000,3e+03,total_time
+experiment_data::005-64gb,BinaryBackend,128000000,3e+03,compute_time
+experiment_data::005-64gb,BinaryBackend,128000000,64,write_time
+Using mrn: 005-128gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 16000000
+Computing 125 chunks and 2000000000 samples.
+spec_params: {
+	mrn: 005-128gb
+	start_time: 0
+	end_time: 2.2e+03
+	start_offset: 0
+	end_offset: 1999999999
+	spec_start_offset: 0
+	spec_end_offset: 1953125
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 2000000000
+	nblocks: 1953125
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-128gb-LL-cached
+Wrote 50 chunks for ch: LL
+Wrote 100 chunks for ch: LL
+Creating: 005-128gb-LP-cached
+Wrote 50 chunks for ch: LP
+Wrote 100 chunks for ch: LP
+Creating: 005-128gb-RP-cached
+Wrote 50 chunks for ch: RP
+Wrote 100 chunks for ch: RP
+Creating: 005-128gb-RL-cached
+Wrote 50 chunks for ch: RL
+Wrote 100 chunks for ch: RL
+experiment_data::005-128gb,BinaryBackend,16000000,7.6e+03,total_time
+experiment_data::005-128gb,BinaryBackend,16000000,7.5e+03,compute_time
+experiment_data::005-128gb,BinaryBackend,16000000,1.6e+02,write_time
+Using mrn: 005-128gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 32000000
+Computing 63 chunks and 2000000000 samples.
+spec_params: {
+	mrn: 005-128gb
+	start_time: 0
+	end_time: 2.2e+03
+	start_offset: 0
+	end_offset: 1999999999
+	spec_start_offset: 0
+	spec_end_offset: 1953125
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 2000000000
+	nblocks: 1953125
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-128gb-LL-cached
+Wrote 50 chunks for ch: LL
+Creating: 005-128gb-LP-cached
+Wrote 50 chunks for ch: LP
+Creating: 005-128gb-RP-cached
+Wrote 50 chunks for ch: RP
+Creating: 005-128gb-RL-cached
+Wrote 50 chunks for ch: RL
+experiment_data::005-128gb,BinaryBackend,32000000,7.8e+03,total_time
+experiment_data::005-128gb,BinaryBackend,32000000,7.7e+03,compute_time
+experiment_data::005-128gb,BinaryBackend,32000000,1.7e+02,write_time
+Using mrn: 005-128gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 32 chunks and 2000000000 samples.
+spec_params: {
+	mrn: 005-128gb
+	start_time: 0
+	end_time: 2.2e+03
+	start_offset: 0
+	end_offset: 1999999999
+	spec_start_offset: 0
+	spec_end_offset: 1953125
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 2000000000
+	nblocks: 1953125
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-128gb-LL-cached
+Creating: 005-128gb-LP-cached
+Creating: 005-128gb-RP-cached
+Creating: 005-128gb-RL-cached
+experiment_data::005-128gb,BinaryBackend,64000000,8e+03,total_time
+experiment_data::005-128gb,BinaryBackend,64000000,7.8e+03,compute_time
+experiment_data::005-128gb,BinaryBackend,64000000,1.9e+02,write_time
+Using mrn: 005-128gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 128000000
+Computing 16 chunks and 2000000000 samples.
+spec_params: {
+	mrn: 005-128gb
+	start_time: 0
+	end_time: 2.2e+03
+	start_offset: 0
+	end_offset: 1999999999
+	spec_start_offset: 0
+	spec_end_offset: 1953125
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 2000000000
+	nblocks: 1953125
+	nfreqs: 513
+	fs: 256
+}
+Creating: 005-128gb-LL-cached
+Creating: 005-128gb-LP-cached
+Creating: 005-128gb-RP-cached
+Creating: 005-128gb-RL-cached
+experiment_data::005-128gb,BinaryBackend,128000000,7.2e+03,total_time
+experiment_data::005-128gb,BinaryBackend,128000000,7e+03,compute_time
+experiment_data::005-128gb,BinaryBackend,128000000,1.4e+02,write_time
