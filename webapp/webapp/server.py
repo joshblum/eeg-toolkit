@@ -101,6 +101,19 @@ def dump_visgoth():
   })
 
 
+@app.route('/visgoth/get_extent', methods=['POST'])
+def get_extent():
+  success = True
+  try:
+    data = request.get_json()
+  except:
+    success = False
+
+  return jsonify({
+      'success': success,
+      'extent': data['client_profile'].get('extent', 1)
+  })
+
 if __name__ == '__main__':
   app.debug = True  # enable auto reload
   app.run(host='0.0.0.0')

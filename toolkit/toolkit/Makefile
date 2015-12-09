@@ -18,7 +18,8 @@ STORAGESRC := storage/binary_backend.cpp\
 COMPUTESRC := compute/eeg_spectrogram.cpp\
 					compute/eeg_change_point.cpp
 VISGOTHSRC := visgoth/visgoth.cpp\
-							visgoth/collectd.cpp
+							visgoth/collectd.cpp\
+							visgoth/HappyHTTP/happyhttp.cpp
 TILEDBLIBPATH := storage/TileDB/core/lib/release
 TILEDBLIBNAME := libtiledb.so
 
