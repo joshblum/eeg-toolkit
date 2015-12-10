@@ -49,10 +49,7 @@ def get_file_sizes(backend_name):
     else:
       key = key[1]  # 005-xgb-backend_name
     file_size = get_file_size(filename)
-    results[key] = {
-        'file_size': file_size,
-        'human_size': sizeof_fmt(file_size)
-    }
+    results[key] = file_size
   return results
 
 
@@ -61,13 +58,19 @@ def store_file_sizes(backend_name, file_sizes):
     f.write(json.dumps(file_sizes))
 
 
-def extract_file_sizes(backend_name):
+def extract_file_sizes(rootdir, backend_name):
   try:
-    with open(DUMP_FILE % backend_name) as f:
+    with open(DUMP_FILE % (rootdir, backend_name)) as f:
       return json.loads(f.read())
   except IOError:
     return {}
 
+
+def extract_all(rootdir=DATADIR):
+  return {
+      backend_name: extract_file_sizes(rootdir, backend_name)
+      for backend_name in FILE_PATTERNS
+  }
 
 if __name__ == '__main__':
   import sys
@@ -77,9 +80,6 @@ if __name__ == '__main__':
     store_file_sizes(backend_name, file_sizes)
     pprint.pprint(file_sizes)
   elif len(sys.argv) == 1:
-    file_sizes = {}
-    for backend_name in FILE_PATTERNS:
-      file_sizes[backend_name] = extract_file_sizes(backend_name)
-    pprint.pprint(file_sizes)
+    pprint.pprint(extract_all())
   else:
     print 'usage: python get_file_sizes.py [BinaryBackend|HDF5Backend|TileDBBackend]'
