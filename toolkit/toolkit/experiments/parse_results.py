@@ -49,14 +49,14 @@ def ingestion_parser(lines):
       mrn,backend_name,desired_size(gb),read_chunk_size(mb),time Returns a
       dictionary of (backend_name, desired_size, read_chunk_size) -> time.
   '''
-  values = defaultdict(list)
+  data = defaultdict(list)
   for line in lines:
     mrn, backend_name, desired_size, read_chunk_size, time = line.split(',')
     key = (backend_name, bytes_to_gb(desired_size),
            bytes_to_mb(read_chunk_size))
     value = float(time)
-    values[key].append(value)
-  return values
+    data[key].append(value)
+  return data
 
 
 def precompute_parser(lines):
@@ -65,15 +65,29 @@ def precompute_parser(lines):
       mrn,backend_name,write_chunk_size(mb),time,tag Returns a dictionary of
       (tag, backend_name, desired_size, write_chunk_size) -> time.
   '''
-  values = defaultdict(list)
+  data = defaultdict(list)
   for line in lines:
     mrn, backend_name, write_chunk_size, time, tag = line.split(
         ',')
     desired_size = get_desired_size_from_mrn(mrn)
     key = (tag, backend_name, desired_size, bytes_to_mb(write_chunk_size))
     value = float(time)
-    values[key].append(value)
-  return values
+    data[key].append(value)
+
+  # combine the region read times into a single read time
+  new_data = defaultdict(list)
+  for k, v in data.iteritems():
+    if 'read_time' in k[0]:
+      new_key = list(k)
+      new_key[0] = 'read_time'
+      new_key = tuple(new_key)
+      values = new_data[new_key]
+      if not len(values):
+          new_data[new_key] = v
+      else:
+        new_data[new_key] = map(sum, zip(values, v))
+  data.update(new_data)
+  return data
 
 
 def avg_values(values):

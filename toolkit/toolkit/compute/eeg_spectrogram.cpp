@@ -237,6 +237,9 @@ void FFT(SpecParams* spec_params, frowvec& diff, fmat& spec_mat)
 void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
 {
 
+  unsigned long long read_time_total = 0;
+  unsigned long long read_time_start;
+
   // nfreqs x nblocks matrix
   spec_mat.set_size(spec_params->nblocks, spec_params->nfreqs);
   spec_mat.fill(0); // can we eliminate this?
@@ -251,13 +254,17 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
 
   frowvec vec1 = frowvec(nsamples);
   frowvec vec2 = frowvec(nsamples);
+  read_time_start = getticks();
   spec_params->backend->read_array(spec_params->mrn, ch_idx1, start_offset, end_offset, vec1);
+  read_time_total += getticks() - read_time_start;
 
   for (int i = 1; i < NUM_DIFFS; i++)
   {
     // Get the column which contains the next channel for the region.
     ch_idx2 = DIFFERENCE_PAIRS[ch].ch_idx[i];
+    read_time_start = getticks();
     spec_params->backend->read_array(spec_params->mrn, ch_idx2, start_offset, end_offset, vec2);
+    read_time_total += getticks() - read_time_start;
     frowvec diff = vec2 - vec1;
 
     // fill in the spec matrix with FFT values
@@ -266,6 +273,9 @@ void eeg_spectrogram(SpecParams* spec_params, int ch, fmat& spec_mat)
   }
   spec_mat /=  (NUM_DIFFS - 1); // average diff spectrograms
   spec_mat = spec_mat.t(); // transpose the output
+
+  string log_line = EXPERIMENT_TAG +  spec_params->mrn + "," + TOSTRING(BACKEND) + "," + to_string(WRITE_CHUNK_SIZE);
+  cout << log_line << "," << ticks_to_seconds(read_time_total) << ",read_time-" << CH_NAME_MAP[ch] << endl;
 }
 
 /*
@@ -277,9 +287,8 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
   // Capture start time
   unsigned long long total_time_start = getticks();
 
-  unsigned long long compute_time_total = 0;
   unsigned long long write_time_total = 0;
-  unsigned long long compute_time_start, write_time_start;
+  unsigned long long write_time_start;
 
   backend->open_array(mrn);
 
@@ -329,9 +338,7 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
       spec_params = SpecParams(backend, mrn, start_time, end_time);
       spec_params.nsamples = end_offset - start_offset;
 
-      compute_time_start = getticks();
       eeg_spectrogram(&spec_params, ch, spec_mat);
-      compute_time_total += getticks() - compute_time_start;
 
       write_time_start = getticks();
       backend->write_array(cached_mrn_name, ALL, cached_start_offset, cached_end_offset, spec_mat);
@@ -356,7 +363,6 @@ void precompute_spectrogram(string mrn, StorageBackend* backend)
   string log_line = EXPERIMENT_TAG +  mrn + "," + TOSTRING(BACKEND) + "," + to_string(WRITE_CHUNK_SIZE);
 
   cout << log_line << "," << total_time << ",total_time" << endl;
-  cout << log_line << "," << ticks_to_seconds(compute_time_total) << ",compute_time"  << endl;
   cout << log_line << "," << ticks_to_seconds(write_time_total) << ",write_time" << endl;
 }
 

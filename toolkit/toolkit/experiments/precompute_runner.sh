@@ -21,7 +21,8 @@ MRN="005"
 RESULTS_FILE="experiments/precompute_results.txt-"$BACKEND
 mv $RESULTS_FILE $RESULTS_FILE-bak-$(date +%s)
 
-WRITE_CHUNK_SIZES="64 128 256 512" #MB
+#WRITE_CHUNK_SIZES="64 128 256 512" #MB
+WRITE_CHUNK_SIZES="256" #MB
 FILE_SIZES="1 2 4 8 16 32 64 128" # GB
 
 for file_size in $FILE_SIZES; do
