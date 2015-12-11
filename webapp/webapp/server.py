@@ -19,7 +19,7 @@ PROFILE_FILENAME = 'profile-dump-{0}.csv'
 # Are we running an experiment?
 EXPERIMENT = False
 
-TARGET_LATENCY = 6000
+TARGET_LATENCY = 1000
 # Regressor tags have 3 parts: 1) which data dump to look at; 2) which profile
 # statistic to train on; 3) the value that the model should predict (always
 # latency for us).
@@ -134,10 +134,13 @@ def get_extent():
   else:
     x_key = DEFAULT_REGRESSOR_TAG[1]
     x_value = data['client_profile'].get(x_key)
+    # The client profile features needed weren't included.
     if x_value is None:
-      extent = 1
-    else:
-      extent = regression.predict_extent(REGRESSORS, TARGET_LATENCY, x_value)
+      return jsonify({
+          'success': False,
+      })
+
+    extent = regression.predict_extent(REGRESSORS, TARGET_LATENCY, x_value)
 
   return jsonify({
       'success': success,

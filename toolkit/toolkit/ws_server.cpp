@@ -91,8 +91,12 @@ void send_frowvec(WsServer* server,
 void send_spectrogram(WsServer* server,
                              shared_ptr<WsServer::Connection> connection,
                              SpecParams spec_params, string canvasId,
-                             fmat& spec_mat)
+                             fmat& spec_mat,
+                             int extent)
 {
+  // TODO: Request IDs, so that both server and client can dump stats like the
+  // extent, and the aggregation happens on the webapp server instead of the
+  // client. For now, this is easier...
   Json content = Json::object
   {
     {"nblocks", (int) spec_mat.n_cols},
@@ -100,7 +104,8 @@ void send_spectrogram(WsServer* server,
     {"fs", spec_params.fs},
     {"startTime", spec_params.start_time},
     {"endTime", spec_params.end_time},
-    {"canvasId", canvasId}
+    {"canvasId", canvasId},
+    {"extent", extent}
   };
 
   size_t data_size = sizeof(float) * spec_mat.n_elem;
@@ -161,7 +166,7 @@ void serve_spectrogram(WsServer* server, shared_ptr<WsServer::Connection> connec
   log_time_diff("eeg_spectrogram", start);
   downsample(spec_mat, extent);
   cap_max_width(spec_mat, max_width);
-  send_spectrogram(server, connection, spec_params, ch_name, spec_mat);
+  send_spectrogram(server, connection, spec_params, ch_name, spec_mat, extent);
 
   // cp_data_t cp_data;
   // get_change_points(spec_mat, &cp_data);
