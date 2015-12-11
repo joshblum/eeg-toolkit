@@ -5,23 +5,25 @@ import pprint
 from collections import defaultdict
 
 DATADIR = '/home/ubuntu/eeg-data/eeg-data'
-DUMPDIR = '../../../experiment-results'
 FILE_PATTERNS = {
     'TileDBBackend': '-tiledb',
     'HDF5Backend': '.h5',
     'BinaryBackend': '.bin',
 }
 
-DUMP_FILE = DUMPDIR + '/%s-file-sizes.json'
+DUMP_FILE = '%s-file-sizes.json'
 
 
-def get_file_size(start_path):
+def get_file_size(path):
   # http://stackoverflow.com/questions/1392413/calculating-a-directory-size-using-python
-  total_size = 0
-  for dirpath, dirnames, filenames in os.walk(start_path):
-    for f in filenames:
-      fp = os.path.join(dirpath, f)
-      total_size += os.path.getsize(fp)
+  if os.path.isdir(path):
+      total_size = 0
+      for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+          fp = os.path.join(dirpath, f)
+          total_size += os.path.getsize(fp)
+  else:
+      total_size = os.path.getsize(path)
   return total_size
 
 
