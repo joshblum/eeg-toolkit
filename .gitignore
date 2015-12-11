@@ -69,3 +69,5 @@ viz_converter
 
 old-data/
 .ipynb_checkpoints/
+*.npy
+*.pkl
