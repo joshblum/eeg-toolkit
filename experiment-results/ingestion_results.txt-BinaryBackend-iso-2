@@ -1,29 +1,3 @@
-Using mrn: 005-1gb backend: BinaryBackend with desired_size: 1000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-1gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-1gb,BinaryBackend,1000000000,16000000,331.162
-Using mrn: 005-1gb backend: BinaryBackend with desired_size: 1000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-1gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-1gb,BinaryBackend,1000000000,32000000,680.735
 Using mrn: 005-1gb backend: BinaryBackend with desired_size: 1000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-1gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
@@ -35,47 +9,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-1gb,BinaryBackend,1000000000,64000000,1097.16
-Using mrn: 005-1gb backend: BinaryBackend with desired_size: 1000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-1gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 15625000, "nsamples": 15625000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-1gb,BinaryBackend,1000000000,128000000,976.129
-Using mrn: 005-2gb backend: BinaryBackend with desired_size: 2000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-2gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-2gb,BinaryBackend,2000000000,16000000,348.53
-Using mrn: 005-2gb backend: BinaryBackend with desired_size: 2000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-2gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-2gb,BinaryBackend,2000000000,32000000,345.417
+Write complete.
+experiment_data::005-1gb,BinaryBackend,1000000000,64000000,1034.74
 Using mrn: 005-2gb backend: BinaryBackend with desired_size: 2000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-2gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
@@ -87,47 +22,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-2gb,BinaryBackend,2000000000,64000000,840.994
-Using mrn: 005-2gb backend: BinaryBackend with desired_size: 2000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-2gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 31250000, "nsamples": 31250000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-2gb,BinaryBackend,2000000000,128000000,613.003
-Using mrn: 005-4gb backend: BinaryBackend with desired_size: 4000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-4gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-4gb,BinaryBackend,4000000000,16000000,785.398
-Using mrn: 005-4gb backend: BinaryBackend with desired_size: 4000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-4gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-4gb,BinaryBackend,4000000000,32000000,1003.12
+Write complete.
+experiment_data::005-2gb,BinaryBackend,2000000000,64000000,740.237
 Using mrn: 005-4gb backend: BinaryBackend with desired_size: 4000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-4gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
@@ -139,47 +35,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-4gb,BinaryBackend,4000000000,64000000,1141.23
-Using mrn: 005-4gb backend: BinaryBackend with desired_size: 4000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-4gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 62500000, "nsamples": 62500000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-4gb,BinaryBackend,4000000000,128000000,1324.81
-Using mrn: 005-8gb backend: BinaryBackend with desired_size: 8000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-8gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-8gb,BinaryBackend,8000000000,16000000,1292.28
-Using mrn: 005-8gb backend: BinaryBackend with desired_size: 8000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-8gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-8gb,BinaryBackend,8000000000,32000000,1302.12
+Write complete.
+experiment_data::005-4gb,BinaryBackend,4000000000,64000000,884.623
 Using mrn: 005-8gb backend: BinaryBackend with desired_size: 8000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-8gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
@@ -191,47 +48,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-8gb,BinaryBackend,8000000000,64000000,1257.81
-Using mrn: 005-8gb backend: BinaryBackend with desired_size: 8000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-8gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 125000000, "nsamples": 125000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-8gb,BinaryBackend,8000000000,128000000,1439.53
-Using mrn: 005-16gb backend: BinaryBackend with desired_size: 16000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-16gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-16gb,BinaryBackend,16000000000,16000000,1801.15
-Using mrn: 005-16gb backend: BinaryBackend with desired_size: 16000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-16gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-16gb,BinaryBackend,16000000000,32000000,1514.31
+Write complete.
+experiment_data::005-8gb,BinaryBackend,8000000000,64000000,1183.7
 Using mrn: 005-16gb backend: BinaryBackend with desired_size: 16000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-16gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
@@ -243,47 +61,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-16gb,BinaryBackend,16000000000,64000000,1875.16
-Using mrn: 005-16gb backend: BinaryBackend with desired_size: 16000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-16gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 250000000, "nsamples": 250000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-16gb,BinaryBackend,16000000000,128000000,1982.53
-Using mrn: 005-32gb backend: BinaryBackend with desired_size: 32000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-32gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-32gb,BinaryBackend,32000000000,16000000,2124.56
-Using mrn: 005-32gb backend: BinaryBackend with desired_size: 32000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-32gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-32gb,BinaryBackend,32000000000,32000000,2282.2
+Write complete.
+experiment_data::005-16gb,BinaryBackend,16000000000,64000000,1364.16
 Using mrn: 005-32gb backend: BinaryBackend with desired_size: 32000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-32gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
@@ -295,47 +74,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-32gb,BinaryBackend,32000000000,64000000,2650.14
-Using mrn: 005-32gb backend: BinaryBackend with desired_size: 32000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-32gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 500000000, "nsamples": 500000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-32gb,BinaryBackend,32000000000,128000000,2797.24
-Using mrn: 005-64gb backend: BinaryBackend with desired_size: 64000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-64gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-64gb,BinaryBackend,64000000000,16000000,4450.75
-Using mrn: 005-64gb backend: BinaryBackend with desired_size: 64000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-64gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-64gb,BinaryBackend,64000000000,32000000,3958.63
+Write complete.
+experiment_data::005-32gb,BinaryBackend,32000000000,64000000,2029.07
 Using mrn: 005-64gb backend: BinaryBackend with desired_size: 64000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-64gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
@@ -347,47 +87,8 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-64gb,BinaryBackend,64000000000,64000000,4033.52
-Using mrn: 005-64gb backend: BinaryBackend with desired_size: 64000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-64gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 1000000000, "nsamples": 1000000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-64gb,BinaryBackend,64000000000,128000000,4616.36
-Using mrn: 005-128gb backend: BinaryBackend with desired_size: 128000000000 and READ_CHUNK_SIZE: 16000000
-Converting mrn: 005-128gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-128gb,BinaryBackend,128000000000,16000000,7817.07
-Using mrn: 005-128gb backend: BinaryBackend with desired_size: 128000000000 and READ_CHUNK_SIZE: 32000000
-Converting mrn: 005-128gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-128gb,BinaryBackend,128000000000,32000000,9123.64
+Write complete.
+experiment_data::005-64gb,BinaryBackend,64000000000,64000000,2728.04
 Using mrn: 005-128gb backend: BinaryBackend with desired_size: 128000000000 and READ_CHUNK_SIZE: 64000000
 Converting mrn: 005-128gb with 55377408 samples and fs=256
 Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
@@ -399,18 +100,5 @@ Wrote ch: 12
 Wrote ch: 16
 Wrote ch: 18
 Wrote ch: 20
-Write complete
-experiment_data::005-128gb,BinaryBackend,128000000000,64000000,7525.59
-Using mrn: 005-128gb backend: BinaryBackend with desired_size: 128000000000 and READ_CHUNK_SIZE: 128000000
-Converting mrn: 005-128gb with 55377408 samples and fs=256
-Array metadata: {"fs": 256, "ncols": 16, "nrows": 2000000000, "nsamples": 2000000000}
-Wrote ch: 0
-Wrote ch: 2
-Wrote ch: 8
-Wrote ch: 10
-Wrote ch: 12
-Wrote ch: 16
-Wrote ch: 18
-Wrote ch: 20
-Write complete
-experiment_data::005-128gb,BinaryBackend,128000000000,128000000,6965.45
+Write complete.
+experiment_data::005-128gb,BinaryBackend,128000000000,64000000,3596.16
