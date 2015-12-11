@@ -32,8 +32,16 @@ function VisgothStat(label, id) {
   this.state = [];
 }
 
+// Maximum number of samples to keep at once for this stat. Default of 0 means
+// keep all samples.
+// NOTE: When collecting stats to train the model, WINDOW should be equal to 1
+// so that only the profile stats that get dumped are only associated with one
+// request.
+VisgothStat.prototype.WINDOW = 3;
+
 VisgothStat.prototype.addValue = function(value) {
   this.state.push(value);
+  this.state = this.state.slice(-this.WINDOW);
 };
 
 VisgothStat.prototype.markStart = function() {
@@ -178,7 +186,7 @@ Visgoth.prototype.sendProfiledMessage = function(type, content) {
 
 Visgoth.prototype.clearStats = function() {
   var profilerStats;
-  for (var label in this.profilers) {
+  for (var label in this.stats) {
     profilerStats = this.stats[label];
     for (var j in profilerStats) {
       profilerStats[j].state = [];
@@ -239,7 +247,6 @@ Visgoth.prototype.runOnce = function(current_extent, max_extent, j, callbackFn) 
     return;
   }
 
-  this.clearStats();
   this.setExtent(current_extent);
   this.sample();
 
