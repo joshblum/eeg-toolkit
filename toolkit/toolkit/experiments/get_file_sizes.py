@@ -27,15 +27,6 @@ def get_file_size(path):
   return total_size
 
 
-def sizeof_fmt(num, suffix='B'):
-  # http://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
-  for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
-    if abs(num) < 1024.0:
-      return "%3.1f %s%s" % (num, unit, suffix)
-    num /= 1024.0
-  return "%.1f %s%s" % (num, 'Y', suffix)
-
-
 def get_file_sizes(backend_name):
   file_ext = FILE_PATTERNS[backend_name]
   filenames = glob.glob('%s/*%s' % (DATADIR, file_ext))
@@ -58,17 +49,17 @@ def store_file_sizes(backend_name, file_sizes):
     f.write(json.dumps(file_sizes))
 
 
-def extract_file_sizes(rootdir, backend_name):
+def extract_file_sizes(backend_name):
   try:
-    with open(DUMP_FILE % (rootdir, backend_name)) as f:
+    with open(DUMP_FILE % backend_name) as f:
       return json.loads(f.read())
   except IOError:
     return {}
 
 
-def extract_all(rootdir=DATADIR):
+def extract_all():
   return {
-      backend_name: extract_file_sizes(rootdir, backend_name)
+      backend_name: extract_file_sizes(backend_name)
       for backend_name in FILE_PATTERNS
   }
 

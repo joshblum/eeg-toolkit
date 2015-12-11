@@ -1,1 +1,1 @@
-../eeg-toolkit/toolkit/toolkit/experiments/parse_results.py
+../toolkit/toolkit/experiments/parse_results.py
