@@ -57,6 +57,7 @@ void OnData(const happyhttp::Response* r, void* userdata, const unsigned char* d
 {
   n = min(n, BUF_SIZE);
   strncpy((char*) userdata, reinterpret_cast<const char*>(data), n);
+  ((char *) userdata)[n] = '\0';
 }
 
 void OnComplete(const happyhttp::Response* r, void* userdata)
