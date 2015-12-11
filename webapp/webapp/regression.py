@@ -12,7 +12,9 @@ from sklearn import linear_model
 from sklearn.externals import joblib
 
 
-inverse_fn = np.vectorize(lambda x: 1/x)
+CHANGE_BASIS = True
+transform_fn = lambda x: 1.0/x
+transform_vectorized = np.vectorize(transform_fn)
 
 def csv_to_dict(filename):
     """
@@ -33,7 +35,7 @@ def csv_to_dict(filename):
                 line_data[k].append(float(v))
     return data
 
-def fit(x, y, extent, change_basis=False, test_set_size=None):
+def fit(x, y, extent, test_set_size=None):
     if test_set_size is None:
         x_train, x_test = x, x
         y_train, y_test = y, y
@@ -41,13 +43,13 @@ def fit(x, y, extent, change_basis=False, test_set_size=None):
         x_train, x_test = x[:-test_set_size], x[-test_set_size:]
         y_train, y_test = y[:-test_set_size], y[-test_set_size:]
 
-    if change_basis:
-        x_test_transform = inverse_fn(x_test)
-        x_train = inverse_fn(x_train)
+    if CHANGE_BASIS:
+        x_test_transform = transform_vectorized(x_test)
+        x_train = transform_vectorized(x_train)
 
     regr = linear_model.TheilSenRegressor()
     regr.fit(x_train, y_train)
-#     print regr.score(x_test_transform, y_test)
+    print extent, regr.score(x_test_transform, y_test)
     
     return regr
 
@@ -61,11 +63,12 @@ def fit_xy(xy):
     nmodels = x.shape[0]
     nsamples = x.shape[1]
     regrs = {}
+    print "Scores for the regressors are:"
     for i in range(nmodels):
         extent = i + 1        
         x_col = x[i, :].reshape((nsamples, 1))
         y_col = y[i, :]
-        regrs[extent] = fit(x_col, y_col, extent, change_basis=True, test_set_size=25)
+        regrs[extent] = fit(x_col, y_col, extent, test_set_size=25)
     
     return regrs
 
@@ -106,20 +109,38 @@ def save_and_load_xy(filename, x_key, y_key, max_extent):
         
     return xy
 
-def save_regressors(filename, x_key, y_key, max_extent=16):
-    """
-    Given a filename tag for the profile dump, train all regression models and
-    save them to disk. Also persist the profile dump data as an numpy array, if
-    not already done.
-    """
-    xy = save_and_load_xy(filename, x_key, y_key, max_extent=max_extent)
-    regressors = fit_xy(xy)
-    pickle_filename = "vg-{0}-{x}-{y}.pkl".format(filename, x=x_key, y=y_key)
-    joblib.dump(regressors, pickle_filename)
 
-def load_regressors(filename, x_key, y_key):
+def save_and_load_regressors(filename, x_key, y_key, max_extent=16):
+    """
+    Given a filename tag for the profile dump, load the corresponding regression models from disk.
+
+    If they don't exist yet, train all regression models and save them to disk.
+    Also persist the profile dump data as an numpy array, if not already done.
+    """
+    import os
     pickle_filename = "vg-{0}-{x}-{y}.pkl".format(filename, x=x_key, y=y_key)
-    return joblib.load(pickle_filename)
+    # If we already serialized the numpy array.
+    if os.path.exists(pickle_filename):
+        return joblib.load(pickle_filename)
+
+    xy = save_and_load_xy(filename, x_key, y_key, max_extent)
+    regressors = fit_xy(xy)
+    joblib.dump(regressors, pickle_filename)
+    return regressors
+
+
+def predict_extent(regressors, target_latency, x_value):
+    x_value = transform_fn(x_value)
+    predictions = []
+    for extent, regressor in regressors.items():
+        predicted_latency = regressor.predict(x_value)[0]
+        distance = abs(predicted_latency - target_latency)
+        predictions.append((extent, distance))
+
+    # Get the extent whose regressor predicted the closest to the target.
+    optimal = min(predictions, key=lambda prediction: prediction[1])
+    extent = optimal[0]
+    return extent
 
 
 if __name__ == '__main__':
@@ -128,4 +149,4 @@ if __name__ == '__main__':
 
     filename = sys.argv[1]
     x_key = sys.argv[2]
-    save_regressors(filename, x_key, 'latency')
+    save_and_load_regressors(filename, x_key, 'latency')

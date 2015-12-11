@@ -4,13 +4,28 @@ from flask import render_template
 from flask import request
 
 import os
-
 import csv
 import simplejson as json
 
+import regression
+
 
 app = Flask(__name__)
+
 PROFILE_FILENAME = 'profile-dump-{0}.csv'
+
+
+# TODO: All of these should live in flask config.
+# Are we running an experiment?
+EXPERIMENT = False
+
+TARGET_LATENCY = 6000
+# Regressor tags have 3 parts: 1) which data dump to look at; 2) which profile
+# statistic to train on; 3) the value that the model should predict (always
+# latency for us).
+# TODO: change to named tuple...
+DEFAULT_REGRESSOR_TAG = ('chrome-ubuntu', 'bandwidth', 'latency')
+REGRESSORS = regression.save_and_load_regressors(*DEFAULT_REGRESSOR_TAG)
 
 
 @app.errorhandler(404)
@@ -106,12 +121,27 @@ def get_extent():
   success = True
   try:
     data = request.get_json()
+
   except:
-    success = False
+    return jsonify({
+        'success': False,
+    })
+
+  # If we're running an experiment, the client will request the extent.
+  # Otherwise, use the models to predict a best extnet.
+  if EXPERIMENT:
+    extent = data['client_profile'].get('extent', 1)
+  else:
+    x_key = DEFAULT_REGRESSOR_TAG[1]
+    x_value = data['client_profile'].get(x_key)
+    if x_value is None:
+      extent = 1
+    else:
+      extent = regression.predict_extent(REGRESSORS, TARGET_LATENCY, x_value)
 
   return jsonify({
       'success': success,
-      'extent': data['client_profile'].get('extent', 1)
+      'extent': extent,
   })
 
 if __name__ == '__main__':
