@@ -1,0 +1,6 @@
+python-dev
+python-pip
+python-numpy
+python-scipy
+libatlas-base-dev
+gfortran
