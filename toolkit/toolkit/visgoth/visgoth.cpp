@@ -96,8 +96,13 @@ uint Visgoth::get_extent(Json profile_data)
   while(conn.outstanding())
     conn.pump();
 
-  Json json_response = Json(response);
+  string err;
+  Json json_response = Json::parse(response, err);
+  uint extent = json_response["extent"].int_value();
+  if (extent == 0) {
+    cout << "WARNING: No extent provided from Visgoth" << endl;
+  }
   free(response);
 
-  return json_response["extent"].int_value();
+  return extent;
 }
