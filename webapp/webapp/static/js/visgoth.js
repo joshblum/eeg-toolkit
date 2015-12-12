@@ -35,9 +35,9 @@ function VisgothStat(label, id) {
 // Maximum number of samples to keep at once for this stat. Default of 0 means
 // keep all samples.
 // NOTE: When collecting stats to train the model, WINDOW should be equal to 1
-// so that only the profile stats that get dumped are only associated with one
+// so that the profile stats that get dumped are only associated with one
 // request.
-VisgothStat.prototype.WINDOW = 3;
+VisgothStat.prototype.WINDOW = 1;
 
 VisgothStat.prototype.addValue = function(value) {
   this.state.push(value);

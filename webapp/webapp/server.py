@@ -19,7 +19,7 @@ PROFILE_FILENAME = 'profile-dump-{0}.csv'
 # Are we running an experiment?
 EXPERIMENT = False
 
-TARGET_LATENCY = 1000
+TARGET_LATENCY = 3500
 # Regressor tags have 3 parts: 1) which data dump to look at; 2) which profile
 # statistic to train on; 3) the value that the model should predict (always
 # latency for us).

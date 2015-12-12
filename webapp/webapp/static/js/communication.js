@@ -92,8 +92,6 @@ ws.onmessage = function(event) {
     var canvasId = content.canvasId || IDS[0];
     var spectrogram = SPECTROGRAMS[canvasId];
     if (type === "spectrogram") {
-        spectrogram.logNetworkEnd(spectrogramRequestCount);
-
         setTime("specStartTime", content.startTime);
         setTime("specEndTime", content.endTime);
         spectrogram.updateStartLoadTime();
@@ -109,6 +107,7 @@ ws.onmessage = function(event) {
         }
 
         spectrogram.logBufferLoadEnd(spectrogramRequestCount);
+        spectrogram.logNetworkEnd(spectrogramRequestCount);
 
         spectrogramRequestCount++;
         spectrogram.updateProgressBar(1);
