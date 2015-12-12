@@ -458,3 +458,463 @@ experiment_data::005-128gb,BinaryBackend,64000000,1.1e+02,read_time-RL
 experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-RL
 experiment_data::005-128gb,BinaryBackend,64000000,9.4e+03,total_time
 experiment_data::005-128gb,BinaryBackend,64000000,2.2e+02,write_time
+Using mrn: 005-1gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 1 chunks and 15625000 samples.
+spec_params: {
+	mrn: 005-1gb
+	start_time: 0
+	end_time: 17
+	start_offset: 0
+	end_offset: 15624999
+	spec_start_offset: 0
+	spec_end_offset: 15258
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 15625000
+	nblocks: 15258
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 15258, "nsamples": 15258}
+Creating: 005-1gb-LL-cached
+experiment_data::005-1gb,BinaryBackend,64000000,14,read_time-LL
+Creating: 005-1gb-LP-cached
+experiment_data::005-1gb,BinaryBackend,64000000,8.6,read_time-LP
+Creating: 005-1gb-RP-cached
+experiment_data::005-1gb,BinaryBackend,64000000,9.9,read_time-RP
+Creating: 005-1gb-RL-cached
+experiment_data::005-1gb,BinaryBackend,64000000,7.8,read_time-RL
+experiment_data::005-1gb,BinaryBackend,64000000,48,total_time
+experiment_data::005-1gb,BinaryBackend,64000000,0.43,write_time
+Using mrn: 005-2gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 1 chunks and 31250000 samples.
+spec_params: {
+	mrn: 005-2gb
+	start_time: 0
+	end_time: 34
+	start_offset: 0
+	end_offset: 31249999
+	spec_start_offset: 0
+	spec_end_offset: 30517
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 31250000
+	nblocks: 30517
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 30517, "nsamples": 30517}
+Creating: 005-2gb-LL-cached
+experiment_data::005-2gb,BinaryBackend,64000000,27,read_time-LL
+Creating: 005-2gb-LP-cached
+experiment_data::005-2gb,BinaryBackend,64000000,12,read_time-LP
+Creating: 005-2gb-RP-cached
+experiment_data::005-2gb,BinaryBackend,64000000,17,read_time-RP
+Creating: 005-2gb-RL-cached
+experiment_data::005-2gb,BinaryBackend,64000000,12,read_time-RL
+experiment_data::005-2gb,BinaryBackend,64000000,84,total_time
+experiment_data::005-2gb,BinaryBackend,64000000,0.82,write_time
+Using mrn: 005-4gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 1 chunks and 62500000 samples.
+spec_params: {
+	mrn: 005-4gb
+	start_time: 0
+	end_time: 68
+	start_offset: 0
+	end_offset: 62499999
+	spec_start_offset: 0
+	spec_end_offset: 61035
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 62500000
+	nblocks: 61035
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 61035, "nsamples": 61035}
+Creating: 005-4gb-LL-cached
+experiment_data::005-4gb,BinaryBackend,64000000,50,read_time-LL
+Creating: 005-4gb-LP-cached
+experiment_data::005-4gb,BinaryBackend,64000000,36,read_time-LP
+Creating: 005-4gb-RP-cached
+experiment_data::005-4gb,BinaryBackend,64000000,54,read_time-RP
+Creating: 005-4gb-RL-cached
+experiment_data::005-4gb,BinaryBackend,64000000,22,read_time-RL
+experiment_data::005-4gb,BinaryBackend,64000000,1.9e+02,total_time
+experiment_data::005-4gb,BinaryBackend,64000000,1.5,write_time
+Using mrn: 005-8gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 2 chunks and 125000000 samples.
+spec_params: {
+	mrn: 005-8gb
+	start_time: 0
+	end_time: 1.4e+02
+	start_offset: 0
+	end_offset: 124999999
+	spec_start_offset: 0
+	spec_end_offset: 122070
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 125000000
+	nblocks: 122070
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 122070, "nsamples": 122070}
+Creating: 005-8gb-LL-cached
+experiment_data::005-8gb,BinaryBackend,64000000,31,read_time-LL
+experiment_data::005-8gb,BinaryBackend,64000000,36,read_time-LL
+Creating: 005-8gb-LP-cached
+experiment_data::005-8gb,BinaryBackend,64000000,39,read_time-LP
+experiment_data::005-8gb,BinaryBackend,64000000,29,read_time-LP
+Creating: 005-8gb-RP-cached
+experiment_data::005-8gb,BinaryBackend,64000000,42,read_time-RP
+experiment_data::005-8gb,BinaryBackend,64000000,39,read_time-RP
+Creating: 005-8gb-RL-cached
+experiment_data::005-8gb,BinaryBackend,64000000,20,read_time-RL
+experiment_data::005-8gb,BinaryBackend,64000000,18,read_time-RL
+experiment_data::005-8gb,BinaryBackend,64000000,3.1e+02,total_time
+experiment_data::005-8gb,BinaryBackend,64000000,2.7,write_time
+Using mrn: 005-16gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 4 chunks and 250000000 samples.
+spec_params: {
+	mrn: 005-16gb
+	start_time: 0
+	end_time: 2.7e+02
+	start_offset: 0
+	end_offset: 249999999
+	spec_start_offset: 0
+	spec_end_offset: 244140
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 250000000
+	nblocks: 244140
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 244140, "nsamples": 244140}
+Creating: 005-16gb-LL-cached
+experiment_data::005-16gb,BinaryBackend,64000000,57,read_time-LL
+experiment_data::005-16gb,BinaryBackend,64000000,63,read_time-LL
+experiment_data::005-16gb,BinaryBackend,64000000,53,read_time-LL
+experiment_data::005-16gb,BinaryBackend,64000000,39,read_time-LL
+Creating: 005-16gb-LP-cached
+experiment_data::005-16gb,BinaryBackend,64000000,20,read_time-LP
+experiment_data::005-16gb,BinaryBackend,64000000,22,read_time-LP
+experiment_data::005-16gb,BinaryBackend,64000000,21,read_time-LP
+experiment_data::005-16gb,BinaryBackend,64000000,27,read_time-LP
+Creating: 005-16gb-RP-cached
+experiment_data::005-16gb,BinaryBackend,64000000,45,read_time-RP
+experiment_data::005-16gb,BinaryBackend,64000000,40,read_time-RP
+experiment_data::005-16gb,BinaryBackend,64000000,34,read_time-RP
+experiment_data::005-16gb,BinaryBackend,64000000,30,read_time-RP
+Creating: 005-16gb-RL-cached
+experiment_data::005-16gb,BinaryBackend,64000000,26,read_time-RL
+experiment_data::005-16gb,BinaryBackend,64000000,37,read_time-RL
+experiment_data::005-16gb,BinaryBackend,64000000,35,read_time-RL
+experiment_data::005-16gb,BinaryBackend,64000000,31,read_time-RL
+experiment_data::005-16gb,BinaryBackend,64000000,6.9e+02,total_time
+experiment_data::005-16gb,BinaryBackend,64000000,5.1,write_time
+Using mrn: 005-32gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 8 chunks and 500000000 samples.
+spec_params: {
+	mrn: 005-32gb
+	start_time: 0
+	end_time: 5.4e+02
+	start_offset: 0
+	end_offset: 499999999
+	spec_start_offset: 0
+	spec_end_offset: 488281
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 500000000
+	nblocks: 488281
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 488281, "nsamples": 488281}
+Creating: 005-32gb-LL-cached
+experiment_data::005-32gb,BinaryBackend,64000000,47,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,50,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,39,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,43,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,55,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,32,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,44,read_time-LL
+experiment_data::005-32gb,BinaryBackend,64000000,39,read_time-LL
+Creating: 005-32gb-LP-cached
+experiment_data::005-32gb,BinaryBackend,64000000,42,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,50,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,46,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,45,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,37,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,41,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,36,read_time-LP
+experiment_data::005-32gb,BinaryBackend,64000000,25,read_time-LP
+Creating: 005-32gb-RP-cached
+experiment_data::005-32gb,BinaryBackend,64000000,55,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,41,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,38,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,33,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,42,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,55,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,60,read_time-RP
+experiment_data::005-32gb,BinaryBackend,64000000,52,read_time-RP
+Creating: 005-32gb-RL-cached
+experiment_data::005-32gb,BinaryBackend,64000000,99,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,75,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,45,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,33,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,40,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,34,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,37,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,33,read_time-RL
+experiment_data::005-32gb,BinaryBackend,64000000,1.7e+03,total_time
+experiment_data::005-32gb,BinaryBackend,64000000,23,write_time
+Using mrn: 005-64gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 16 chunks and 1000000000 samples.
+spec_params: {
+	mrn: 005-64gb
+	start_time: 0
+	end_time: 1.1e+03
+	start_offset: 0
+	end_offset: 999999999
+	spec_start_offset: 0
+	spec_end_offset: 976562
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 1000000000
+	nblocks: 976562
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 976562, "nsamples": 976562}
+Creating: 005-64gb-LL-cached
+experiment_data::005-64gb,BinaryBackend,64000000,41,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,35,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,40,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,32,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,33,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,57,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,66,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,46,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,39,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,41,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,47,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,58,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,39,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,39,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,34,read_time-LL
+experiment_data::005-64gb,BinaryBackend,64000000,26,read_time-LL
+Creating: 005-64gb-LP-cached
+experiment_data::005-64gb,BinaryBackend,64000000,35,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,41,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,48,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,37,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,29,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,30,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,30,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,34,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,43,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,44,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,44,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,34,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,34,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,30,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,37,read_time-LP
+experiment_data::005-64gb,BinaryBackend,64000000,37,read_time-LP
+Creating: 005-64gb-RP-cached
+experiment_data::005-64gb,BinaryBackend,64000000,51,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,48,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,40,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,38,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,41,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,53,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,35,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,39,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,32,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,40,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,43,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,68,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,54,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,59,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,43,read_time-RP
+experiment_data::005-64gb,BinaryBackend,64000000,34,read_time-RP
+Creating: 005-64gb-RL-cached
+experiment_data::005-64gb,BinaryBackend,64000000,53,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,51,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,39,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,43,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,42,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,43,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,49,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,36,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,34,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,38,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,38,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,39,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,48,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,55,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,45,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,18,read_time-RL
+experiment_data::005-64gb,BinaryBackend,64000000,3.1e+03,total_time
+experiment_data::005-64gb,BinaryBackend,64000000,47,write_time
+Using mrn: 005-128gb backend: BinaryBackend and WRITE_CHUNK_SIZE: 64000000
+Computing 32 chunks and 2000000000 samples.
+spec_params: {
+	mrn: 005-128gb
+	start_time: 0
+	end_time: 2.2e+03
+	start_offset: 0
+	end_offset: 1999999999
+	spec_start_offset: 0
+	spec_end_offset: 1953125
+	nfft: 1024
+	nstep: 256
+	shift: 1024
+	nsamples: 2000000000
+	nblocks: 1953125
+	nfreqs: 513
+	fs: 256
+}
+{"fs": 256, "ncols": 513, "nrows": 1953125, "nsamples": 1953125}
+Creating: 005-128gb-LL-cached
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,64,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,34,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,40,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,37,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,58,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,33,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,51,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,61,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,43,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,41,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,70,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,56,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,31,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,43,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,56,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,33,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,31,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,40,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,76,read_time-LL
+experiment_data::005-128gb,BinaryBackend,64000000,13,read_time-LL
+Creating: 005-128gb-LP-cached
+experiment_data::005-128gb,BinaryBackend,64000000,61,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,55,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,43,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,47,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,47,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,48,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,70,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,69,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,57,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,57,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,42,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,47,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,37,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,32,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,40,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,58,read_time-LP
+experiment_data::005-128gb,BinaryBackend,64000000,14,read_time-LP
+Creating: 005-128gb-RP-cached
+experiment_data::005-128gb,BinaryBackend,64000000,74,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,68,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,69,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,60,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,52,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,45,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,62,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,37,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,34,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,42,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,62,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,41,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,55,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,34,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,52,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,58,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,57,read_time-RP
+experiment_data::005-128gb,BinaryBackend,64000000,16,read_time-RP
+Creating: 005-128gb-RL-cached
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,47,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,39,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,53,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,36,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,37,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,42,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,51,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,34,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,30,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,43,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,47,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,46,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,49,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,47,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,38,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,35,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,41,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,37,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,44,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,43,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,31,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,7.2,read_time-RL
+experiment_data::005-128gb,BinaryBackend,64000000,6.8e+03,total_time
+experiment_data::005-128gb,BinaryBackend,64000000,1.7e+02,write_time
