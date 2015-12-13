@@ -18,7 +18,7 @@ def parse_log(filename):
           line = line[len(DELIMITER):]
           lines.append(line.rstrip())
   except IOError:
-    print 'File %s not found.' % filename
+    pass
 
   return lines
 
@@ -32,7 +32,7 @@ def bytes_to_mb(byte_str):
     The logs  have an error where the value is / sizeof(float).
     We multiply here to compensate
   """
-  return '%smb' % (4*int(byte_str) / 10**6)
+  return '%smb' % (4 * int(byte_str) / 10**6)
 
 
 def get_desired_size_from_mrn(mrn):
@@ -74,19 +74,14 @@ def precompute_parser(lines):
     value = float(time)
     data[key].append(value)
 
-  # combine the region read times into a single read time
-  new_data = defaultdict(list)
-  for k, v in data.iteritems():
-    if 'read_time' in k[0]:
-      new_key = list(k)
+    if 'read_time' in tag:
+      new_key = list(key)
       new_key[0] = 'read_time'
       new_key = tuple(new_key)
-      values = new_data[new_key]
-      if not len(values):
-          new_data[new_key] = v
-      else:
-        new_data[new_key] = map(sum, zip(values, v))
-  data.update(new_data)
+      if not len(data[new_key]):
+        data[new_key] = [0]
+      data[new_key][0] += value
+
   return data
 
 
@@ -110,10 +105,16 @@ def main(backend_name):
   results = {}
   for exp_name, value_pair in EXPERIMENTS.iteritems():
     filename, parser = value_pair
-    filename += '-%s' % backend_name
-    lines = parse_log(filename)
-    values = avg_values(parser(lines))
-    results[exp_name] = values
+    filename += '-%s-iso-' % backend_name
+    i = 1
+    values = {}
+    while True:
+      lines = parse_log(filename + str(i))
+      if not len(lines):
+        break
+      values = parser(lines)
+      i += 1
+    results[exp_name] = avg_values(values)
   return results
 
 
