@@ -133,5 +133,16 @@ static inline vector<string> split(const string &s, char delim) {
     return elems;
 }
 
+static inline size_t gigabytes_to_bytes(size_t num_gb)
+{
+  return num_gb * 1000000000;
+}
+
+static inline string mrn_to_filename(string mrn, string format)
+{
+  return DATADIR + mrn + "." + format;
+}
+
+
 #endif // HELPERS_H
 

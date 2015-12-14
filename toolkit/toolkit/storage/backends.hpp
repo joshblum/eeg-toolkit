@@ -216,8 +216,8 @@ class AbstractStorageBackend
     virtual void create_array(string mrn, ArrayMetadata* metadata) = 0;
     virtual void open_array(string mrn) = 0;
     virtual void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf) = 0;
-    virtual void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf) = 0;
     virtual void read_array(string mrn, int start_offset, int end_offset, fmat& buf) = 0;
+    virtual void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf) = 0;
     virtual void close_array(string mrn) = 0;
 };
 

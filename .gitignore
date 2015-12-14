@@ -65,6 +65,7 @@ test
 ws_server
 edf_converter
 data_to_file
+viz_to_file
 precompute_spectrogram
 viz_converter
 

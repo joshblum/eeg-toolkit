@@ -5,11 +5,6 @@
 
 using namespace std;
 
-size_t gigabytes_to_bytes(size_t num_gb)
-{
-  return num_gb * 1000000000;
-}
-
 /*
  * Command line program to convert an
  * EDF file for the given `mrn` to the specified backend

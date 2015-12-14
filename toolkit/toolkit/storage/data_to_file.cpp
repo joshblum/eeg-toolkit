@@ -5,11 +5,6 @@
 
 using namespace std;
 
-string mrn_to_filename(string mrn, string format)
-{
-  return DATADIR + mrn + "." + format;
-}
-
 void data_to_file(string mrn, string type)
 {
   string path = mrn_to_filename(mrn, type);
