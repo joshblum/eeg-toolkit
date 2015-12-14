@@ -43,7 +43,6 @@ function Spectrogram(id) {
     this.specFrequencyScale = getElementById("specFreqScale", id);
     this.specDataView = getElementById("specDataView", id);
     this.progressBar = getElementById("progressBar", id);
-    this.annotation = new Annotation(this.specContainer);
 
     this.gl = null; // the WebGL instance
 

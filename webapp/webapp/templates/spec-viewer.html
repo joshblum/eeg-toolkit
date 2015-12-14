@@ -2,9 +2,7 @@
 {% block title %} EEG Spectrogram Viewer {% endblock %}
 
 {% block styles %}
-<link type="text/css" rel="stylesheet" href="/static/css/leaflet.css" />
 <link type="text/css" rel="stylesheet" href="/static/css/spec-viewer.css">
-<link type="text/css" rel="stylesheet" href="/static/css/annotation.css">
 {% endblock %}
 
 {% block body %}
@@ -314,16 +312,10 @@
       vTextureCoord = aTextureCoord;
   }
 </script>
-<script type="text/javascript" src="/static/js/leaflet.js"></script>
-<script type="text/javascript" src="/static/js/d3.min.js"></script>
-<script type="text/javascript" src="/static/js/clipper_unminified.js"></script>
-<script type="text/javascript" src="/static/js/concavehull.js"></script>
-<script type="text/javascript" src="/static/js/leaflet.freedraw.js"></script>
 <script type="text/javascript" src="/static/js/reconnecting-websocket.min.js"></script>
 <script type="text/javascript" src="/static/js/visgoth.js"></script>
 <script type="text/javascript" src="/static/js/specsize.js"></script>
 <script type="text/javascript" src="/static/js/spectrogram.js"></script>
 <script type="text/javascript" src="/static/js/spec-viewer.js"></script>
 <script type="text/javascript" src="/static/js/communication.js"></script>
-<script type="text/javascript" src="/static/js/annotation.js"></script>
 {% endblock %}
