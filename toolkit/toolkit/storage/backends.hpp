@@ -11,7 +11,6 @@
 #include "../helpers.hpp"
 #include "EDFlib/edflib.h"
 #include "H5Cpp.h"
-#include "TileDB/core/include/capis/tiledb.h"
 
 #define CELL_SIZE (sizeof(int32_t) * 2 + sizeof(float)) // struct gets padded to 24 bytes
 
@@ -257,29 +256,6 @@ class HDF5Backend: public AbstractStorageBackend<H5File>
   protected:
     string mrn_to_array_name(string mrn);
     void _read_array(string mrn, hsize_t offset[], hsize_t count[], fmat& buf);
-
-  public:
-    ArrayMetadata get_array_metadata(string mrn);
-    void create_array(string mrn, ArrayMetadata* metadata);
-    void open_array(string mrn);
-    void read_array(string mrn, int ch, int start_offset, int end_offset, frowvec& buf);
-    void read_array(string mrn, int start_offset, int end_offset, fmat& buf);
-    void write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf);
-    void close_array(string mrn);
-};
-
-typedef pair<TileDB_CTX*, int> tiledb_cache_pair;
-
-class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
-{
-  protected:
-    string mrn_to_array_name(string mrn);
-    string get_array_name(string mrn);
-    string get_group();
-    string get_workspace();
-    void _open_array(string mrn, const char* mode);
-    void _read_array(string mrn, double* range, fmat& buf);
-    void write_metadata(string mrn, ArrayMetadata* metadata);
 
   public:
     ArrayMetadata get_array_metadata(string mrn);

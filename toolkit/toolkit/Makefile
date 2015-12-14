@@ -13,15 +13,12 @@ STORAGESRC := storage/binary_backend.cpp\
 					storage/edf_backend.cpp\
 					storage/edf_to_array.cpp\
 					storage/hdf5_backend.cpp\
-					storage/tiledb_backend.cpp\
 					json11/json11.cpp # required by binary_backend for metadata
 COMPUTESRC := compute/eeg_spectrogram.cpp\
 					compute/eeg_change_point.cpp
 VISGOTHSRC := visgoth/visgoth.cpp\
 							visgoth/collectd.cpp\
 							visgoth/HappyHTTP/happyhttp.cpp
-TILEDBLIBPATH := storage/TileDB/core/lib/release
-TILEDBLIBNAME := libtiledb.so
 
 WSSRC := $(COMPUTESRC)\
 				$(STORAGESRC)\
@@ -74,8 +71,6 @@ LDFLAGS := -lfftw3\
 					/usr/lib/x86_64-linux-gnu/libhdf5.a\
 					-lz\
 					-ldl\
-					-L$(TILEDBLIBPATH)\
-					-l:$(TILEDBLIBNAME)
 
 ifeq ($(DEBUG),1)
 	# -g needed for test framework assertions
