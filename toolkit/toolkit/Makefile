@@ -33,6 +33,8 @@ TESTSRC := $(COMPUTESRC)\
 					test.cpp
 EDFCONVERTSRC := $(STORAGESRC)\
 								storage/edf_converter.cpp
+DATATOFILESRC := $(STORAGESRC)\
+								storage/data_to_file.cpp
 VIZCONVERTSRC := $(STORAGESRC)\
 								compute/eeg_spectrogram.cpp\
 								storage/viz_converter.cpp
@@ -44,6 +46,7 @@ COBJ := $(CSRC:.c=.o)
 WSOBJ := $(COBJ) $(WSSRC:.cpp=.o)
 TESTOBJ := $(COBJ) $(TESTSRC:.cpp=.o)
 EDFCONVERTOBJ := $(COBJ) $(EDFCONVERTSRC:.cpp=.o)
+DATATOFILEOBJ := $(COBJ) $(DATATOFILESRC:.cpp=.o)
 VIZCONVERTOBJ := $(COBJ) $(VIZCONVERTSRC:.cpp=.o)
 PREOCMPUTEOBJ := $(COBJ) $(PRECOMPUTESRC:.cpp=.o)
 
@@ -121,6 +124,9 @@ test: $(TESTOBJ)
 edf_converter: $(EDFCONVERTOBJ)
 	$(CXX) -o $@ $(EDFCONVERTOBJ) $(LDFLAGS)
 
+data_to_file: $(DATATOFILEOBJ)
+	$(CXX) -o $@ $(DATATOFILEOBJ) $(LDFLAGS)
+
 viz_converter: $(VIZCONVERTOBJ)
 	$(CXX) -o $@ $(VIZCONVERTOBJ) $(LDFLAGS)
 
@@ -133,5 +139,6 @@ clean:
 	find . -type f -name ws_server -delete
 	find . -type f -name test -delete
 	find . -type f -name edf_converter -delete
+	find . -type f -name data_to_file -delete
 	find . -type f -name viz_converter -delete
 	find . -type f -name precompute_spectrogram -delete
