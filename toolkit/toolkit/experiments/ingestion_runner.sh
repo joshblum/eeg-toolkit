@@ -33,7 +33,7 @@ done;
 for file_size in $FILE_SIZES; do
   for read_chunk in $READ_CHUNK_SIZES; do
     make clean
-    make edf_converter READ_CHUNK=$read_chunk BACKEND=$BACKEND
+    make edf_converter READ_CHUNK=$read_chunk BACKEND=$BACKEND -j4
 
     # clear file systems caches
     sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
