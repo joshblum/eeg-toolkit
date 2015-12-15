@@ -105,7 +105,7 @@ def main(backend_name):
   results = {}
   for exp_name, value_pair in EXPERIMENTS.iteritems():
     filename, parser = value_pair
-    filename += '-%s-iso-' % backend_name
+    filename += '-%s-' % backend_name
     i = 1
     values = {}
     while True:
