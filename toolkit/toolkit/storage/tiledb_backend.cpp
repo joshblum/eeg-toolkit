@@ -1,4 +1,5 @@
 #include "backends.hpp"
+#include "TileDB/core/include/capis/tiledb.h"
 
 #include<string>
 #include<armadillo>

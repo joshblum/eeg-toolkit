@@ -48,7 +48,8 @@ void HDF5Backend::create_array(string mrn, ArrayMetadata* metadata)
 
   hsize_t chunk_dims[DATA_RANK];
 
-  if (is_cached_array(mrn)){
+  if (is_cached_array(mrn))
+  {
     chunk_dims[0] = min(metadata->nrows, WRITE_CHUNK_SIZE);
     chunk_dims[1] = metadata->ncols;
   }

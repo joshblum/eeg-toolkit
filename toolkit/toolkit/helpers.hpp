@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <string>
 #include <armadillo>
+#include "config.hpp"
 
 
 using namespace std;
