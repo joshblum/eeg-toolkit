@@ -7,34 +7,31 @@
 using namespace std;
 using namespace arma;
 
-#define DIM_NAME "__hide"
-#define ATTR_NAME "sample"
-#define ROW_NAME "samples"
-#define COL_NAME "channels"
-#define RANGE_SIZE 4
-#define TILEDB_READ_MODE "r"
-#define TILEDB_WRITE_MODE "w"
-#define TILEDB_APPEND_MODE "a"
+#define DIM_NUM 2
+#define RANGE_SIZE 2*(DIM_NUM)
+#define WORKSPACE "tiledb_workspace/"
+#define CATALOG "tiledb_catalog/"
 
 string TileDBBackend::mrn_to_array_name(string mrn)
 {
+  mrn = WORKSPACE + mrn;
   return _mrn_to_array_name(mrn, "-tiledb");
 }
 
 string TileDBBackend::get_array_name(string mrn)
 {
-  return mrn + "-tiledb";
+  return get_workspace() +  mrn + "-tiledb";
 }
 
 
 string TileDBBackend::get_workspace()
 {
-  return DATADIR;
+  return DATADIR WORKSPACE;
 }
 
-string TileDBBackend::get_group()
+string TileDBBackend::get_catalog()
 {
-  return "";
+  return DATADIR CATALOG;
 }
 
 ArrayMetadata TileDBBackend::get_array_metadata(string mrn)
@@ -80,57 +77,120 @@ void TileDBBackend::create_array(string mrn, ArrayMetadata* metadata)
 {
   // tmp fix until TileDB metadata is implemented
   write_metadata(mrn, metadata);
-  string group = get_group();
-  string workspace = get_workspace();
+
+  /* Prepare the array schema. */
+  TileDB_ArraySchema array_schema = {};
+
   string array_name = get_array_name(mrn);
-  // csv of array schema
-  string array_schema_str = array_name + ",1," + ATTR_NAME + ",2," + COL_NAME + "," + ROW_NAME + ",0," + to_string(metadata->ncols) + ",0," + to_string(metadata->nrows) + ",float32,int32,*,column-major,*,*,*,NONE,GZIP";
+  array_schema.array_name_ = array_name.c_str();
+
+  /* Set attributes and number of attributes. */
+  int attribute_num = 1;
+  array_schema.attributes_ = new const char*[attribute_num];
+  array_schema.attributes_[0] = "sample";
+  array_schema.attribute_num_ = attribute_num;
+
+  /* Set dimensions and number of dimensions. */
+  int dim_num = DIM_NUM;
+  array_schema.dimensions_ = new const char*[dim_num];
+  array_schema.dimensions_[1] = "samples";
+  array_schema.dimensions_[0] = "channels";
+  array_schema.dim_num_ = dim_num;
+
+  /* The array is dense. */
+  array_schema.dense_ = 1;
+  array_schema.cell_order_ = "row-major";
+  //array_schema.tile_order_ = "column-major";
+
+  /* Set compression. */
+  array_schema.compression_ = new const char*[attribute_num + 1];
+  array_schema.compression_[0] = "NONE";
+  array_schema.compression_[1] = "GZIP";
+
+  /* Set tile extents. */
+  array_schema.tile_extents_ = new double[dim_num];
+  if (is_cached_array(mrn))
+  {
+    array_schema.tile_extents_[1] = min(metadata->nrows, WRITE_CHUNK_SIZE);
+    array_schema.tile_extents_[0] = metadata->ncols;
+  }
+  else
+  {
+    array_schema.tile_extents_[1] = min(metadata->nrows, READ_CHUNK_SIZE);
+    array_schema.tile_extents_[0] = 1;
+  }
+
+  /* Set domain. */
+  array_schema.domain_ = new double[2*dim_num];
+  array_schema.domain_[0] = 0;
+  array_schema.domain_[3] = metadata->nrows;
+  array_schema.domain_[2] = 0;
+  array_schema.domain_[1] = metadata->ncols;
+
+  /* Set types: float32 for "sample" and int64 for the coordinates. */
+  array_schema.types_ = new const char*[attribute_num + 1];
+  array_schema.types_[0] = "float32";
+  array_schema.types_[1] = "int32";
 
   // Initialize TileDB
   TileDB_CTX* tiledb_ctx;
-  tiledb_ctx_init(tiledb_ctx);
+  tiledb_ctx_init(&tiledb_ctx);
+
+  // First we need a workspace and catalog set
+  if (tiledb_workspace_create(tiledb_ctx, get_workspace().c_str(), get_catalog().c_str()) == TILEDB_OK)
+  {
+    cout << "TileDB workspace created." << endl;
+  }
 
   if (array_exists(mrn))
   {
     // Necessary for clean since arrays are not cleared when redefined
-    if (tiledb_array_delete(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str()))
+    if (tiledb_array_delete(tiledb_ctx, array_name.c_str()) == TILEDB_ERR)
     {
       cout << "TileDB delete error." << endl;
       exit(-1);
     }
   }
 
-  // Store the array schema
-  if (tiledb_array_define(tiledb_ctx, workspace.c_str(), group.c_str(), array_schema_str.c_str()))
+  /* Create the array. */
+  if (tiledb_array_create(tiledb_ctx, &array_schema) == TILEDB_ERR)
   {
     cout << "TileDB define error." << endl;
     exit(-1);
   }
+
+  /* Clean up. */
+  delete [] array_schema.compression_;
+  delete [] array_schema.attributes_;
+  delete [] array_schema.dimensions_;
+  delete [] array_schema.tile_extents_;
+  delete [] array_schema.domain_;
+  delete [] array_schema.types_;
+
   tiledb_ctx_finalize(tiledb_ctx);
 }
 
 void TileDBBackend::open_array(string mrn)
 {
-  _open_array(mrn, TILEDB_READ_MODE);
+  _open_array(mrn, TILEDB_ARRAY_MODE_READ);
 }
 
-void TileDBBackend::_open_array(string mrn, const char* mode)
+void TileDBBackend::_open_array(string mrn, int mode)
 {
   if (in_cache(mrn))
   {
     return;
   }
   TileDB_CTX* tiledb_ctx;
-  tiledb_ctx_init(tiledb_ctx);
-  string group = get_group();
-  string workspace = get_workspace();
+  tiledb_ctx_init(&tiledb_ctx);
   string array_name = get_array_name(mrn);
-  int array_id = tiledb_array_open(tiledb_ctx, workspace.c_str(), group.c_str(), array_name.c_str(), mode);
-  if (array_id == -1)
+  int array_id = tiledb_array_open(tiledb_ctx, array_name.c_str(), mode);
+  if (array_id == TILEDB_ERR)
   {
     cout << "TileDB open error." << endl;
     exit(-1);
   }
+
   put_cache(mrn, tiledb_cache_pair(tiledb_ctx, array_id));
 }
 
@@ -159,24 +219,25 @@ void TileDBBackend::_read_array(string mrn, double* range, fmat& buf)
   tiledb_cache_pair cache_pair = get_cache(mrn);
   TileDB_CTX* tiledb_ctx = cache_pair.first;
   int array_id = cache_pair.second;
-  const char* dim_names = DIM_NAME;
-  int dim_names_num = 1;
-  const char* attribute_names = ATTR_NAME;
-  int attribute_names_num = 1;
-  size_t cell_buf_size = sizeof(float) * buf.n_elem;
-  tiledb_subarray_buf(tiledb_ctx, array_id, range,
-      RANGE_SIZE, &dim_names, dim_names_num,
-      &attribute_names, attribute_names_num,
-      buf.memptr(), &cell_buf_size);
+  int dim_num = 0;
+  const char** dims = new const char*[dim_num];
+  dims[0] = "__hide";
+
+  int attribute_num = 0;
+  const char** attributes = NULL;
+  int buf_size = sizeof(float) * buf.n_elem;
+  tiledb_array_read(tiledb_ctx, array_id, range,
+      dims, dim_num,
+      attributes, attribute_num,
+      buf.memptr(), &buf_size);
 }
 
 void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_offset, fmat& buf)
 {
-  _open_array(mrn, TILEDB_APPEND_MODE);
+  _open_array(mrn, TILEDB_ARRAY_MODE_WRITE);
   tiledb_cache_pair pair = get_cache(mrn);
   TileDB_CTX* tiledb_ctx = pair.first;
   int array_id = pair.second;
-  cell_t cell;
   if (ch == ALL) {
     buf = buf.t();
   }
@@ -184,11 +245,7 @@ void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_of
   {
     for (uword j = 0; j < buf.n_cols; j++)
     {
-      // x (col) coord, y (row) coord, attribute
-      cell.x = ch == ALL ? start_offset + j : CH_REVERSE_IDX[ch];
-      cell.y = ch == ALL ? i : start_offset + j;
-      cell.sample = buf(i, j);
-      tiledb_cell_write_sorted(tiledb_ctx, array_id, &cell);
+      tiledb_array_write_dense(tiledb_ctx, array_id, &buf(i,j));
     }
   }
 }

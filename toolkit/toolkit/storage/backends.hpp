@@ -275,9 +275,9 @@ class TileDBBackend: public AbstractStorageBackend<tiledb_cache_pair>
   protected:
     string mrn_to_array_name(string mrn);
     string get_array_name(string mrn);
-    string get_group();
+    string get_catalog();
     string get_workspace();
-    void _open_array(string mrn, const char* mode);
+    void _open_array(string mrn, int mode);
     void _read_array(string mrn, double* range, fmat& buf);
     void write_metadata(string mrn, ArrayMetadata* metadata);
 
