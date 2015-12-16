@@ -6,7 +6,7 @@ from collections import defaultdict
 
 DATADIR = '/home/ubuntu/eeg-data/eeg-data'
 FILE_PATTERNS = {
-    'TileDBBackend': '-tiledb',
+    'TileDBBackend': 'tiledb_workspace/*-tiledb',
     'HDF5Backend': '.h5',
     'BinaryBackend': '.bin',
 }
