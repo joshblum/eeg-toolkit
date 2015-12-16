@@ -225,7 +225,7 @@ void TileDBBackend::_read_array(string mrn, double* range, fmat& buf)
 
   int attribute_num = 0;
   const char** attributes = NULL;
-  int buf_size = sizeof(float) * buf.n_elem;
+  size_t buf_size = sizeof(float) * buf.n_elem;
   tiledb_array_read(tiledb_ctx, array_id, range,
       dims, dim_num,
       attributes, attribute_num,
