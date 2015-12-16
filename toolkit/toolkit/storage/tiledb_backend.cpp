@@ -200,17 +200,17 @@ void TileDBBackend::read_array(string mrn, int ch, int start_offset, int end_off
   range[0] = CH_REVERSE_IDX[ch];
   range[1] = CH_REVERSE_IDX[ch];
   range[2] = start_offset;
-  range[3] = end_offset;
+  range[3] = start_offset + buf.n_cols;
   _read_array(mrn, range, buf);
 }
 
 void TileDBBackend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
 {
   double* range = new double[RANGE_SIZE];
-  range[0] = 0;
-  range[1] = get_ncols(mrn);
-  range[2] = start_offset;
-  range[3] = end_offset;
+  range[0] = start_offset;
+  range[1] = start_offset + buf.n_rows;
+  range[2] = 0;
+  range[3] = buf.n_cols;
   _read_array(mrn, range, buf);
 }
 
