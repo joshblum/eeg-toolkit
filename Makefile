@@ -23,6 +23,7 @@ DOCKER_TOOLKIT_NAME := "eeg-toolkit-toolkit"
 
 MOUNT_POINT := "/home/ubuntu/eeg-data/eeg-data"
 DEVICE := "/dev/vdb"
+IP := $(shell (dig +short myip.opendns.com @resolver1.opendns.com))
 
 default: ws_server
 
@@ -68,8 +69,12 @@ docker-build: clean submodules
 	-cd toolkit && docker build -t $(REPO)/$(DOCKER_TOOLKIT_NAME):latest .
 
 docker-run:
-	-docker run -d -p 5000:5000 --name=$(DOCKER_WEBAPP_NAME) $(REPO)/$(DOCKER_WEBAPP_NAME)
-	-docker run -d -p 8080:8080 --name=$(DOCKER_TOOLKIT_NAME) -v $(MOUNT_POINT):$(MOUNT_POINT) $(REPO)/$(DOCKER_TOOLKIT_NAME)
+	-docker run -d -p 5000:5000 \
+		--name=$(DOCKER_WEBAPP_NAME) $(REPO)/$(DOCKER_WEBAPP_NAME)
+	-docker run -d -p 8080:8080 \
+		--add-host=visgoth:$(IP) \
+		--name=$(DOCKER_TOOLKIT_NAME) \
+		-v $(MOUNT_POINT):$(MOUNT_POINT) $(REPO)/$(DOCKER_TOOLKIT_NAME)
 
 docker-stop:
 	-docker stop $(DOCKER_WEBAPP_NAME)

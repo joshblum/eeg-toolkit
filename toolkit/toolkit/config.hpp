@@ -35,6 +35,12 @@ using namespace std;
 #define WS_DEFAULT_PORT 8080
 #define COLLECTD_SOCK "/home/ubuntu/eeg-toolkit/collectd-unixsock"
 
+#ifndef VISGOTH_IP
+#define VISGOTH_IP "visgoth"
+#else
+#define VISGOTH_IP STRINGIFY(_VISGOTH_IP)
+#endif
+
 // spectrogram config
 typedef enum
 {

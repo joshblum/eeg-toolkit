@@ -86,7 +86,7 @@ uint Visgoth::get_extent(Json profile_data)
 
   char* response = (char*) malloc(sizeof(char) * 1024);
 
-  happyhttp::Connection conn("127.0.0.1", 5000);
+  happyhttp::Connection conn(VISGOTH_IP, 5000);
   conn.setcallbacks(OnBegin, OnData, OnComplete, (void*) response);
   conn.request("POST",
       "/visgoth/get_extent",

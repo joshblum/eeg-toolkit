@@ -103,6 +103,10 @@ ifneq ($(WRITE_CHUNK),)
 	OPTS += -DWRITE_CHUNK=$(WRITE_CHUNK)
 endif
 
+ifneq ($(VISGOTH_IP),)
+	OPTS += -D_VISGOTH_IP=$(VISGOTH_IP)
+endif
+
 default: ws_server
 
 installdeps:
