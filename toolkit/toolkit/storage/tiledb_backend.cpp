@@ -207,11 +207,12 @@ void TileDBBackend::read_array(string mrn, int ch, int start_offset, int end_off
 void TileDBBackend::read_array(string mrn, int start_offset, int end_offset, fmat& buf)
 {
   double* range = new double[RANGE_SIZE];
-  range[0] = start_offset;
-  range[1] = start_offset + buf.n_rows;
-  range[2] = 0;
-  range[3] = buf.n_cols;
+  range[0] = 0;
+  range[1] = buf.n_cols;
+  range[2] = start_offset;
+  range[3] = start_offset + buf.n_rows;
   _read_array(mrn, range, buf);
+  buf = buf.t();
 }
 
 void TileDBBackend::_read_array(string mrn, double* range, fmat& buf)
@@ -238,9 +239,6 @@ void TileDBBackend::write_array(string mrn, int ch, int start_offset, int end_of
   tiledb_cache_pair pair = get_cache(mrn);
   TileDB_CTX* tiledb_ctx = pair.first;
   int array_id = pair.second;
-  if (ch == ALL) {
-    buf = buf.t();
-  }
   for (uword i = 0; i < buf.n_rows; i++)
   {
     for (uword j = 0; j < buf.n_cols; j++)
