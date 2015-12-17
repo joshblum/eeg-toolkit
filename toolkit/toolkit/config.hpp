@@ -36,7 +36,7 @@ using namespace std;
 #define COLLECTD_SOCK "/home/ubuntu/eeg-toolkit/collectd-unixsock"
 
 #ifndef VISGOTH_IP
-#define VISGOTH_IP "visgoth"
+#define VISGOTH_IP "localhost"
 #else
 #define VISGOTH_IP STRINGIFY(_VISGOTH_IP)
 #endif
